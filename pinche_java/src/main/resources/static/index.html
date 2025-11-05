@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pinche API Home</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 32px; line-height: 1.6; }
+      h1 { margin-bottom: 8px; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+      .section { margin-top: 24px; }
+      ul { padding-left: 20px; }
+      a { color: #1f6feb; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .note { color: #6b7280; }
+    </style>
+  </head>
+  <body>
+    <h1>Pinche API is running</h1>
+    <p>Welcome! This backend exposes REST endpoints under <code>/api/*</code>. Try these sample calls:</p>
+
+    <div class="section">
+      <h2>Sample Endpoints</h2>
+      <ul>
+        <li>
+          Info list (type 1):
+          <a href="/api/info/lists?type=1&page=1">/api/info/lists?type=1&page=1</a>
+        </li>
+        <li>
+          Dynamic list:
+          <a href="/api/dynamic/getList?page=1">/api/dynamic/getList?page=1</a>
+        </li>
+        <li>
+          Notices (requires an existing <code>id</code>):
+          <code>/api/notice/index?id=1</code>
+        </li>
+        <li>
+          Messages (requires <code>sk</code> and <code>type</code>):
+          <code>/api/msg/get?sk=mock_sk_xxx&type=1&page=1</code>
+        </li>
+        <li>
+          My appointments (requires <code>sk</code>):
+          <code>/api/appointment/my?sk=mock_sk_xxx</code>
+        </li>
+      </ul>
+      <p class="note">Note: some endpoints expect existing data in the database and/or a valid <code>sk</code> token.</p>
+    </div>
+
+    <div class="section">
+      <h2>Status</h2>
+      <ul>
+        <li>Port: <code>8080</code></li>
+        <li>Database: <code>MySQL</code> (schema <code>pinche</code>)</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Next Steps</h2>
+      <ul>
+        <li>Populate initial data for <code>info</code> or <code>notice</code> to see results.</li>
+        <li>Use the mini-program frontend to interact with APIs.</li>
+      </ul>
+    </div>
+  </body>
+  </html>
