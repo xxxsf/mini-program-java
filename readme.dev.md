@@ -1,6 +1,6 @@
-# Pinche 开发文档（本地开发）
+# RideHailingBoat 开发文档（本地开发）
 
-本指南面向在本机进行开发与调试的场景，涵盖后端 `pinche_java`（Spring Boot）、小程序前端 `pinche_xcx`、以及可选的历史 PHP 站点 `pinche_xcx_data` 的使用说明。
+本指南面向在本机进行开发与调试的场景，涵盖后端 `ridehailingBoat_Java`（Spring Boot）、小程序前端 `ridehailingBoat_miniProgram` 的使用说明。（若你使用历史数据项目，可按需自行补充）
 
 
 ## 本地启动
@@ -8,7 +8,7 @@
 
 #### 启动后端
 ```bash
-cd pinche_java
+cd ridehailingBoat_Java
 ./mvnw spring-boot:run
 ```
 
@@ -20,22 +20,21 @@ sudo service mysql start
 
 #### 启动前端
 ```bash
-cd pinche_xcx
-// 打开微信开发者工具，选择 `导入项目`，指向 `pinche_xcx` 目录。
+cd ridehailingBoat_miniProgram
+// 打开微信开发者工具，选择 `导入项目`，指向 `ridehailingBoat_miniProgram` 目录。
 ```
 
 
 
 
 ## 项目概述
-- 后端：`pinche_java` 使用 Spring Boot 2.7 + Spring Data JPA，默认连接本地 MySQL，提供 `REST API` 服务。
-- 前端：`pinche_xcx` 为微信小程序代码，可在微信开发者工具中打开并联调后端接口。
-- 数据：建议在 MySQL 中创建数据库 `pinche` 并导入初始表结构与数据。
+- 后端：`ridehailingBoat_Java` 使用 Spring Boot 2.7 + Spring Data JPA，默认连接本地 MySQL，提供 `REST API` 服务。
+- 前端：`ridehailingBoat_miniProgram` 为微信小程序代码，可在微信开发者工具中打开并联调后端接口。
+- 数据：默认使用历史数据库名 `pinche`（为兼容旧表结构），你也可以调整为其他库名并同步修改配置。
 
 ## 目录结构
-- `pinche_java/`：后端 Java 项目（Maven Wrapper 已配置）。
-- `pinche_xcx/`：微信小程序前端工程。
-- `pinche_xcx_data/`：历史 PHP 项目与 SQL（可用于导入初始数据）。
+- `ridehailingBoat_Java/`：后端 Java 项目（Maven Wrapper 已配置）。
+- `ridehailingBoat_miniProgram/`：微信小程序前端工程。
 
 ## 开发环境准备
 - Java：推荐 `JDK 17`（本项目已在 17 下运行），Spring Boot 2.7 也兼容 Java 8+。
@@ -61,9 +60,9 @@ mysql -u root -p -e "CREATE USER 'pinche_app'@'localhost' IDENTIFIED BY 'your_st
 mysql -u root -p -e "GRANT ALL PRIVILEGES ON pinche.* TO 'pinche_app'@'localhost'; FLUSH PRIVILEGES;"
 ```
 
-## 后端启动（pinche_java）
+## 后端启动（ridehailingBoat_Java）
 
-配置文件位置：`pinche_java/src/main/resources/application.properties`
+配置文件位置：`ridehailingBoat_Java/src/main/resources/application.properties`
 
 - 默认使用本地 MySQL：
 ```
@@ -74,9 +73,9 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
 ```
 
-- 启动命令（项目根目录下或进入 `pinche_java/`）：
+- 启动命令（项目根目录下或进入 `ridehailingBoat_Java/`）：
 ```
-cd pinche_java
+cd ridehailingBoat_Java
 ./mvnw spring-boot:run
 ```
 
@@ -84,7 +83,7 @@ cd pinche_java
 ```
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
-H2 控制台地址：`http://localhost:8080/h2-console`，JDBC URL：`jdbc:h2:mem:pinche`
+H2 控制台地址：`http://localhost:8080/h2-console`，JDBC URL：`jdbc:h2:mem:ridehailingboat`
 
 启动成功后：
 - 服务地址：`http://localhost:8080/`

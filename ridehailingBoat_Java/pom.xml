@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>pinche</artifactId>
+	<artifactId>ridehailingBoat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>pinche</name>
-	<description>Pinche project for Spring Boot</description>
+	<name>rideHailingBoat</name>
+	<description>RideHailingBoat project for Spring Boot</description>
 	<url/>
 	<licenses>
 		<license/>

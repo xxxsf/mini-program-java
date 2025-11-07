@@ -4,7 +4,7 @@ var util = require('utils/util.js');
 App({
   onLaunch: function () {
     var that = this;
-    // 小程序初始化先判断用户是否登录    
+    // 小程序初始化先判断用户是否登录  
       wx.checkSession({
         success: function(){  
           wx.getStorage({  
