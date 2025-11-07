@@ -1,0 +1,46 @@
+<view class="search-page">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input" value="{{keyword}}" placeholder="请输入终点" confirm-type="search" bindinput="onInput" bindconfirm="doSearch" />
+    <button class="map-btn" size="mini" bindtap="chooseOnMap">地图选点</button>
+  </view>
+
+  <!-- 历史记录 -->
+  <view class="section" wx:if="{{history.length>0}}">
+    <view class="section-head">
+      <text>历史记录</text>
+      <text class="clear" bindtap="clearHistory">清空</text>
+    </view>
+    <view class="cell" wx:for="{{history}}" wx:key="*this" bindtap="tapHistory" data-item="{{item}}">
+      <text class="name">{{item.name}}</text>
+      <text class="addr">{{item.address}}</text>
+    </view>
+  </view>
+
+  <!-- 常用码头设置 -->
+  <view class="section shortcuts">
+    <view class="cell">
+      <text class="icon">🏠</text>
+      <text class="name">设置常用出发码头</text>
+    </view>
+    <view class="cell">
+      <text class="icon">⚓</text>
+      <text class="name">设置常用回程码头</text>
+    </view>
+  </view>
+
+  <!-- 搜索结果列表 -->
+  <view class="list" wx:if="{{results.length>0}}">
+    <view class="cell" wx:for="{{results}}" wx:key="id" bindtap="pickPlace" data-item="{{item}}">
+      <text class="icon">⚓</text>
+      <view class="info">
+        <view class="name">{{item.name}}</view>
+        <view class="addr">{{item.address}}</view>
+      </view>
+      <view class="distance" wx:if="{{item._distance}}">{{item._distance}}km</view>
+    </view>
+  </view>
+
+  <!-- 空态 -->
+  <view class="empty" wx:if="{{results.length===0 && keyword}}">没有找到相关地点</view>
+</view>

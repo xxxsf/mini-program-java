@@ -2,6 +2,31 @@
 
 本指南面向在本机进行开发与调试的场景，涵盖后端 `pinche_java`（Spring Boot）、小程序前端 `pinche_xcx`、以及可选的历史 PHP 站点 `pinche_xcx_data` 的使用说明。
 
+
+## 本地启动
+
+
+#### 启动后端
+```bash
+cd pinche_java
+./mvnw spring-boot:run
+```
+
+#### 启动mysql
+```bash
+// 启动mysql服务
+sudo service mysql start
+```
+
+#### 启动前端
+```bash
+cd pinche_xcx
+// 打开微信开发者工具，选择 `导入项目`，指向 `pinche_xcx` 目录。
+```
+
+
+
+
 ## 项目概述
 - 后端：`pinche_java` 使用 Spring Boot 2.7 + Spring Data JPA，默认连接本地 MySQL，提供 `REST API` 服务。
 - 前端：`pinche_xcx` 为微信小程序代码，可在微信开发者工具中打开并联调后端接口。

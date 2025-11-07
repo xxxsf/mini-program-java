@@ -1,0 +1,54 @@
+<view class="boat-page">
+  <!-- 顶部地图区域 -->
+  <view class="map-wrap">
+    <map class="map" style="height:{{mapHeight}}px" latitude="{{latitude}}" longitude="{{longitude}}" scale="16" markers="{{markers}}" show-location="true"></map>
+    <!-- 顶部城市与扫一扫 -->
+    <view class="top-bar">
+      <view class="city">{{city}}<text class="arrow">▾</text></view>
+      <view class="scan">扫一扫</view>
+    </view>
+    <!-- 立即出发 / 预约拼单 -->
+    <view class="quick-tabs">
+      <view class="tab {{activeTab==0?'tab-on':''}}" bindtap="switchTab" data-idx="0">立即出发</view>
+      <view class="tab {{activeTab==1?'tab-on':''}}" bindtap="switchTab" data-idx="1">预约拼单</view>
+    </view>
+    <!-- 目的卡片 -->
+    <view class="dest-card">
+      <view class="row" bindtap="chooseLocation">
+        <view class="dot green"></view>
+        <text>从 {{startText}} 上船</text>
+      </view>
+      <view class="row">
+        <view class="dot orange"></view>
+        <input class="input" placeholder="您想去哪儿？" confirm-type="search" bindconfirm="goSearch" bindfocus="goSearch" />
+      </view>
+    </view>
+    <!-- 重新定位按钮 -->
+    <view class="locate-btn" bindtap="reLocate">定位</view>
+  </view>
+
+  <!-- 快捷功能区 -->
+  <view class="feature-grid">
+    <view class="feature" bindtap="goReserve">
+      <image src="/img/appointment.png" class="feat-icon" />
+      <text class="feat-text">预约拼单</text>
+    </view>
+    <view class="feature" bindtap="goHelp">
+      <image src="/img/people.png" class="feat-icon" />
+      <text class="feat-text">帮人叫船</text>
+    </view>
+    <view class="feature" bindtap="goBus">
+      <image src="/img/goods.png" class="feat-icon" />
+      <text class="feat-text">站点巴士</text>
+    </view>
+    <view class="feature" bindtap="goDrive">
+      <image src="/img/driver.png" class="feat-icon" />
+      <text class="feat-text">手机驾驭</text>
+    </view>
+  </view>
+
+  <!-- banner -->
+  <view class="banner">
+    <image src="/img/app3.png" mode="scaleToFill" />
+  </view>
+</view>

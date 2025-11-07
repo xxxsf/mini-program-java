@@ -1,0 +1,33 @@
+<view class="route-page">
+  <map id="map" class="map" style="height:{{mapHeight}}px" latitude="{{origin.lat}}" longitude="{{origin.lng}}" scale="14" markers="{{markers}}" polyline="{{polyline}}" show-location="true">
+    <cover-view class="banner">
+      <cover-view>时间预估 | {{distanceKm}}公里 {{durationMin}}分钟</cover-view>
+    </cover-view>
+  </map>
+
+  <view class="sheet">
+    <view class="title">多选船型更快出发</view>
+    <radio-group bindchange="chooseType">
+      <label class="boat-item" wx:for="{{boatTypes}}" wx:key="id">
+        <view class="left">
+          <image class="icon" src="{{item.icon}}"></image>
+          <view>
+            <view class="name">{{item.name}}</view>
+            <view class="desc">{{item.desc}}</view>
+          </view>
+        </view>
+        <view class="right">
+          <radio value="{{item.id}}" checked="{{item.id===selectedType}}"/>
+          <view class="price">≈¥{{item.price}}</view>
+        </view>
+      </label>
+    </radio-group>
+
+    <view class="actions">
+      <button class="action left" size="mini">预约出发</button>
+      <button class="action right" size="mini">帮人叫船</button>
+    </view>
+
+    <button class="call-btn" bindtap="callBoat">呼叫1种船型</button>
+  </view>
+</view>
