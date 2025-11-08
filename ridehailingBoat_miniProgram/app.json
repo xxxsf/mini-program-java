@@ -30,28 +30,29 @@
     "enablePullDownRefresh": true
   },
   "tabBar": {
+    "custom": true,
     "color": "#aaa",
     "selectedColor": "#ddc40b",
     "backgroundColor": "#fff",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/boat/index",
         "text": "首页",
-        "iconPath": "img/app0.png",
-        "selectedIconPath": "img/app1.png"
+        "iconPath": "/img/index.png",
+        "selectedIconPath": "/img/index.png"
       },
       {
         "pagePath": "pages/boat/captain/index",
         "text": "船主",
-        "iconPath": "img/driver.png",
-        "selectedIconPath": "img/driver.png"
+        "iconPath": "/img/driver.png",
+        "selectedIconPath": "/img/driver.png"
       },
       {
         "pagePath": "pages/my/index",
         "text": "个人中心",
-        "iconPath": "img/account.png",
-        "selectedIconPath": "img/account1.png"
+        "iconPath": "/img/account.png",
+        "selectedIconPath": "/img/account.png"
       }
     ]
   },

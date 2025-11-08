@@ -21,7 +21,7 @@ var rootDocment = baseURL+'api/';
 
 var wxAppinfo = {
   'name': '个人小程序测试',
-  'logo': 'https://wx.qlogo.cn/mmhead/Q3auHgzwzM41GbicIwic6JOHzehVqd3OubV4GmEQA67KRXyoZ3Y6maHg/0'
+  'logo': '/img/logo.png'
 };
 
 //修改成你的appid及appsecret
