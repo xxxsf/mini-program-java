@@ -6,6 +6,9 @@ var util = require('../../utils/util.js');
 Page({
   onShow: function () {
     var that = this;
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 2 });
+    }
     that.setData({
       userInfo:app.globalData.userInfo
     });
