@@ -24,11 +24,66 @@ Page({
     wx.navigateTo({ url: '/pages/myInvoices/index' });
   },
 
+  // 从微信聊天导入 PDF 发票
   onSourceChat: function () {
-    this.setData({ showSourceSheet: false });
-    wx.showToast({ title: '请从聊天中转发文件', icon: 'none' });
+    var that = this;
+    that.setData({ showSourceSheet: false });
+
+    wx.chooseMessageFile({
+      count: 10,
+      type: 'file',
+      extension: ['pdf'],
+      success: function (res) {
+        var files = res.tempFiles;
+        if (!files || files.length === 0) {
+          wx.showToast({ title: '未选择文件', icon: 'none' });
+          return;
+        }
+
+        wx.showLoading({ title: '正在导入...' });
+
+        var invoices = wx.getStorageSync('my_invoices') || [];
+        var now = new Date();
+
+        for (var i = 0; i < files.length; i++) {
+          var file = files[i];
+          var invoice = {
+            id: Date.now().toString() + '_' + i,
+            source: 'wechat_chat',
+            fileName: file.name,
+            filePath: file.path,
+            fileSize: file.size,
+            industry: '待识别',
+            company: file.name.replace(/\.pdf$/i, ''),
+            amount: '待识别',
+            date: util.formatTime(now),
+            payer: '待识别',
+            createTime: now.getTime(),
+            status: 'pending'
+          };
+          invoices.unshift(invoice);
+        }
+
+        wx.setStorageSync('my_invoices', invoices);
+        wx.hideLoading();
+
+        wx.showToast({
+          title: '成功导入 ' + files.length + ' 张发票',
+          icon: 'success',
+          duration: 1500
+        });
+
+        setTimeout(function () {
+          wx.navigateTo({ url: '/pages/myInvoices/index' });
+        }, 1500);
+      },
+      fail: function () {
+        wx.showToast({ title: '未选择文件', icon: 'none' });
+      }
+    });
   },
 
+  // 从手机本地导入（跳转到本地导入页面）
   onSourceLocal: function () {
     this.setData({ showSourceSheet: false });
     wx.navigateTo({ url: '/pages/addInvoice/index' });

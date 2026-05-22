@@ -145,6 +145,26 @@ page { background: #f5f5f5; }
   font-weight: bold;
 }
 
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 400rpx;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+  margin-top: 12rpx;
+}
+.card-delete {
+  font-size: 24rpx;
+  color: #ff4d4f;
+  padding: 4rpx 16rpx;
+}
+
 .empty {
   display: flex;
   flex-direction: column;
