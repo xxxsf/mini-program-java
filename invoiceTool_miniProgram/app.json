@@ -1,0 +1,68 @@
+{
+  "pages": [
+    "pages/boat/search/index",
+    "pages/boat/route/index",
+    "pages/boat/index",
+    "pages/boat/captain/index",
+    "pages/my/index",
+    "pages/toLogin/toLogin",
+    "pages/my/info",
+    "pages/my/list",
+    "pages/my/fav",
+    "pages/my/mydyn",
+    "pages/info/index",
+    "pages/info/add",
+    "pages/info/edit",
+    "pages/dynamic/index",
+    "pages/dynamic/add",
+    "pages/comment/index",
+    "pages/notice/index",
+    "pages/msg/index",
+    "pages/msg/list",
+    "pages/my/appointment",
+    "pages/appointment/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#f4de3b",
+    "navigationBarTitleText": "发票管理工具",
+    "navigationBarTextStyle": "black",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#aaa",
+    "selectedColor": "#ddc40b",
+    "backgroundColor": "#fff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/boat/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/boat/captain/index",
+        "text": "船主"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "text": "个人中心"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 10000,
+    "downloadFile": 10000
+  },
+  "debug": true,
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "sitemapLocation": "sitemap.json"
+}
