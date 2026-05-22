@@ -1,28 +1,66 @@
 <view class="page">
-  <view class="title">如何选择本地文件</view>
+  <view class="title">从手机本地导入</view>
 
   <view class="desc">
-    轻触「选择文件」后，在「最近项目」中 选择要上传的文件。
+    选择以下方式导入发票文件到微信发票助手。
   </view>
 
-  <view class="tips-title">选择本地文件说明：</view>
+  <!-- 导入方式列表 -->
+  <view class="import-options">
+    <view class="option-item" bindtap="onTakePhoto">
+      <view class="option-icon camera-icon">📷</view>
+      <view class="option-info">
+        <text class="option-title">拍照导入</text>
+        <text class="option-desc">使用相机拍摄纸质发票</text>
+      </view>
+      <text class="option-arrow">></text>
+    </view>
+
+    <view class="option-item" bindtap="onChooseFromAlbum">
+      <view class="option-icon album-icon">🖼</view>
+      <view class="option-info">
+        <text class="option-title">从相册选择</text>
+        <text class="option-desc">选择已保存的发票图片，最多9张</text>
+      </view>
+      <text class="option-arrow">></text>
+    </view>
+
+    <view class="option-item" bindtap="onSelectFile">
+      <view class="option-icon file-icon">📄</view>
+      <view class="option-info">
+        <text class="option-title">选择PDF文件</text>
+        <text class="option-desc">从聊天记录中选择PDF发票文件，最多10个</text>
+      </view>
+      <text class="option-arrow">></text>
+    </view>
+  </view>
+
+  <!-- 说明 -->
+  <view class="tips-title">导入说明：</view>
   <view class="tips">
     <view class="tip-item">
       <text class="dot">·</text>
-      <text>电子发票 (票据) PDF版式文件最大不能超过100K。</text>
+      <text>支持 PDF 格式的电子发票文件（不超过100K）。</text>
     </view>
     <view class="tip-item">
       <text class="dot">·</text>
-      <text>最多可以选择10个电子发票 (票据) 文件。</text>
+      <text>支持拍照或从相册选择发票图片。</text>
     </view>
     <view class="tip-item">
       <text class="dot">·</text>
-      <text>文件将上传到云端处理，请保持网络通畅。</text>
+      <text>导入后可在"我的发票"中查看和管理。</text>
     </view>
   </view>
 
-  <view class="bottom-area">
-    <text class="agreement">你同意并授权将选中文件添加到微信卡包</text>
-    <button class="select-btn" bindtap="onSelectFile">选择文件</button>
+  <!-- 已导入文件列表 -->
+  <view class="imported-section" wx:if="{{importedFiles.length > 0}}">
+    <text class="imported-title">已导入 ({{importedFiles.length}})</text>
+    <block wx:for="{{importedFiles}}" wx:key="id">
+      <view class="imported-item">
+        <text class="imported-name">{{item.fileName}}</text>
+        <text class="imported-status">{{item.status === 'pending' ? '待识别' : '已识别'}}</text>
+      </view>
+    </block>
+    <button class="view-btn" bindtap="onViewInvoices">查看我的发票</button>
   </view>
 </view>
