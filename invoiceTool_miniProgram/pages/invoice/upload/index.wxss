@@ -1,0 +1,93 @@
+/* pages/invoice/upload/index.wxss */
+
+.container {
+  min-height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-content {
+  flex: 1;
+  padding: 60rpx 60rpx 0;
+}
+
+.title {
+  font-size: 40rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.instruction {
+  margin-bottom: 80rpx;
+}
+
+.instruction-text {
+  font-size: 30rpx;
+  color: #333;
+  text-align: center;
+  display: block;
+  line-height: 1.8;
+}
+
+.rules-section {
+  margin-bottom: 40rpx;
+}
+
+.rules-title {
+  font-size: 28rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.rule-dot {
+  font-size: 28rpx;
+  color: #333;
+  margin-right: 12rpx;
+  line-height: 1.6;
+}
+
+.rule-text {
+  font-size: 28rpx;
+  color: #333;
+  flex: 1;
+  line-height: 1.6;
+}
+
+.bottom-area {
+  padding: 40rpx 60rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.consent-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 24rpx;
+}
+
+.select-file-btn {
+  width: 80%;
+  background-color: #fff;
+  color: #09BB07;
+  border: 2rpx solid #09BB07;
+  border-radius: 12rpx;
+  font-size: 34rpx;
+  padding: 24rpx 0;
+  text-align: center;
+}
+
+.select-file-btn::after {
+  border: none;
+}

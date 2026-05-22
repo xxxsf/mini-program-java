@@ -1,0 +1,44 @@
+<!--pages/invoice/headerAdd/index.wxml-->
+<view class="container">
+  <view class="page-title">填写发票抬头信息</view>
+
+  <view class="form-section">
+    <view class="form-item">
+      <text class="form-label">名称</text>
+      <input class="form-input" placeholder="抬头名称" placeholder-class="placeholder" value="{{name}}" bindinput="onNameInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">税号</text>
+      <input class="form-input" placeholder="纳税人识别号" placeholder-class="placeholder" value="{{taxNo}}" bindinput="onTaxNoInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">单位地址</text>
+      <input class="form-input" placeholder="公司地址 (选填)" placeholder-class="placeholder" value="{{address}}" bindinput="onAddressInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">电话号码</text>
+      <input class="form-input" placeholder="公司电话 (选填)" placeholder-class="placeholder" value="{{phone}}" bindinput="onPhoneInput" type="number" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">开户银行</text>
+      <input class="form-input" placeholder="开户银行 (选填)" placeholder-class="placeholder" value="{{bank}}" bindinput="onBankInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">银行账户</text>
+      <input class="form-input" placeholder="银行账户 (选填)" placeholder-class="placeholder" value="{{bankAccount}}" bindinput="onBankAccountInput" />
+    </view>
+  </view>
+
+  <view class="btn-area">
+    <button class="save-btn {{canSave ? 'active' : ''}}" bindtap="onSave">保存</button>
+  </view>
+
+  <view class="delete-area" wx:if="{{isEdit}}">
+    <text class="delete-btn" bindtap="onDelete">删除此抬头</text>
+  </view>
+</view>

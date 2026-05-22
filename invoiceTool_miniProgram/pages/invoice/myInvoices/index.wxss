@@ -1,0 +1,338 @@
+/* pages/invoice/myInvoices/index.wxss */
+
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding-bottom: 120rpx;
+}
+
+/* 搜索栏 */
+.search-bar {
+  background-color: #fff;
+  padding: 16rpx 24rpx;
+}
+
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 12rpx 20rpx;
+}
+
+.search-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  margin-right: 40rpx;
+}
+
+.filter-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.filter-arrow {
+  font-size: 20rpx;
+  color: #999;
+  margin-left: 6rpx;
+}
+
+.batch-btn {
+  margin-left: auto;
+}
+
+.batch-text {
+  font-size: 28rpx;
+  color: #576B95;
+}
+
+/* 促销横幅 */
+.promo-banner {
+  margin: 20rpx 24rpx;
+  background: linear-gradient(135deg, #09BB07, #07a006);
+  border-radius: 16rpx;
+  padding: 36rpx 30rpx;
+}
+
+.promo-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.promo-text-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.promo-title {
+  font-size: 36rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.promo-subtitle {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.promo-btn {
+  background-color: #FFE500;
+  color: #333;
+  font-size: 26rpx;
+  font-weight: bold;
+  padding: 14rpx 32rpx;
+  border-radius: 30rpx;
+}
+
+/* QQ邮箱关联 */
+.email-bar {
+  margin: 0 24rpx 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx 30rpx;
+  display: flex;
+  align-items: center;
+}
+
+.email-icon {
+  font-size: 36rpx;
+  margin-right: 16rpx;
+}
+
+.email-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.email-btn {
+  background-color: #09BB07;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 8rpx;
+}
+
+/* 添加发票 */
+.add-invoice-bar {
+  margin: 0 24rpx 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx 30rpx;
+  display: flex;
+  align-items: center;
+}
+
+.add-icon {
+  font-size: 36rpx;
+  color: #09BB07;
+  margin-right: 12rpx;
+}
+
+.add-text {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 发票列表 */
+.invoice-list {
+  margin: 0 24rpx;
+}
+
+.invoice-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: flex-start;
+}
+
+.checkbox-wrap {
+  margin-right: 20rpx;
+  padding-top: 4rpx;
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox.checked {
+  background-color: #09BB07;
+  border-color: #09BB07;
+}
+
+.check-mark {
+  color: #fff;
+  font-size: 24rpx;
+}
+
+.invoice-content {
+  flex: 1;
+}
+
+.invoice-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.invoice-tag {
+  background-color: #e8f5e9;
+  color: #09BB07;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  margin-right: 12rpx;
+}
+
+.invoice-company {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.invoice-detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.detail-label {
+  font-size: 26rpx;
+  color: #999;
+  width: 100rpx;
+}
+
+.detail-value {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.detail-value.amount {
+  color: #333;
+  font-weight: 500;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #ccc;
+}
+
+/* 批量操作栏 */
+.batch-action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  border-top: 1rpx solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+}
+
+.batch-select-all {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.batch-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.batch-action-btn {
+  padding: 12rpx 30rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+.batch-action-btn.delete {
+  background-color: #fa5151;
+  color: #fff;
+}
+
+/* 筛选弹窗 */
+.filter-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.filter-modal {
+  position: fixed;
+  top: 180rpx;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  z-index: 101;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.filter-option {
+  padding: 24rpx 40rpx;
+  font-size: 28rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.filter-option.active {
+  color: #09BB07;
+}
