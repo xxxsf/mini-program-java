@@ -69,7 +69,7 @@
 /* 促销横幅 */
 .promo-banner {
   margin: 20rpx 24rpx;
-  background: linear-gradient(135deg, #09BB07, #07a006);
+  background: linear-gradient(135deg, #3B5BDB, #2748B8);
   border-radius: 16rpx;
   padding: 36rpx 30rpx;
 }
@@ -128,7 +128,7 @@
 }
 
 .email-btn {
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   color: #fff;
   font-size: 24rpx;
   padding: 8rpx 24rpx;
@@ -147,7 +147,7 @@
 
 .add-icon {
   font-size: 36rpx;
-  color: #09BB07;
+  color: #3B5BDB;
   margin-right: 12rpx;
 }
 
@@ -187,8 +187,8 @@
 }
 
 .checkbox.checked {
-  background-color: #09BB07;
-  border-color: #09BB07;
+  background-color: #3B5BDB;
+  border-color: #3B5BDB;
 }
 
 .check-mark {
@@ -207,8 +207,8 @@
 }
 
 .invoice-tag {
-  background-color: #e8f5e9;
-  color: #09BB07;
+  background-color: #EEF2FF;
+  color: #3B5BDB;
   font-size: 22rpx;
   padding: 4rpx 12rpx;
   border-radius: 4rpx;
@@ -334,5 +334,5 @@
 }
 
 .filter-option.active {
-  color: #09BB07;
+  color: #3B5BDB;
 }

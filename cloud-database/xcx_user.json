@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "demo_user_001",
+    "id": 1,
+    "openId": "demo_openid_replace_after_login",
+    "nickName": "演示用户",
+    "avatarUrl": "",
+    "gender": "0",
+    "language": "zh_CN",
+    "city": "",
+    "province": "",
+    "country": "",
+    "county": "",
+    "phone": "",
+    "vehicle": "",
+    "name": "",
+    "createTime": 0,
+    "updateTime": 0
+  }
+]

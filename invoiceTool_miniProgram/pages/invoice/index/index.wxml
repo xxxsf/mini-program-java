@@ -1,6 +1,6 @@
 <!--pages/invoice/index/index.wxml-->
 <view class="container">
-  <!-- 顶部绿色区域 -->
+  <!-- 顶部主题区域 -->
   <view class="header-area">
     <!-- 用户信息栏 -->
     <view class="user-bar" wx:if="{{userInfo}}">

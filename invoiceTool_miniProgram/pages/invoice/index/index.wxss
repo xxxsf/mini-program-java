@@ -6,9 +6,9 @@
   padding-bottom: 40rpx;
 }
 
-/* 顶部绿色区域 */
+/* 顶部主题区域 */
 .header-area {
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   padding: 30rpx 0 80rpx;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -101,7 +101,7 @@
 
 .email-icon {
   font-size: 40rpx;
-  color: #09BB07;
+  color: #3B5BDB;
 }
 
 .email-text {
@@ -111,7 +111,7 @@
 }
 
 .email-btn {
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   color: #fff;
   font-size: 26rpx;
   padding: 10rpx 30rpx;
@@ -121,7 +121,7 @@
 /* 促销横幅 */
 .promo-banner {
   margin: 24rpx;
-  background: linear-gradient(135deg, #09BB07, #07a006);
+  background: linear-gradient(135deg, #3B5BDB, #2748B8);
   border-radius: 16rpx;
   overflow: hidden;
   padding: 40rpx 30rpx;
@@ -192,7 +192,7 @@
   width: 48rpx;
   height: 48rpx;
   border-radius: 50%;
-  border: 2rpx solid #09BB07;
+  border: 2rpx solid #3B5BDB;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -200,7 +200,7 @@
 
 .add-icon {
   font-size: 36rpx;
-  color: #09BB07;
+  color: #3B5BDB;
   line-height: 1;
 }
 

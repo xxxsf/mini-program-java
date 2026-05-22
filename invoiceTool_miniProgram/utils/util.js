@@ -6,11 +6,10 @@ var wxAppinfo = {
   'logo': '/img/logo.png'
 };
 
-var AppConf = { 'appid': 'wxea2ccba308593803', 'appsecret': 'de7b8dd83ffb3a91c8479c25c6de26bc' };
+var AppConf = { 'appid': 'wxb95ae2df41575bc3' };
 
 function req(url, data, cb) {
   data.appid = AppConf.appid;
-  data.appsecret = AppConf.appsecret;
   wx.request({
     url: rootDocment + url,
     data: data,
@@ -27,7 +26,6 @@ function req(url, data, cb) {
 
 function getReq(url, data, cb) {
   data.appid = AppConf.appid;
-  data.appsecret = AppConf.appsecret;
   wx.request({
     url: rootDocment + url,
     data: data,
@@ -35,6 +33,42 @@ function getReq(url, data, cb) {
     header: { 'Content-Type': 'application/x-www-form-urlencoded' },
     success: function (res) {
       return typeof cb == 'function' && cb(res.data);
+    },
+    fail: function () {
+      return typeof cb == 'function' && cb(false);
+    }
+  });
+}
+
+function jsonReq(url, data, cb) {
+  wx.request({
+    url: rootDocment + url,
+    data: data || {},
+    method: 'post',
+    header: { 'Content-Type': 'application/json' },
+    success: function (res) {
+      return typeof cb == 'function' && cb(res.data);
+    },
+    fail: function () {
+      return typeof cb == 'function' && cb(false);
+    }
+  });
+}
+
+function uploadFile(filePath, name, formData, cb) {
+  wx.uploadFile({
+    url: rootDocment + 'upload',
+    filePath: filePath,
+    name: name || 'file',
+    formData: formData || {},
+    success: function (res) {
+      var data = false;
+      try {
+        data = JSON.parse(res.data);
+      } catch (e) {
+        data = false;
+      }
+      return typeof cb == 'function' && cb(data);
     },
     fail: function () {
       return typeof cb == 'function' && cb(false);
@@ -52,6 +86,8 @@ function formatTime(date) {
 module.exports = {
   req: req,
   getReq: getReq,
+  jsonReq: jsonReq,
+  uploadFile: uploadFile,
   formatTime: formatTime,
   wxAppinfo: wxAppinfo,
   baseURL: baseURL

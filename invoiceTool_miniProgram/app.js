@@ -1,3 +1,5 @@
+var util = require('./utils/util.js')
+
 App({
   onLaunch: function () {
     this.checkLogin()
@@ -11,8 +13,10 @@ App({
     var that = this
     try {
       var userInfo = wx.getStorageSync('userInfo')
-      if (userInfo && userInfo.nickName) {
+      var sk = wx.getStorageSync('sk')
+      if (userInfo && userInfo.nickName && sk) {
         that.globalData.userInfo = userInfo
+        that.globalData.sk = sk
         that.globalData.isLoggedIn = true
 
         wx.checkSession({
@@ -39,16 +43,22 @@ App({
     })
   },
 
-  onLoginSuccess: function (userInfo) {
+  onLoginSuccess: function (userInfo, sk) {
     this.globalData.userInfo = userInfo
+    this.globalData.sk = sk
     this.globalData.isLoggedIn = true
     wx.setStorageSync('userInfo', userInfo)
+    wx.setStorageSync('sk', sk)
+    this.loadInvoiceHeaders()
+    this.loadInvoices()
   },
 
   logout: function () {
     this.globalData.userInfo = null
+    this.globalData.sk = ''
     this.globalData.isLoggedIn = false
     wx.removeStorageSync('userInfo')
+    wx.removeStorageSync('sk')
     wx.reLaunch({ url: '/pages/invoice/login/index' })
   },
 
@@ -63,6 +73,16 @@ App({
   // ===== 发票抬头管理 =====
 
   loadInvoiceHeaders: function () {
+    var that = this
+    if (this.globalData.sk) {
+      util.req('invoiceHeader/list', { sk: this.globalData.sk }, function (data) {
+        if (data && data.status == 1) {
+          that.globalData.invoiceHeaders = data.data || []
+          wx.setStorageSync('invoiceHeaders', that.globalData.invoiceHeaders)
+        }
+      })
+      return
+    }
     try {
       var headers = wx.getStorageSync('invoiceHeaders')
       if (headers) {
@@ -74,6 +94,16 @@ App({
   },
 
   loadInvoices: function () {
+    var that = this
+    if (this.globalData.sk) {
+      util.req('invoice/list', { sk: this.globalData.sk }, function (data) {
+        if (data && data.status == 1) {
+          that.globalData.invoices = data.data || []
+          wx.setStorageSync('invoices', that.globalData.invoices)
+        }
+      })
+      return
+    }
     try {
       var invoices = wx.getStorageSync('invoices')
       if (invoices) {
@@ -92,53 +122,69 @@ App({
     wx.setStorageSync('invoices', this.globalData.invoices)
   },
 
-  addInvoiceHeader: function (header) {
-    header.id = Date.now().toString()
-    this.globalData.invoiceHeaders.push(header)
-    this.saveInvoiceHeaders()
-  },
-
-  updateInvoiceHeader: function (id, header) {
-    var headers = this.globalData.invoiceHeaders
-    for (var i = 0; i < headers.length; i++) {
-      if (headers[i].id === id) {
-        headers[i] = Object.assign(headers[i], header)
-        break
+  addInvoiceHeader: function (header, cb) {
+    var that = this
+    util.jsonReq('invoiceHeader/save?sk=' + this.globalData.sk, header, function (data) {
+      if (data && data.status == 1) {
+        that.loadInvoiceHeaders()
       }
+      if (typeof cb == 'function') cb(data)
+    })
+  },
+
+  updateInvoiceHeader: function (id, header, cb) {
+    header.id = parseInt(id)
+    this.addInvoiceHeader(header, cb)
+  },
+
+  deleteInvoiceHeader: function (id, cb) {
+    var that = this
+    util.req('invoiceHeader/delete', { sk: this.globalData.sk, id: id }, function (data) {
+      if (data && data.status == 1) {
+        that.loadInvoiceHeaders()
+      }
+      if (typeof cb == 'function') cb(data)
+    })
+  },
+
+  addInvoice: function (invoice, cb) {
+    var that = this
+    util.jsonReq('invoice/save?sk=' + this.globalData.sk, invoice, function (data) {
+      if (data && data.status == 1) {
+        that.loadInvoices()
+      }
+      if (typeof cb == 'function') cb(data)
+    })
+  },
+
+  deleteInvoice: function (id, cb) {
+    var that = this
+    util.req('invoice/delete', { sk: this.globalData.sk, id: id }, function (data) {
+      if (data && data.status == 1) {
+        that.loadInvoices()
+      }
+      if (typeof cb == 'function') cb(data)
+    })
+  },
+
+  deleteInvoices: function (ids, cb) {
+    var that = this
+    var finished = 0
+    if (!ids.length) {
+      if (typeof cb == 'function') cb({ status: 1 })
+      return
     }
-    this.saveInvoiceHeaders()
-  },
-
-  deleteInvoiceHeader: function (id) {
-    this.globalData.invoiceHeaders = this.globalData.invoiceHeaders.filter(function (h) {
-      return h.id !== id
+    ids.forEach(function (id) {
+      that.deleteInvoice(id, function () {
+        finished++
+        if (finished === ids.length && typeof cb == 'function') cb({ status: 1 })
+      })
     })
-    this.saveInvoiceHeaders()
-  },
-
-  addInvoice: function (invoice) {
-    invoice.id = Date.now().toString()
-    invoice.createTime = new Date().getTime()
-    this.globalData.invoices.unshift(invoice)
-    this.saveInvoices()
-  },
-
-  deleteInvoice: function (id) {
-    this.globalData.invoices = this.globalData.invoices.filter(function (inv) {
-      return inv.id !== id
-    })
-    this.saveInvoices()
-  },
-
-  deleteInvoices: function (ids) {
-    this.globalData.invoices = this.globalData.invoices.filter(function (inv) {
-      return ids.indexOf(inv.id) === -1
-    })
-    this.saveInvoices()
   },
 
   globalData: {
     userInfo: null,
+    sk: '',
     isLoggedIn: false,
     invoiceHeaders: [],
     invoices: []

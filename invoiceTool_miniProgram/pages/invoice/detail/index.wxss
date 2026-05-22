@@ -54,7 +54,7 @@
 }
 
 .status-normal {
-  color: #09BB07;
+  color: #3B5BDB;
 }
 
 .status-reimbursed {

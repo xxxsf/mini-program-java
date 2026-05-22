@@ -22,7 +22,7 @@
   width: 160rpx;
   height: 160rpx;
   border-radius: 32rpx;
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,7 +113,7 @@
 
 .login-btn {
   width: 100%;
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   color: #fff;
   border: none;
   border-radius: 12rpx;
@@ -150,8 +150,8 @@
 }
 
 .agreement-checkbox.checked {
-  background-color: #09BB07;
-  border-color: #09BB07;
+  background-color: #3B5BDB;
+  border-color: #3B5BDB;
 }
 
 .check-icon {

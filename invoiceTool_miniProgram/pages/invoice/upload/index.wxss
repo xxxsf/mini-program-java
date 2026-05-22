@@ -80,8 +80,8 @@
 .select-file-btn {
   width: 80%;
   background-color: #fff;
-  color: #09BB07;
-  border: 2rpx solid #09BB07;
+  color: #3B5BDB;
+  border: 2rpx solid #3B5BDB;
   border-radius: 12rpx;
   font-size: 34rpx;
   padding: 24rpx 0;

@@ -58,7 +58,7 @@
 }
 
 .save-btn.active {
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   color: #fff;
 }
 

@@ -16,7 +16,7 @@
   ],
   "window": {
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#07C160",
+    "navigationBarBackgroundColor": "#3B5BDB",
     "navigationBarTitleText": "微信发票助手",
     "navigationBarTextStyle": "white",
     "enablePullDownRefresh": false,

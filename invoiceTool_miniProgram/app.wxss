@@ -23,7 +23,7 @@ view, text, image {
 }
 
 .btn-primary {
-  background-color: #09BB07;
+  background-color: #3B5BDB;
   color: #fff;
   border: none;
   border-radius: 8rpx;
@@ -38,8 +38,8 @@ view, text, image {
 
 .btn-outline {
   background-color: #fff;
-  color: #09BB07;
-  border: 2rpx solid #09BB07;
+  color: #3B5BDB;
+  border: 2rpx solid #3B5BDB;
   border-radius: 8rpx;
   font-size: 32rpx;
   padding: 20rpx 0;

@@ -46,6 +46,6 @@ page { background: #fff; }
   border: none;
 }
 .save-btn.active {
-  background: #07C160;
+  background: #3B5BDB;
   color: #fff;
 }

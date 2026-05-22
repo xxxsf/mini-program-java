@@ -82,17 +82,18 @@ Page({
       bankAccount: this.data.bankAccount.trim()
     }
 
-    if (this.data.isEdit) {
-      app.updateInvoiceHeader(this.data.editId, header)
-      wx.showToast({ title: '更新成功', icon: 'success' })
-    } else {
-      app.addInvoiceHeader(header)
-      wx.showToast({ title: '保存成功', icon: 'success' })
+    var successTitle = this.data.isEdit ? '更新成功' : '保存成功'
+    var onSaved = function () {
+      wx.showToast({ title: successTitle, icon: 'success' })
+      setTimeout(function () {
+        wx.navigateBack()
+      }, 1500)
     }
-
-    setTimeout(function () {
-      wx.navigateBack()
-    }, 1500)
+    if (this.data.isEdit) {
+      app.updateInvoiceHeader(this.data.editId, header, onSaved)
+    } else {
+      app.addInvoiceHeader(header, onSaved)
+    }
   },
 
   onDelete: function () {
@@ -102,11 +103,12 @@ Page({
       content: '确定要删除此发票抬头吗？',
       success: function (res) {
         if (res.confirm) {
-          app.deleteInvoiceHeader(that.data.editId)
-          wx.showToast({ title: '删除成功', icon: 'success' })
-          setTimeout(function () {
-            wx.navigateBack()
-          }, 1500)
+          app.deleteInvoiceHeader(that.data.editId, function () {
+            wx.showToast({ title: '删除成功', icon: 'success' })
+            setTimeout(function () {
+              wx.navigateBack()
+            }, 1500)
+          })
         }
       }
     })

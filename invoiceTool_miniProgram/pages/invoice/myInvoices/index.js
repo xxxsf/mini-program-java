@@ -17,14 +17,18 @@ Page({
   },
 
   onShow: function () {
-    var invoices = app.globalData.invoices.map(function (inv) {
-      var d = new Date(inv.date || inv.createTime)
-      inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'
-      inv.selected = false
-      return inv
-    })
-    this.setData({ invoices: invoices })
-    this.applyFilters()
+    var that = this
+    app.loadInvoices()
+    setTimeout(function () {
+      var invoices = app.globalData.invoices.map(function (inv) {
+        var d = new Date(inv.date || inv.createTime)
+        inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'
+        inv.selected = false
+        return inv
+      })
+      that.setData({ invoices: invoices })
+      that.applyFilters()
+    }, 300)
   },
 
   onSearchInput: function (e) {
@@ -88,7 +92,7 @@ Page({
     var id = e.currentTarget.dataset.id
     var invoices = this.data.invoices
     for (var i = 0; i < invoices.length; i++) {
-      if (invoices[i].id === id) {
+      if (String(invoices[i].id) === String(id)) {
         invoices[i].selected = !invoices[i].selected
         break
       }
@@ -133,10 +137,11 @@ Page({
           for (var i = 0; i < invoices.length; i++) {
             if (invoices[i].selected) ids.push(invoices[i].id)
           }
-          app.deleteInvoices(ids)
-          that.setData({ batchMode: false })
-          that.onShow()
-          wx.showToast({ title: '删除成功', icon: 'success' })
+          app.deleteInvoices(ids, function () {
+            that.setData({ batchMode: false })
+            that.onShow()
+            wx.showToast({ title: '删除成功', icon: 'success' })
+          })
         }
       }
     })

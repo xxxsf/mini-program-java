@@ -1,4 +1,5 @@
 var app = getApp()
+var util = require('../../../utils/util.js')
 
 var defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI9FhqR54SAoQBe2yrEMKmRPiaTd3g9QRIbCqOa30MBMbApRQConnQhItfN7NZLIM7m3d3OA/0'
 
@@ -39,21 +40,21 @@ Page({
     wx.login({
       success: function (loginRes) {
         if (loginRes.code) {
-          var userInfo = {
-            avatarUrl: that.data.avatarUrl,
-            nickName: that.data.nickname.trim(),
-            code: loginRes.code,
-            loginTime: Date.now()
-          }
-
-          app.onLoginSuccess(userInfo)
-
-          wx.hideLoading()
-          wx.showToast({ title: '登录成功', icon: 'success' })
-
-          setTimeout(function () {
-            wx.reLaunch({ url: '/pages/invoice/index/index' })
-          }, 1500)
+          util.req('user/login', { code: loginRes.code }, function (data) {
+            wx.hideLoading()
+            if (data && data.status == 1) {
+              var userInfo = data.user || {}
+              userInfo.nickName = that.data.nickname.trim()
+              userInfo.avatarUrl = that.data.avatarUrl
+              app.onLoginSuccess(userInfo, data.sk)
+              wx.showToast({ title: '登录成功', icon: 'success' })
+              setTimeout(function () {
+                wx.reLaunch({ url: '/pages/invoice/index/index' })
+              }, 1500)
+            } else {
+              wx.showToast({ title: (data && data.msg) || '登录失败', icon: 'none' })
+            }
+          })
         } else {
           wx.hideLoading()
           wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })

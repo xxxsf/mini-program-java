@@ -1,4 +1,5 @@
 var app = getApp()
+var util = require('../../../utils/util.js')
 
 Page({
   data: {},
@@ -41,37 +42,30 @@ Page({
 
   processFiles: function (files) {
     wx.showLoading({ title: '正在处理...' })
-
-    var categories = ['酒店行业', '餐饮行业', '交通出行', '其他']
-
-    for (var i = 0; i < files.length; i++) {
-      var fileName = files[i].name || '未知文件'
-      var sellerName = fileName.replace('.pdf', '').replace('.PDF', '')
-
-      var invoice = {
-        sellerName: sellerName,
-        buyerName: '个人',
-        amount: (Math.random() * 1000 + 50).toFixed(2),
-        date: Date.now(),
-        category: categories[Math.floor(Math.random() * categories.length)],
-        status: 'normal',
-        invoiceNo: 'FP' + Date.now() + i,
-        fileName: fileName,
-        fileSize: files[i].size,
-        filePath: files[i].path
-      }
-
-      app.addInvoice(invoice)
+    if (!app.globalData.sk) {
+      wx.hideLoading()
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      return
     }
+    this.uploadNext(files, 0, 0)
+  },
 
-    wx.hideLoading()
-    wx.showToast({
-      title: '成功导入' + files.length + '张发票',
-      icon: 'success'
+  uploadNext: function (files, index, successCount) {
+    var that = this
+    if (index >= files.length) {
+      app.loadInvoices()
+      wx.hideLoading()
+      wx.showToast({
+        title: '成功导入' + successCount + '张发票',
+        icon: successCount > 0 ? 'success' : 'none'
+      })
+      setTimeout(function () {
+        wx.navigateTo({ url: '/pages/invoice/myInvoices/index' })
+      }, 1500)
+      return
+    }
+    util.uploadFile(files[index].path, 'file', { sk: app.globalData.sk }, function (data) {
+      that.uploadNext(files, index + 1, data && data.status == 1 ? successCount + 1 : successCount)
     })
-
-    setTimeout(function () {
-      wx.navigateTo({ url: '/pages/invoice/myInvoices/index' })
-    }, 1500)
   }
 })

@@ -2,8 +2,10 @@ package com.example.invoicetool.controller;
 
 import com.example.invoicetool.entity.User;
 import com.example.invoicetool.repository.UserRepository;
+import com.example.invoicetool.service.AuthService;
 import com.example.invoicetool.service.WeChatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,16 +23,25 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private WeChatService weChatService;
+    @Autowired
+    private AuthService authService;
+    @Value("${wechat.appid}")
+    private String appid;
+    @Value("${wechat.appsecret}")
+    private String appsecret;
 
     @PostMapping("/login")
     public Map<String, Object> login(@RequestParam String code,
-                                     @RequestParam String appid,
-                                     @RequestParam String appsecret,
                                      @RequestParam(required = false) String encryptedData,
                                      @RequestParam(required = false) String iv) {
         Map<String, Object> result = new HashMap<>();
 
         // 1) code2session 获取 openid & session_key
+        if (appsecret == null || appsecret.trim().isEmpty()) {
+            result.put("status", 0);
+            result.put("msg", "后端未配置微信 appsecret");
+            return result;
+        }
         Map<String, String> session = weChatService.code2Session(appid, appsecret, code);
         String openId = session.get("openid");
         String sessionKey = session.get("session_key");
@@ -70,8 +81,7 @@ public class UserController {
 
         userRepository.save(user);
 
-        // 4) 维持兼容的 sk 返回（前端依赖该格式）
-        String sk = "mock_sk_" + openId;
+        String sk = authService.createSession(user, sessionKey);
 
         result.put("status", 1);
         result.put("msg", "登录成功");
@@ -82,9 +92,7 @@ public class UserController {
 
     @PostMapping("/editUser")
     public Map<String, Object> editUser(@RequestBody User user, @RequestParam String sk) {
-        // TODO: Implement user validation (vaild_sk)
-        String openId = "mock_openid_12345"; // Placeholder for openId from sk
-        User existingUser = userRepository.findByOpenId(openId);
+        User existingUser = authService.requireUser(sk);
         if (existingUser != null) {
             existingUser.setNickName(user.getNickName());
             existingUser.setAvatarUrl(user.getAvatarUrl());
@@ -105,8 +113,7 @@ public class UserController {
 
     @PostMapping("/vaild_sk")
     public Map<String, Object> vaildSk(@RequestParam String sk) {
-        // TODO: Implement actual sk validation
-        boolean isValid = sk != null && sk.startsWith("mock_sk_");
+        boolean isValid = authService.isValid(sk);
 
         Map<String, Object> result = new HashMap<>();
         result.put("status", isValid ? 1 : 0);
