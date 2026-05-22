@@ -1,0 +1,83 @@
+<view class="page">
+  <!-- 顶部绿色区域 -->
+  <view class="header">
+    <view class="actions">
+      <view class="action-item" bindtap="onAddInvoice">
+        <view class="action-icon">
+          <text class="icon-circle">+</text>
+        </view>
+        <text class="action-label">添加发票</text>
+      </view>
+      <view class="action-item" bindtap="onMyInvoices">
+        <view class="action-icon">
+          <image class="action-img" src="/img/invoice-list.svg" mode="aspectFit" />
+        </view>
+        <text class="action-label">我的发票</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 关联邮箱 -->
+  <view class="email-bar" bindtap="onLinkEmail">
+    <image class="email-icon" src="/img/email.png" mode="aspectFit" />
+    <text class="email-text">关联QQ邮箱，自动同步邮箱发票。</text>
+    <view class="email-btn">关联</view>
+  </view>
+
+  <!-- Banner -->
+  <view class="banner">
+    <image src="/img/banner.png" mode="aspectFill" class="banner-img" />
+  </view>
+
+  <!-- 发票抬头 -->
+  <view class="section">
+    <text class="section-title">发票抬头</text>
+
+    <view class="header-add" bindtap="onAddHeader">
+      <text class="header-add-icon">+</text>
+      <text class="header-add-text">添加发票抬头</text>
+    </view>
+
+    <block wx:for="{{headers}}" wx:key="id">
+      <view class="header-item" bindtap="onEditHeader" data-id="{{item.id}}">
+        <view class="header-info">
+          <text class="header-name">{{item.name}}</text>
+          <text class="header-tax" wx:if="{{item.taxNo}}">税号: {{item.taxNo}}</text>
+        </view>
+        <text class="header-arrow">></text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 常见问题 -->
+  <view class="faq" bindtap="onFaq">
+    <text class="faq-text">常见问题</text>
+  </view>
+
+  <!-- 添加发票来源弹窗 -->
+  <view class="mask" wx:if="{{showSourceSheet}}" bindtap="closeSourceSheet"></view>
+  <view class="source-sheet {{showSourceSheet ? 'show' : ''}}">
+    <view class="sheet-header">
+      <view class="sheet-close" bindtap="closeSourceSheet">×</view>
+      <view class="sheet-title-wrap">
+        <text class="sheet-title">选择发票来源</text>
+        <text class="sheet-desc">目前仅可识别pdf格式的发票</text>
+      </view>
+    </view>
+    <view class="sheet-option" bindtap="onSourceChat">
+      <image class="sheet-icon" src="/img/chat-icon.svg" mode="aspectFit" />
+      <text class="sheet-label">从微信聊天导入</text>
+      <text class="sheet-arrow">></text>
+    </view>
+    <view class="sheet-option" bindtap="onSourceLocal">
+      <image class="sheet-icon" src="/img/file-icon.svg" mode="aspectFit" />
+      <text class="sheet-label">从本地文件导入</text>
+      <text class="sheet-arrow">></text>
+    </view>
+    <view class="sheet-footer">
+      <text class="sheet-link" bindtap="onLinkEmail">关联QQ邮箱</text>
+      <text class="sheet-sep">|</text>
+      <text class="sheet-link" bindtap="onOtherSource">其他渠道导入</text>
+    </view>
+  </view>
+</view>

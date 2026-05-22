@@ -1,0 +1,72 @@
+<view class="page">
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <icon type="search" size="14" color="#999" />
+    <input class="search-input" placeholder="搜索收款方、付款方名称" confirm-type="search" bindinput="onSearchInput" value="{{keyword}}" />
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item" bindtap="onFilterTime">
+      <text>时间</text>
+      <text class="filter-arrow">▾</text>
+    </view>
+    <view class="filter-item" bindtap="onFilterStatus">
+      <text>状态</text>
+      <text class="filter-arrow">▾</text>
+    </view>
+    <view class="filter-item" bindtap="onFilterType">
+      <text>类型</text>
+      <text class="filter-arrow">▾</text>
+    </view>
+    <view class="batch-btn" bindtap="onBatchSelect">
+      <text>批量选择</text>
+    </view>
+  </view>
+
+  <!-- Banner -->
+  <view class="banner">
+    <image src="/img/banner.png" mode="aspectFill" class="banner-img" />
+  </view>
+
+  <!-- 关联邮箱 -->
+  <view class="email-bar" bindtap="onLinkEmail">
+    <image class="email-icon" src="/img/email.png" mode="aspectFit" />
+    <text class="email-text">关联QQ邮箱，自动同步邮箱发票。</text>
+    <view class="email-btn">关联</view>
+  </view>
+
+  <!-- 添加发票入口 -->
+  <view class="add-entry" bindtap="onAddInvoice">
+    <text class="add-icon">+</text>
+    <text class="add-text">添加发票</text>
+  </view>
+
+  <!-- 发票列表 -->
+  <block wx:for="{{filteredList}}" wx:key="id">
+    <view class="invoice-card" bindtap="onInvoiceDetail" data-id="{{item.id}}">
+      <view class="card-top">
+        <view class="card-tag">{{item.industry}}</view>
+        <text class="card-company">{{item.company}}</text>
+      </view>
+      <view class="card-row">
+        <text class="card-label">金额</text>
+        <text class="card-value amount">¥{{item.amount}}</text>
+      </view>
+      <view class="card-row">
+        <text class="card-label">时间</text>
+        <text class="card-value">{{item.date}}</text>
+      </view>
+      <view class="card-row">
+        <text class="card-label">付款方</text>
+        <text class="card-value">{{item.payer}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{filteredList.length === 0}}">
+    <text class="empty-text">暂无发票</text>
+    <text class="empty-hint">点击上方"添加发票"导入</text>
+  </view>
+</view>
