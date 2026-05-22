@@ -1,0 +1,28 @@
+<view class="page">
+  <view class="title">如何选择本地文件</view>
+
+  <view class="desc">
+    轻触「选择文件」后，在「最近项目」中 选择要上传的文件。
+  </view>
+
+  <view class="tips-title">选择本地文件说明：</view>
+  <view class="tips">
+    <view class="tip-item">
+      <text class="dot">·</text>
+      <text>电子发票 (票据) PDF版式文件最大不能超过100K。</text>
+    </view>
+    <view class="tip-item">
+      <text class="dot">·</text>
+      <text>最多可以选择10个电子发票 (票据) 文件。</text>
+    </view>
+    <view class="tip-item">
+      <text class="dot">·</text>
+      <text>文件将上传到云端处理，请保持网络通畅。</text>
+    </view>
+  </view>
+
+  <view class="bottom-area">
+    <text class="agreement">你同意并授权将选中文件添加到微信卡包</text>
+    <button class="select-btn" bindtap="onSelectFile">选择文件</button>
+  </view>
+</view>

@@ -1,0 +1,32 @@
+<view class="page">
+  <view class="title">填写发票抬头信息</view>
+
+  <view class="form">
+    <view class="form-row">
+      <text class="form-label">名称</text>
+      <input class="form-input" placeholder="抬头名称" value="{{name}}" bindinput="onNameInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">税号</text>
+      <input class="form-input" placeholder="纳税人识别号" value="{{taxNo}}" bindinput="onTaxInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">单位地址</text>
+      <input class="form-input" placeholder="公司地址 (选填)" value="{{address}}" bindinput="onAddressInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">电话号码</text>
+      <input class="form-input" placeholder="公司电话 (选填)" value="{{phone}}" bindinput="onPhoneInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">开户银行</text>
+      <input class="form-input" placeholder="开户银行 (选填)" value="{{bank}}" bindinput="onBankInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">银行账户</text>
+      <input class="form-input" placeholder="银行账户 (选填)" value="{{bankAccount}}" bindinput="onAccountInput" />
+    </view>
+  </view>
+
+  <button class="save-btn" bindtap="onSave">保存</button>
+</view>

@@ -1,0 +1,162 @@
+page { background: #f5f5f5; }
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #f0f0f0;
+  margin: 20rpx 24rpx;
+  padding: 16rpx 24rpx;
+  border-radius: 8rpx;
+  gap: 12rpx;
+}
+.search-input {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+}
+.filter-item {
+  display: flex;
+  align-items: center;
+  margin-right: 32rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+.filter-arrow {
+  font-size: 20rpx;
+  margin-left: 4rpx;
+  color: #999;
+}
+.batch-btn {
+  margin-left: auto;
+  font-size: 26rpx;
+  color: #07C160;
+}
+
+.banner {
+  margin: 16rpx 24rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.banner-img {
+  width: 100%;
+  height: 160rpx;
+}
+
+.email-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 16rpx 24rpx;
+  padding: 24rpx;
+  border-radius: 12rpx;
+}
+.email-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+}
+.email-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+}
+.email-btn {
+  background: #07C160;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 28rpx;
+  border-radius: 8rpx;
+}
+
+.add-entry {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  margin: 16rpx 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+}
+.add-icon {
+  width: 44rpx;
+  height: 44rpx;
+  border: 2rpx solid #07C160;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #07C160;
+  font-size: 32rpx;
+  margin-right: 16rpx;
+  line-height: 44rpx;
+  text-align: center;
+}
+.add-text {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.invoice-card {
+  background: #fff;
+  margin: 16rpx 24rpx;
+  padding: 24rpx;
+  border-radius: 12rpx;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.card-tag {
+  background: #e8f5e9;
+  color: #07C160;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  margin-right: 12rpx;
+}
+.card-company {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}
+.card-row {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0;
+}
+.card-label {
+  font-size: 24rpx;
+  color: #999;
+  width: 100rpx;
+}
+.card-value {
+  font-size: 26rpx;
+  color: #333;
+}
+.card-value.amount {
+  color: #333;
+  font-weight: bold;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+.empty-text {
+  font-size: 30rpx;
+  color: #999;
+}
+.empty-hint {
+  font-size: 24rpx;
+  color: #ccc;
+  margin-top: 12rpx;
+}

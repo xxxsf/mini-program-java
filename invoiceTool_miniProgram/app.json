@@ -1,15 +1,22 @@
 {
   "pages": [
+    "pages/home/index",
     "pages/invoice/index/index",
     "pages/invoice/login/index",
     "pages/invoice/myInvoices/index",
     "pages/invoice/upload/index",
     "pages/invoice/headerAdd/index",
-    "pages/invoice/detail/index"
+    "pages/invoice/detail/index",
+    "pages/myInvoices/index",
+    "pages/addInvoice/index",
+    "pages/invoiceHeader/add",
+    "pages/my/index",
+    "pages/my/info",
+    "pages/toLogin/toLogin"
   ],
   "window": {
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#09BB07",
+    "navigationBarBackgroundColor": "#07C160",
     "navigationBarTitleText": "微信发票助手",
     "navigationBarTextStyle": "white",
     "enablePullDownRefresh": false,

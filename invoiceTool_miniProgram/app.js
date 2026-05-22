@@ -33,8 +33,6 @@ App({
     wx.login({
       success: function (res) {
         if (res.code) {
-          // 获取到 code，可用于向后端换取 session_key
-          // 当前为本地模式，仅刷新登录态
           console.log('静默登录成功，code:', res.code)
         }
       }

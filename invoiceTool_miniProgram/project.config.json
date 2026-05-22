@@ -46,7 +46,7 @@
   "compileType": "miniprogram",
   "libVersion": "2.17.0",
   "appid": "wxb95ae2df41575bc3",
-  "projectname": "invoice-assistant",
+  "projectname": "invoiceAssistant",
   "isGameTourist": false,
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
