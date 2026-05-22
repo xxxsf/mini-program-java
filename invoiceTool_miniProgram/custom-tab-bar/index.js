@@ -16,9 +16,9 @@ Component({
 
     if (!list || !list.length) {
       list = [
-        { pagePath: '/pages/boat/index', text: '首页', iconPath: '/img/index.png', selectedIconPath: '/img/index.png' },
-        { pagePath: '/pages/boat/captain/index', text: '船主', iconPath: '/img/driver.png', selectedIconPath: '/img/driver.png' },
-        { pagePath: '/pages/my/index', text: '个人中心', iconPath: '/img/account.png', selectedIconPath: '/img/account.png' }
+        { pagePath: '/pages/boat/index', text: '首页', iconPath: '/img/index_unactive.svg', selectedIconPath: '/img/index.svg' },
+        { pagePath: '/pages/boat/captain/index', text: '船主', iconPath: '/img/driver_unactive.svg', selectedIconPath: '/img/driver.svg' },
+        { pagePath: '/pages/my/index', text: '个人中心', iconPath: '/img/account_unactive.svg', selectedIconPath: '/img/account.svg' }
       ];
     }
 

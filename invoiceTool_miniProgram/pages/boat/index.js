@@ -113,8 +113,7 @@ Page({
   },
   goDrive() {
     wx.showToast({ title: '手机驾驭开发中', icon: 'none' });
-  }
-  ,
+  },
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 });
