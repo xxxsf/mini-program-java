@@ -1,0 +1,222 @@
+name: InvoiceTool CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  # ============================================
+  # Java 后端构建和测试
+  # ============================================
+  build-backend:
+    name: Build Java Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+          
+      - name: Build with Maven
+        run: |
+          cd invoiceTool_Java
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          
+      - name: Run tests
+        run: |
+          cd invoiceTool_Java
+          ./mvnw test
+          
+      - name: Generate test report
+        if: always()
+        run: |
+          cd invoiceTool_Java
+          ./mvnw surefire-report:report
+          
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: invoiceTool_Java/target/surefire-reports/
+          
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build -t invoicetool:${{ github.sha }} .
+          docker tag invoicetool:${{ github.sha }} invoicetool:latest
+          
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker tag invoicetool:latest ${{ secrets.DOCKER_USERNAME }}/invoicetool:latest
+          docker tag invoicetool:latest ${{ secrets.DOCKER_USERNAME }}/invoicetool:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/invoicetool:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/invoicetool:${{ github.sha }}
+
+  # ============================================
+  # 微信小程序构建
+  # ============================================
+  build-miniprogram:
+    name: Build WeChat Mini Program
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies (if any)
+        run: |
+          cd invoiceTool_miniProgram
+          # 如果有 package.json，运行 npm install
+          if [ -f package.json ]; then
+            npm install
+          fi
+          
+      - name: Validate miniprogram structure
+        run: |
+          cd invoiceTool_miniProgram
+          if [ ! -f app.json ]; then
+            echo "Error: app.json not found"
+            exit 1
+          fi
+          if [ ! -f app.js ]; then
+            echo "Error: app.js not found"
+            exit 1
+          fi
+          echo "✅ Mini program structure is valid"
+          
+      - name: Create deployment package
+        run: |
+          cd invoiceTool_miniProgram
+          tar -czf ../miniprogram-build.tar.gz .
+          
+      - name: Upload miniprogram artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: miniprogram-package
+          path: miniprogram-build.tar.gz
+
+  # ============================================
+  # 部署到服务器/云平台
+  # ============================================
+  deploy-backend:
+    name: Deploy Backend
+    needs: build-backend
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # 停止现有容器
+            docker stop invoicetool || true
+            docker rm invoicetool || true
+            
+            # 拉取最新镜像
+            docker pull ${{ secrets.DOCKER_USERNAME }}/invoicetool:latest
+            
+            # 启动新容器
+            docker run -d \
+              --name invoicetool \
+              -p 8080:8080 \
+              -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
+              --restart unless-stopped \
+              ${{ secrets.DOCKER_USERNAME }}/invoicetool:latest
+              
+            # 清理旧镜像
+            docker image prune -f
+
+  # ============================================
+  # 微信小程序上传（需要特殊工具）
+  # ============================================
+  upload-miniprogram:
+    name: Upload Mini Program to WeChat
+    needs: build-miniprogram
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Download miniprogram artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: miniprogram-package
+          
+      - name: Extract package
+        run: |
+          tar -xzf miniprogram-build.tar.gz
+          mv invoiceTool_miniProgram/* .
+          
+      - name: Setup WeChat CLI tools
+        run: |
+          # 安装微信开发者工具 CLI (需要特殊处理)
+          echo "⚠️  WeChat CLI tools require manual setup"
+          echo "请手动使用微信开发者工具上传小程序"
+          
+      - name: Create deployment notification
+        run: |
+          echo "🚀 小程序代码已准备好，请手动上传："
+          echo "1. 下载构建产物"
+          echo "2. 使用微信开发者工具打开项目"
+          echo "3. 点击 '上传' 按钮"
+          echo "4. 填写版本号和备注"
+
+  # ============================================
+  # 通知
+  # ============================================
+  notify:
+    name: Send Notification
+    needs: [build-backend, build-miniprogram, deploy-backend]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Send success notification
+        if: ${{ needs.build-backend.result == 'success' && needs.build-miniprogram.result == 'success' }}
+        run: |
+          echo "✅ 部署成功！"
+          echo "后端服务已更新"
+          echo "小程序代码已准备好"
+          
+      - name: Send failure notification
+        if: ${{ needs.build-backend.result == 'failure' || needs.build-miniprogram.result == 'failure' }}
+        run: |
+          echo "❌ 部署失败，请检查日志"

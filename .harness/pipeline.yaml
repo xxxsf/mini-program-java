@@ -1,0 +1,89 @@
+# Simplified Harness Pipeline Configuration
+# This is a more practical configuration for the InvoiceTool project
+
+version: 1
+name: InvoiceTool Build and Deploy
+identifier: invoicetool_build_deploy
+projectIdentifier: default
+orgIdentifier: default
+
+stages:
+  # Build Stage - Compile and Test
+  - stage:
+      name: Build
+      identifier: build
+      type: CI
+      spec:
+        cloneCodebase: true
+        platform:
+          os: Linux
+          arch: Amd64
+        runtime:
+          type: Cloud
+          spec: {}
+        execution:
+          steps:
+            # Set up Java environment
+            - step:
+                type: Run
+                name: Setup Java
+                identifier: setup_java
+                spec:
+                  shell: Sh
+                  command: |-
+                    java -version
+                    echo "JAVA_HOME=$JAVA_HOME"
+            
+            # Build with Maven
+            - step:
+                type: Run
+                name: Maven Build
+                identifier: maven_build
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    chmod +x mvnw
+                    ./mvnw clean package -DskipTests
+            
+            # Run tests
+            - step:
+                type: Run
+                name: Run Tests
+                identifier: run_tests
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    ./mvnw test
+            
+            # Build Docker image
+            - step:
+                type: Run
+                name: Build Docker Image
+                identifier: build_docker
+                spec:
+                  shell: Sh
+                  command: |-
+                    docker build -t invoicetool:${PIPELINE_EXECUTION_ID} .
+                    docker tag invoicetool:${PIPELINE_EXECUTION_ID} invoicetool:latest
+
+  # Deploy Stage - Deploy to Kubernetes
+  - stage:
+      name: Deploy
+      identifier: deploy
+      type: CD
+      spec:
+        serviceConfig:
+          serviceRef: invoicetool-service
+          environmentRef: production
+          deploymentType: Kubernetes
+          
+        execution:
+          steps:
+            - step:
+                type: K8sRollingDeploy
+                name: Rolling Deployment
+                identifier: rolling_deploy
+                spec:
+                  timeout: 10m

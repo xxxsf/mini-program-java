@@ -1,0 +1,148 @@
+# Harness CI/CD Configuration for InvoiceTool Project
+# This configuration defines the build, test, and deployment pipeline for the Spring Boot application
+
+version: 1
+name: invoice-tool-pipeline
+identifier: invoicetoolpipeline
+projectIdentifier: invoicetool
+orgIdentifier: default
+
+# Pipeline stages
+stages:
+  - stage:
+      name: Build
+      identifier: Build
+      type: CI
+      spec:
+        cloneCodebase: true
+        platform:
+          os: Linux
+          arch: Amd64
+        runtime:
+          type: Cloud
+          spec: {}
+        execution:
+          steps:
+            - step:
+                type: Run
+                name: Build Java Application
+                identifier: build_java_app
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    chmod +x mvnw
+                    ./mvnw clean package -DskipTests
+            - step:
+                type: Run
+                name: Run Tests
+                identifier: run_tests
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    ./mvnw test
+            - step:
+                type: Run
+                name: Build Docker Image
+                identifier: build_docker_image
+                spec:
+                  shell: Sh
+                  command: |-
+                    docker build -t invoicetool:latest .
+                    docker tag invoicetool:latest invoicetool:$(date +%Y%m%d-%H%M%S)
+
+  - stage:
+      name: Deploy
+      identifier: Deploy
+      type: CD
+      spec:
+        serviceConfig:
+          serviceRef: invoice-tool-service
+          serviceInputs:
+            serviceDefinition:
+              type: Kubernetes
+              spec:
+                artifacts:
+                  primary:
+                    primaryArtifactRef: invoicetool-image
+                    sources:
+                      - identifier: invoicetool-image
+                        type: DockerRegistry
+                        spec:
+                          imagePath: invoicetool:latest
+        environmentConfig:
+          environmentRef: production
+          deployToAll: false
+          infrastructureDefinitions:
+            - identifier: kubernetes-cluster
+        execution:
+          steps:
+            - step:
+                type: K8sRollingDeploy
+                name: Rolling Deployment
+                identifier: rolling_deployment
+                spec:
+                  timeout: 10m
+
+# Service definitions
+services:
+  - name: invoice-tool-service
+    identifier: invoice-tool-service
+    serviceDefinition:
+      type: Kubernetes
+      spec:
+        manifests:
+          - manifest:
+              identifier: k8s-manifests
+              type: K8sManifest
+              spec:
+                store:
+                  type: Git
+                  spec:
+                    connectorRef: account.gitHubConnector
+                    repoName: mini-program-java
+                    branch: main
+                    paths:
+                      - .harness/k8s/
+        artifacts:
+          primary:
+            primaryArtifactRef: invoicetool-image
+            sources:
+              - identifier: invoicetool-image
+                type: DockerRegistry
+                spec:
+                  imagePath: <+input>
+                  tag: <+input>
+                  connectorRef: account.dockerHubConnector
+
+# Environment definitions
+environments:
+  - name: production
+    identifier: production
+    type: Production
+    orgIdentifier: default
+    projectIdentifier: invoicetool
+    variables:
+      - name: SPRING_DATASOURCE_URL
+        type: String
+        value: jdbc:mysql://mysql-service:3306/invoicetool
+      - name: SPRING_DATASOURCE_USERNAME
+        type: Secret
+        value: mysql_username
+      - name: SPRING_DATASOURCE_PASSWORD
+        type: Secret
+        value: mysql_password
+
+# Infrastructure definitions
+infrastructure:
+  - name: kubernetes-cluster
+    identifier: kubernetes-cluster
+    description: Kubernetes cluster for deployment
+    type: KubernetesDirect
+    orgIdentifier: default
+    projectIdentifier: invoicetool
+    spec:
+      connectorRef: account.kubernetesCluster
+      namespace: default
+      releaseName: invoicetool-release

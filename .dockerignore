@@ -1,0 +1,51 @@
+# Maven
+invoiceTool_Java/target/
+invoiceTool_Java/.mvn/
+invoiceTool_Java/mvnw
+invoiceTool_Java/mvnw.cmd
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.eclipse/
+.metadata/
+.settings/
+.project
+.classpath
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+readme.dev.md
+LICENSE
+
+# WeChat Mini Program (not needed for backend container)
+invoiceTool_miniProgram/
+
+# Config files
+project.config.json
+project.private.config.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Harness files (not needed in container)
+.harness/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

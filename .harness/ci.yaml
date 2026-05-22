@@ -1,0 +1,96 @@
+# Harness CI Configuration for InvoiceTool
+# Focuses on continuous integration and testing
+
+version: 1
+name: InvoiceTool CI
+identifier: invoicetool_ci
+projectIdentifier: default
+orgIdentifier: default
+
+properties:
+  ci:
+    codebase:
+      connectorRef: account.github
+      repoName: mini-program-java
+      build: <+input>
+
+stages:
+  - stage:
+      name: Build and Test
+      identifier: build_test
+      type: CI
+      spec:
+        cloneCodebase: true
+        platform:
+          os: Linux
+          arch: Amd64
+        runtime:
+          type: Cloud
+          spec: {}
+        execution:
+          steps:
+            # Cache Maven dependencies
+            - step:
+                type: Run
+                name: Cache Maven Dependencies
+                identifier: cache_maven
+                spec:
+                  shell: Sh
+                  command: |-
+                    echo "Caching Maven dependencies..."
+            
+            # Build project
+            - step:
+                type: Run
+                name: Maven Build
+                identifier: maven_build
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    chmod +x mvnw
+                    ./mvnw clean install -DskipTests
+            
+            # Run unit tests
+            - step:
+                type: Run
+                name: Unit Tests
+                identifier: unit_tests
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    ./mvnw test
+            
+            # Generate test reports
+            - step:
+                type: Run
+                name: Generate Test Reports
+                identifier: test_reports
+                spec:
+                  shell: Sh
+                  command: |-
+                    cd invoiceTool_Java
+                    ./mvnw surefire-report:report
+            
+            # Build Docker image for deployment
+            - step:
+                type: Run
+                name: Build Docker Image
+                identifier: docker_build
+                spec:
+                  shell: Sh
+                  command: |-
+                    docker build -t invoicetool:latest .
+                    docker tag invoicetool:latest your-docker-registry/invoicetool:latest
+            
+            # Push Docker image (optional)
+            - step:
+                type: Run
+                name: Push Docker Image
+                identifier: docker_push
+                spec:
+                  shell: Sh
+                  command: |-
+                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                    docker push your-docker-registry/invoicetool:latest

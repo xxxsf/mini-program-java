@@ -1,0 +1,178 @@
+# Harness 配置示例
+# 请根据您的实际环境更新以下值
+
+# ============================================
+# 连接器配置 (需要在 Harness 中创建)
+# ============================================
+
+connectors:
+  github:
+    name: "github-connector"
+    id: "account.github-connector"
+    description: "GitHub 仓库连接器"
+    
+  docker:
+    name: "docker-hub-connector"
+    id: "account.docker-hub-connector"
+    description: "Docker Hub 连接器"
+    
+  kubernetes:
+    name: "kubernetes-connector"
+    id: "account.kubernetes-connector"
+    description: "Kubernetes 集群连接器"
+
+# ============================================
+# Docker 配置
+# ============================================
+
+docker:
+  registry: "docker.io"
+  username: "your-dockerhub-username"  # 替换为您的 Docker Hub 用户名
+  image_name: "invoicetool"
+  tag: "latest"
+  
+  # 完整镜像路径
+  full_image_path: "your-dockerhub-username/invoicetool:latest"
+
+# ============================================
+# Kubernetes 配置
+# ============================================
+
+kubernetes:
+  namespace: "default"
+  cluster_name: "your-cluster-name"
+  
+  # 服务配置
+  service:
+    type: "LoadBalancer"  # 或 "NodePort", "ClusterIP"
+    port: 80
+    target_port: 8080
+    
+  # 部署配置
+  deployment:
+    replicas: 2
+    image_pull_policy: "Always"
+    
+  # 资源限制
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+# ============================================
+# 数据库配置
+# ============================================
+
+database:
+  host: "mysql-service"  # Kubernetes 服务名或外部 IP
+  port: 3306
+  name: "invoicetool"
+  username: "root"  # 将存储在 Kubernetes Secret 中
+  password: "your_password"  # 将存储在 Kubernetes Secret 中
+  
+  # JDBC URL
+  url: "jdbc:mysql://mysql-service:3306/invoicetool?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+
+# ============================================
+# 应用配置
+# ============================================
+
+application:
+  name: "invoicetool"
+  port: 8080
+  profile: "production"
+  
+  # 健康检查
+  health_check:
+    liveness_path: "/actuator/health"
+    readiness_path: "/actuator/health/readiness"
+    initial_delay_seconds: 60
+    period_seconds: 10
+
+# ============================================
+# Secrets 配置 (示例)
+# ============================================
+
+# 注意：这些值应该在 Harness Secrets Manager 中创建
+secrets:
+  mysql_username:
+    name: "mysql_username"
+    description: "MySQL 数据库用户名"
+    
+  mysql_password:
+    name: "mysql_password"
+    description: "MySQL 数据库密码"
+    
+  docker_hub_token:
+    name: "docker_hub_token"
+    description: "Docker Hub 访问令牌"
+
+# ============================================
+# 管道配置示例
+# ============================================
+
+pipeline:
+  name: "invoice-tool-pipeline"
+  description: "Invoice Tool CI/CD Pipeline"
+  
+  build:
+    java_version: "17"
+    maven_goals: "clean package -DskipTests"
+    run_tests: true
+    
+  deploy:
+    strategy: "Rolling"  # 或 "Canary", "BlueGreen"
+    timeout: "10m"
+    auto_approve: false  # 生产环境建议设为 false
+
+# ============================================
+# 通知配置
+# ============================================
+
+notifications:
+  slack:
+    webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    channels:
+      - "#deployments"
+      - "#alerts"
+      
+  email:
+    recipients:
+      - "devops@example.com"
+      - "team@example.com"
+
+# ============================================
+# 环境配置
+# ============================================
+
+environments:
+  development:
+    namespace: "dev"
+    replicas: 1
+    auto_deploy: true
+    
+  staging:
+    namespace: "staging"
+    replicas: 2
+    auto_deploy: true
+    
+  production:
+    namespace: "prod"
+    replicas: 3
+    auto_deploy: false
+    require_approval: true
+
+# ============================================
+# 更新步骤
+# ============================================
+
+# 1. 在 Harness 中创建连接器，获取实际的连接器 ID
+# 2. 更新上述 connectors 部分的 ID
+# 3. 更新 docker.username 为您的 Docker Hub 用户名
+# 4. 更新 database 配置为您的实际数据库信息
+# 5. 在 Harness Secrets Manager 中创建对应的 secrets
+# 6. 根据需要调整 kubernetes 和 application 配置
+# 7. 更新 pipeline.yaml 中的引用
