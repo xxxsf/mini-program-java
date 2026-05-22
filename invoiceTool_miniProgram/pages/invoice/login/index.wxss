@@ -1,0 +1,170 @@
+/* pages/invoice/login/index.wxss */
+
+.container {
+  min-height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 60rpx;
+}
+
+/* 头部 Logo 区域 */
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 120rpx;
+  margin-bottom: 80rpx;
+}
+
+.app-logo {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 32rpx;
+  background-color: #09BB07;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+}
+
+.logo-icon {
+  font-size: 80rpx;
+}
+
+.app-name {
+  font-size: 40rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+}
+
+.app-desc {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 头像和昵称区域 */
+.login-content {
+  width: 100%;
+  margin-bottom: 60rpx;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.section-label {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.avatar-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+  width: 80rpx;
+  height: 80rpx;
+}
+
+.avatar-btn::after {
+  border: none;
+}
+
+.avatar-img {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+.nickname-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.nickname-input {
+  text-align: right;
+  font-size: 30rpx;
+  color: #333;
+  flex: 1;
+  margin-left: 40rpx;
+}
+
+/* 底部登录按钮 */
+.login-footer {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 0 60rpx 60rpx;
+  padding-bottom: calc(60rpx + env(safe-area-inset-bottom));
+}
+
+.login-btn {
+  width: 100%;
+  background-color: #09BB07;
+  color: #fff;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 34rpx;
+  padding: 24rpx 0;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+/* 协议区域 */
+.agreement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.checkbox-wrap {
+  margin-right: 10rpx;
+}
+
+.agreement-checkbox {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agreement-checkbox.checked {
+  background-color: #09BB07;
+  border-color: #09BB07;
+}
+
+.check-icon {
+  color: #fff;
+  font-size: 20rpx;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.agreement-link {
+  font-size: 24rpx;
+  color: #576B95;
+}

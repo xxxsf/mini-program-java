@@ -1,0 +1,102 @@
+<!--pages/invoice/index/index.wxml-->
+<view class="container">
+  <!-- 顶部绿色区域 -->
+  <view class="header-area">
+    <!-- 用户信息栏 -->
+    <view class="user-bar" wx:if="{{userInfo}}">
+      <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+      <text class="user-name">{{userInfo.nickName}}</text>
+      <text class="logout-btn" bindtap="onLogout">退出</text>
+    </view>
+
+    <view class="action-buttons">
+      <view class="action-btn" bindtap="onAddInvoice">
+        <view class="action-icon-wrap">
+          <text class="action-icon">+</text>
+        </view>
+        <text class="action-text">添加发票</text>
+      </view>
+      <view class="action-btn" bindtap="onMyInvoices">
+        <view class="action-icon-wrap">
+          <text class="action-icon-doc">📋</text>
+        </view>
+        <text class="action-text">我的发票</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 关联QQ邮箱提示 -->
+  <view class="email-link-bar" bindtap="onLinkEmail">
+    <view class="email-icon-wrap">
+      <text class="email-icon">✉</text>
+    </view>
+    <text class="email-text">关联QQ邮箱，自动同步邮箱发票。</text>
+    <view class="email-btn">关联</view>
+  </view>
+
+  <!-- 促销横幅 -->
+  <view class="promo-banner">
+    <view class="promo-content">
+      <view class="promo-text-area">
+        <text class="promo-title">购在中国</text>
+        <text class="promo-subtitle">有奖发票</text>
+      </view>
+      <view class="promo-btn" bindtap="onPromo">立即参与</view>
+    </view>
+  </view>
+
+  <!-- 发票抬头 -->
+  <view class="section-label">发票抬头</view>
+
+  <view class="header-list">
+    <!-- 添加发票抬头 -->
+    <view class="header-item add-header" bindtap="onAddHeader">
+      <view class="add-icon-circle">
+        <text class="add-icon">+</text>
+      </view>
+      <text class="add-text">添加发票抬头</text>
+      <text class="arrow">›</text>
+    </view>
+
+    <!-- 已保存的发票抬头列表 -->
+    <view class="header-item" wx:for="{{invoiceHeaders}}" wx:key="id" bindtap="onHeaderTap" data-id="{{item.id}}">
+      <view class="header-info">
+        <text class="header-name">{{item.name}}</text>
+        <text class="header-tax">税号：{{item.taxNo}}</text>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 常见问题链接 -->
+  <view class="faq-link" bindtap="onFaq">
+    <text class="faq-text">常见问题</text>
+  </view>
+
+  <!-- 选择发票来源弹窗 -->
+  <view class="modal-mask" wx:if="{{showSourceModal}}" bindtap="onCloseSourceModal"></view>
+  <view class="source-modal {{showSourceModal ? 'show' : ''}}">
+    <view class="modal-header">
+      <view class="modal-close" bindtap="onCloseSourceModal">✕</view>
+      <view class="modal-title-area">
+        <text class="modal-title">选择发票来源</text>
+        <text class="modal-desc">目前仅可识别pdf格式的发票</text>
+      </view>
+    </view>
+    <view class="source-option" bindtap="onSourceChat">
+      <text class="source-icon chat-icon">💬</text>
+      <text class="source-text">从微信聊天导入</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="source-option" bindtap="onSourceFile">
+      <text class="source-icon file-icon">📁</text>
+      <text class="source-text">从本地文件导入</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="source-bottom-links">
+      <text class="bottom-link" bindtap="onLinkEmail">关联QQ邮箱</text>
+      <text class="bottom-divider">|</text>
+      <text class="bottom-link" bindtap="onOtherChannel">其他渠道导入</text>
+    </view>
+  </view>
+</view>
