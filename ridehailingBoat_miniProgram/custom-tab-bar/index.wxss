@@ -22,3 +22,11 @@
   margin-top: 2px;
   color: #333;
 }
+
+/* 激活态样式钩子：你可以在这里自定义选中态的样式 */
+.tab-item.active .label {
+  color: #FDA007;
+}
+.icon.active {
+  /* 例如加色或阴影：filter: brightness(1.1); */
+}

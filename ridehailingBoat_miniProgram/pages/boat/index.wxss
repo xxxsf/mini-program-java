@@ -34,9 +34,8 @@ page, .boat-page {
   border-radius: 16px;
   font-size: 14px;
 }
-/* *{
-  box-sizing: border-box;
-} */
+
+
 .operation-container {
   position: absolute;
   bottom: -10px;
@@ -46,12 +45,9 @@ page, .boat-page {
 
 .operation-card {
   background-color: #f5f5f5;
-  border: 1px solid red;
-  padding: 0 10px;
+  box-sizing: border-box;
+  padding: 0 10px 0;
   width: 100%;
-  /* padding-bottom: 20px; */
-  width: calc(100% - 10px);
-  /* display: flex; */
 }
 
 .quick-tabs {
