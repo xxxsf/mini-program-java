@@ -2,7 +2,7 @@
   <!-- 搜索框 -->
   <view class="search-bar">
     <icon type="search" size="14" color="#999" />
-    <input class="search-input" placeholder="搜索收款方、付款方名称" confirm-type="search" bindinput="onSearchInput" value="{{keyword}}" />
+    <input class="search-input" placeholder="搜索收款方、付款方、文件名" confirm-type="search" bindinput="onSearchInput" value="{{keyword}}" />
   </view>
 
   <!-- 筛选栏 -->
@@ -24,11 +24,6 @@
     </view>
   </view>
 
-  <!-- Banner -->
-  <view class="banner">
-    <image src="/img/banner.png" mode="aspectFill" class="banner-img" />
-  </view>
-
   <!-- 关联邮箱 -->
   <view class="email-bar" bindtap="onLinkEmail">
     <image class="email-icon" src="/img/email.png" mode="aspectFit" />
@@ -46,20 +41,27 @@
   <block wx:for="{{filteredList}}" wx:key="id">
     <view class="invoice-card" bindtap="onInvoiceDetail" data-id="{{item.id}}">
       <view class="card-top">
-        <view class="card-tag">{{item.industry}}</view>
-        <text class="card-company">{{item.company}}</text>
+        <view class="card-tag">{{item.source === 'wechat_chat' ? '微信聊天' : item.source === 'local_album' ? '相册导入' : item.source === 'local_camera' ? '拍照导入' : item.source === 'local_file' ? '本地文件' : item.industry || '其他'}}</view>
+        <text class="card-company">{{item.company || item.fileName}}</text>
       </view>
       <view class="card-row">
         <text class="card-label">金额</text>
-        <text class="card-value amount">¥{{item.amount}}</text>
+        <text class="card-value amount">{{item.amount === '待识别' ? '待识别' : '¥' + item.amount}}</text>
       </view>
       <view class="card-row">
         <text class="card-label">时间</text>
         <text class="card-value">{{item.date}}</text>
       </view>
-      <view class="card-row">
+      <view class="card-row" wx:if="{{item.payer}}">
         <text class="card-label">付款方</text>
         <text class="card-value">{{item.payer}}</text>
+      </view>
+      <view class="card-row" wx:if="{{item.fileName}}">
+        <text class="card-label">文件</text>
+        <text class="card-value file-name">{{item.fileName}}</text>
+      </view>
+      <view class="card-actions">
+        <text class="card-delete" catchtap="onDeleteInvoice" data-id="{{item.id}}">删除</text>
       </view>
     </view>
   </block>
