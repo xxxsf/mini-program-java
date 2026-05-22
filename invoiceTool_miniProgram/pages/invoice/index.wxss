@@ -1,4 +1,4 @@
-page, .boat-page {
+page, .invoice-page {
   background: #f7f7f7;
   height: 100%;
 }

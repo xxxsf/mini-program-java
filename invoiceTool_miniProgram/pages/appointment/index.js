@@ -27,7 +27,7 @@ Page({
         if(data.status == 1){
           if(type == 1){
             wx.showToast({
-              title: '打船成功,请留意与乘客联系',
+              title: '开票成功,请留意联系',
               icon: 'success',
               duration: 2000
             })

@@ -36,11 +36,11 @@
                 </view>
             </view>
         
-            <view class="weui-cells__title">填写打船信息</view>
+            <view class="weui-cells__title">填写开票信息</view>
             <view class="weui-cells weui-cells_after-title">
                 <view class="weui-cell weui-cell_input">
                     <view class="weui-cell__hd">
-                        <view class="weui-label">打船类型</view>
+                        <view class="weui-label">发票类型</view>
                     </view>
                     <view class="weui-cell__bd">
                         <radio-group class="radio-group weui-cell weui-check__label" name="type" bindchange="selectType">
@@ -92,7 +92,7 @@
                 </view>
                 <view class="weui-cell weui-cell_input" wx:if="{{type == 1}}">
                     <view class="weui-cell__hd">
-                        <view class="weui-label">打船价格</view>
+                        <view class="weui-label">开票费用</view>
                     </view>
                     <view class="weui-cell__bd">
                         <input class="weui-input" name="price" value="{{price}}" placeholder="请填写价格,不填则为面议"/>

@@ -1,14 +1,8 @@
-# pinche_xcx
-
-[![GitHub stars](https://img.shields.io/github/stars/vincenth520/pinche_xcx.svg)](https://github.com/vincenth520/pinche_xcx/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/vincenth520/pinche_xcx.svg)](https://github.com/vincenth520/pinche_xcx/network)
-[![GitHub issues](https://img.shields.io/github/issues/vincenth520/pinche_xcx.svg)](https://github.com/vincenth520/pinche_xcx/issues)
-[![GitHub release](https://img.shields.io/github/release/vincenth520/pinche_xcx.svg)](https://github.com/vincenth520/pinche_xcx/releases)
-[![GitHub license](https://img.shields.io/badge/license-APACHE2.0-blue.svg)](https://raw.githubusercontent.com/vincenth520/pinche_xcx/master/LICENSE)
+# invoiceTool_miniProgram
 
 ## 项目说明
 
-寻车，达成，寻同路人，拼车出行，绿色环保，本项目的目的是为了方便同程出行的用户，车主乘客自主发布拼车信息，并实现自能预约通知，使拼车更加方便快捷。
+发票管理工具微信小程序前端，用于发票的开具、管理、查询和预约等功能。
 
 如果您使用的无appid测试,项目将无法正常登陆,所以如果您希望完全正常使用请添加appid
 
@@ -31,7 +25,7 @@
 修改utils/utils.js
 ```
 var wxAppinfo = {
-  'name': '同城拼车', //登录页标题
+  'name': '发票管理工具', //登录页标题
   'logo': 'https://wx.qlogo.cn/mmhead/Q3auHgzwzM41GbicIwic6JOHzehVqd3OubV4GmEQA67KRXyoZ3Y6maHg/0' //登录页logo
 };
 

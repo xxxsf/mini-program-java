@@ -1,4 +1,4 @@
-// pages/boat/captain/index.js
+// pages/invoice/manage/index.js
 Page({
 
   /**

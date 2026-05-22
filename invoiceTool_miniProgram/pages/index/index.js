@@ -38,8 +38,8 @@ Page({
       wx.showToast({title:`目标：${value}`, icon:'none'});
     }
   },
-  goReserve(){wx.showToast({title:'预约拼单（占位）',icon:'none'})},
-  goHelp(){wx.showToast({title:'帮人叫船（占位）',icon:'none'})},
+  goReserve(){wx.showToast({title:'预约开票（占位）',icon:'none'})},
+  goHelp(){wx.showToast({title:'代开发票（占位）',icon:'none'})},
   goBus(){wx.showToast({title:'站点巴士（占位）',icon:'none'})},
   goDrive(){wx.showToast({title:'手机驾驭（占位）',icon:'none'})}
 });

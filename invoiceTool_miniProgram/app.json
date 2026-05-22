@@ -1,9 +1,9 @@
 {
   "pages": [
-    "pages/boat/search/index",
-    "pages/boat/route/index",
-    "pages/boat/index",
-    "pages/boat/captain/index",
+    "pages/invoice/search/index",
+    "pages/invoice/route/index",
+    "pages/invoice/index",
+    "pages/invoice/manage/index",
     "pages/my/index",
     "pages/toLogin/toLogin",
     "pages/my/info",
@@ -37,12 +37,12 @@
     "borderStyle": "white",
     "list": [
       {
-        "pagePath": "pages/boat/index",
+        "pagePath": "pages/invoice/index",
         "text": "首页"
       },
       {
-        "pagePath": "pages/boat/captain/index",
-        "text": "船主"
+        "pagePath": "pages/invoice/manage/index",
+        "text": "发票管理"
       },
       {
         "pagePath": "pages/my/index",

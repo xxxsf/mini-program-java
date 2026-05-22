@@ -1,4 +1,4 @@
-<view class="boat-page">
+<view class="invoice-page">
   <!-- 顶部地图区域 -->
   <view class="map-wrap">
     <map class="map" latitude="{{latitude}}" longitude="{{longitude}}" scale="16" markers="{{markers}}"></map>
@@ -7,16 +7,16 @@
       <view class="city">{{city}}<text class="arrow">▾</text></view>
       <view class="scan">扫一扫</view>
     </view>
-    <!-- 立即出发 / 预约拼单 -->
+    <!-- 立即开票 / 预约开票 -->
     <view class="quick-tabs">
       <view class="tab {{activeTab==0?'tab-on':''}}" bindtap="switchTab" data-idx="0">立即出发</view>
-      <view class="tab {{activeTab==1?'tab-on':''}}" bindtap="switchTab" data-idx="1">预约拼单</view>
+      <view class="tab {{activeTab==1?'tab-on':''}}" bindtap="switchTab" data-idx="1">预约开票</view>
     </view>
     <!-- 目的卡片 -->
     <view class="dest-card">
       <view class="row">
         <view class="dot green"></view>
-        <text>从 {{startText}} 上船</text>
+        <text>从 {{startText}} 开始</text>
       </view>
       <view class="row">
         <view class="dot orange"></view>
@@ -29,11 +29,11 @@
   <view class="feature-grid">
     <view class="feature" bindtap="goReserve">
       <image src="/img/appointment.png" class="feat-icon" />
-      <text class="feat-text">预约拼单</text>
+      <text class="feat-text">预约开票</text>
     </view>
     <view class="feature" bindtap="goHelp">
       <image src="/img/people.png" class="feat-icon" />
-      <text class="feat-text">帮人叫船</text>
+      <text class="feat-text">代开发票</text>
     </view>
     <view class="feature" bindtap="goBus">
       <image src="/img/goods.png" class="feat-icon" />

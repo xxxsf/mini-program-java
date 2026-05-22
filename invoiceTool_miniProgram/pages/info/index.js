@@ -199,12 +199,12 @@ Page({
   },
   toIndex:function(){
     wx.reLaunch({
-      url: '/pages/boat/index'
+      url: '/pages/invoice/index'
     })
   },
   onShareAppMessage: function () { 
     return {
-      title: '打船详情',
+      title: '发票详情',
       path: 'pages/info/index?id='+this.data.data.id
     }
   },

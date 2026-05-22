@@ -1,4 +1,4 @@
-<view class="boat-page">
+<view class="invoice-page">
   <!-- 顶部地图区域 -->
   <view class="map-wrap">
     <map class="map" style="height:{{mapHeight}}px" latitude="{{latitude}}" longitude="{{longitude}}" scale="16" markers="{{markers}}" show-location="true"></map>
@@ -13,10 +13,10 @@
     <view class="locate-btn" bindtap="reLocate">定位</view>
 
     <view class="operation-container">
-      <!-- 立即出发 / 预约拼单 -->
+      <!-- 立即开票 / 预约开票 -->
       <view class="quick-tabs">
-        <view class="tab {{activeTab==0?'tab-on':''}}" bindtap="switchTab" data-idx="0">立即出发</view>
-        <view class="tab {{activeTab==1?'tab-on':''}}" bindtap="switchTab" data-idx="1">预约拼单</view>
+        <view class="tab {{activeTab==0?'tab-on':''}}" bindtap="switchTab" data-idx="0">立即开票</view>
+        <view class="tab {{activeTab==1?'tab-on':''}}" bindtap="switchTab" data-idx="1">预约开票</view>
       </view>
 
       <view class="operation-card">
@@ -24,7 +24,7 @@
         <view class="dest-card">
           <view class="row" bindtap="chooseLocation">
             <view class="dot green"></view>
-            <text>从 {{startText}} 上船</text>
+            <text>从 {{startText}} 开始</text>
           </view>
           <view class="row">
             <view class="dot orange"></view>
@@ -36,19 +36,19 @@
         <view class="feature-grid">
           <view class="feature" bindtap="goReserve">
             <image src="/img/yuyuepindan.png" class="feat-icon" />
-            <text class="feat-text">预约拼单</text>
+            <text class="feat-text">预约开票</text>
           </view>
           <view class="feature" bindtap="goHelp">
             <image src="/img/bangrenjiaochuan.png" class="feat-icon" />
-            <text class="feat-text">帮人叫船</text>
+            <text class="feat-text">代开发票</text>
           </view>
           <view class="feature" bindtap="goBus">
             <image src="/img/zhandianbashi.png" class="feat-icon" />
-            <text class="feat-text">站点巴士</text>
+            <text class="feat-text">批量开票</text>
           </view>
           <view class="feature" bindtap="goDrive">
             <image src="/img/shoujijiashi.png" class="feat-icon" />
-            <text class="feat-text">手机驾驭</text>
+            <text class="feat-text">扫码开票</text>
           </view>
         </view>
         

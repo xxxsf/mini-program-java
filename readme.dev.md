@@ -30,7 +30,7 @@ cd invoiceTool_miniProgram
 ## 项目概述
 - 后端：`invoiceTool_Java` 使用 Spring Boot 2.7 + Spring Data JPA，默认连接本地 MySQL，提供 `REST API` 服务。
 - 前端：`invoiceTool_miniProgram` 为微信小程序代码，可在微信开发者工具中打开并联调后端接口。
-- 数据：默认使用历史数据库名 `pinche`（为兼容旧表结构），你也可以调整为其他库名并同步修改配置。
+- 数据：默认使用历史数据库名 `invoicetool`（为兼容旧表结构，原名 `pinche`），你也可以调整为其他库名并同步修改配置。
 
 ## 目录结构
 - `invoiceTool_Java/`：后端 Java 项目（Maven Wrapper 已配置）。
@@ -44,20 +44,20 @@ cd invoiceTool_miniProgram
 ## 数据库初始化
 1) 创建数据库（如未创建）：
 ```
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pinche CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS invoicetool CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
 ```
 
 2) 导入初始表结构与数据（可选但推荐）：
 ```
-mysql -u root -p pinche < pinche_xcx_data/sql/xcx.sql
+mysql -u root -p invoicetool < pinche_xcx_data/sql/xcx.sql
 ```
 
 > 说明：后端的部分查询使用了原始表名，例如 `xcx_info`、`xcx_appointment`、`xcx_msg`、`xcx_user`，导入上述 SQL 文件可一次性建立这些表。
 
 3) 为后端创建专用账号（推荐）：
 ```
-mysql -u root -p -e "CREATE USER 'pinche_app'@'localhost' IDENTIFIED BY 'your_strong_password';"
-mysql -u root -p -e "GRANT ALL PRIVILEGES ON pinche.* TO 'pinche_app'@'localhost'; FLUSH PRIVILEGES;"
+mysql -u root -p -e "CREATE USER 'invoicetool_app'@'localhost' IDENTIFIED BY 'your_strong_password';"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON invoicetool.* TO 'invoicetool_app'@'localhost'; FLUSH PRIVILEGES;"
 ```
 
 ## 后端启动（invoiceTool_Java）
@@ -66,7 +66,7 @@ mysql -u root -p -e "GRANT ALL PRIVILEGES ON pinche.* TO 'pinche_app'@'localhost
 
 - 默认使用本地 MySQL：
 ```
-spring.datasource.url=jdbc:mysql://localhost:3306/pinche?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.url=jdbc:mysql://localhost:3306/invoicetool?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 spring.datasource.username=root
 spring.datasource.password=你的密码
 spring.jpa.hibernate.ddl-auto=update
@@ -89,8 +89,8 @@ H2 控制台地址：`http://localhost:8080/h2-console`，JDBC URL：`jdbc:h2:me
 - 服务地址：`http://localhost:8080/`
 - 已添加根路径欢迎页（静态 `index.html`），便于快速跳转到常用接口。
 
-## 前端启动（pinche_xcx）
-1) 打开微信开发者工具，选择“导入项目”，目录指向 `pinche_xcx/`。
+## 前端启动（invoiceTool_miniProgram）
+1) 打开微信开发者工具，选择“导入项目”，目录指向 `invoiceTool_miniProgram/`。
 2) 确认小程序的请求域名配置允许调用 `http://localhost:8080`（开发阶段可关闭校验或使用本机网络调试）。
 3) 如需修改后端地址，可在前端 `utils/` 或相关配置中设置请求基础 URL。
 
@@ -104,7 +104,7 @@ H2 控制台地址：`http://localhost:8080/h2-console`，JDBC URL：`jdbc:h2:me
 - `POST /api/appointment/add`：添加预约（JSON 体为预约实体）。
 - `GET /api/appointment/my?sk=mock_sk_xxx`：我的预约。
 - `GET /api/appointment/mycount?sk=mock_sk_xxx`：我的预约计数。
-- `GET /api/appointment/getPassenger?sk=mock_sk_xxx`：乘客信息。
+- `GET /api/appointment/getPassenger?sk=mock_sk_xxx`：受票人信息。
 - `GET /api/appointment/detail?id=1&sk=mock_sk_xxx`：预约详情。
 - `POST /api/user/login?code=xxx`：登录（目前为模拟逻辑，生成 `mock_sk_*`）。
 - `POST /api/user/vaild_sk?sk=mock_sk_xxx`：校验 `sk`（模拟）。
@@ -123,9 +123,9 @@ curl "http://localhost:8080/api/info/lists?type=1&page=1"
 - 无法连接 MySQL：
   - 确认 MySQL 服务已启动且端口 `3306` 可用。
   - 检查 `spring.datasource.url` 是否包含 `allowPublicKeyRetrieval=true` 与 `serverTimezone=UTC`。
-  - 确认用户名/密码正确、数据库 `pinche` 已创建且有权限。
+  - 确认用户名/密码正确、数据库 `invoicetool` 已创建且有权限。
 - 表不存在或字段不匹配：
-  - 先导入 `pinche_xcx_data/sql/xcx.sql`，确保存在 `xcx_*` 系列表。
+  - 先导入 `pinche_xcx_data/sql/xcx.sql`（历史数据包），确保存在 `xcx_*` 系列表。
   - 检查实体类与 DDL 的字段类型（时间/整型/字符串）是否一致。
 - H2 开发模式：
   - 使用 `-Dspring-boot.run.profiles=dev` 可快速启动，无需 MySQL；用于前后端联调和无状态测试。
@@ -143,7 +143,7 @@ curl "http://localhost:8080/api/info/lists?type=1&page=1"
 - 配置：使用外部化配置（环境变量、配置中心或密钥管理）。
 - 构建：
 ```
-cd pinche_java
+cd invoiceTool_Java
 ./mvnw clean package
 ```
 - 运行：将打包后的 `jar` 部署到服务器，使用 `java -jar` 启动并配置 `--spring.profiles.active`。

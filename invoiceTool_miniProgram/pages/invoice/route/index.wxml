@@ -6,9 +6,9 @@
   </map>
 
   <view class="sheet">
-    <view class="title">多选船型更快出发</view>
+    <view class="title">选择发票类型</view>
     <radio-group bindchange="chooseType">
-      <label class="boat-item" wx:for="{{boatTypes}}" wx:key="id">
+      <label class="invoice-item" wx:for="{{invoiceTypes}}" wx:key="id">
         <view class="left">
           <image class="icon" src="{{item.icon}}"></image>
           <view>
@@ -25,9 +25,9 @@
 
     <view class="actions">
       <button class="action left" size="mini">预约出发</button>
-      <button class="action right" size="mini">帮人叫船</button>
+      <button class="action right" size="mini">代开发票</button>
     </view>
 
-    <button class="call-btn" bindtap="callBoat">呼叫1种船型</button>
+    <button class="call-btn" bindtap="confirmInvoice">确认开票</button>
   </view>
 </view>

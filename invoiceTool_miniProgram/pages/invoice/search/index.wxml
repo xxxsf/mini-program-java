@@ -17,15 +17,15 @@
     </view>
   </view>
 
-  <!-- 常用码头设置 -->
+  <!-- 常用地址设置 -->
   <view class="section shortcuts">
     <view class="cell">
       <text class="icon">🏠</text>
-      <text class="name">设置常用出发码头</text>
+      <text class="name">设置常用出发地址</text>
     </view>
     <view class="cell">
       <text class="icon">⚓</text>
-      <text class="name">设置常用回程码头</text>
+      <text class="name">设置常用回程地址</text>
     </view>
   </view>
 

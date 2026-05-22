@@ -29,7 +29,7 @@
             <text class="tit">出发时间:</text><text>{{data.tm}}</text>
         </view>
         <view class="p contact" wx:if="{{data.type == 1}}">
-            <text class="tit">打船价格:</text><text>{{data.price}}</text>
+            <text class="tit">开票费用:</text><text>{{data.price}}</text>
         </view>
         <view class="p contact">
             <text wx:if="{{data.type == 1}}" class="tit">剩余空位:</text><text wx:elif="{{data.type == 2}}" class="tit">人数:</text><text>{{data.surplus}}</text>

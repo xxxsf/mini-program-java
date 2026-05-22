@@ -40,8 +40,8 @@ Page({
   },
   onShareAppMessage: function () {
     return {
-      title: '同城打船',
-      path: 'pages/boat/index'
+      title: '发票管理',
+      path: 'pages/invoice/index'
     }
   },
   getList:function(date='',start='',over=''){

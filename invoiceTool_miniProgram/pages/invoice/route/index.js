@@ -1,4 +1,4 @@
-// pages/boat/route/index.js
+// pages/invoice/route/index.js
 
 Page({
   data: {
@@ -9,10 +9,10 @@ Page({
     polyline: [],
     distanceKm: '0.0',
     durationMin: '0',
-    boatTypes: [
-      { id: 'b1', name: '惊喜特价', desc: '天天有折扣', price: 68.8, icon: '/img/vehicle.png' },
-      { id: 'b2', name: '博道快线', desc: '6座标配', price: 98.8, icon: '/img/vehicle.png' },
-      { id: 'b3', name: '博道豪华船', desc: '舒适服务', price: 198.8, icon: '/img/vehicle.png' }
+    invoiceTypes: [
+      { id: 'b1', name: '普通发票', desc: '适用于小额报销', price: 68.8, icon: '/img/vehicle.png' },
+      { id: 'b2', name: '增值税发票', desc: '企业报销必备', price: 98.8, icon: '/img/vehicle.png' },
+      { id: 'b3', name: '专用发票', desc: '大额报销适用', price: 198.8, icon: '/img/vehicle.png' }
     ],
     selectedType: 'b1'
   },
@@ -73,8 +73,8 @@ Page({
     this.setData({ selectedType: e.detail.value });
   },
 
-  callBoat() {
+  confirmInvoice() {
     const { selectedType, dest } = this.data;
-    wx.showToast({ title: `已呼叫(${selectedType}) → ${dest.name || '目的地'}`, icon: 'none' });
+    wx.showToast({ title: `已确认(${selectedType}) → ${dest.name || '目的地'}`, icon: 'none' });
   }
 });

@@ -1,4 +1,4 @@
-// pages/boat/index.js
+// pages/invoice/index.js
 
 Page({
   data: {
@@ -99,20 +99,20 @@ Page({
   },
 
   goSearch() {
-    wx.navigateTo({ url: '/pages/boat/search/index' });
+    wx.navigateTo({ url: '/pages/invoice/search/index' });
   },
 
   goReserve() {
-    wx.showToast({ title: '预约拼单开发中', icon: 'none' });
+    wx.showToast({ title: '预约开票开发中', icon: 'none' });
   },
   goHelp() {
-    wx.showToast({ title: '帮人叫船开发中', icon: 'none' });
+    wx.showToast({ title: '代开发票开发中', icon: 'none' });
   },
   goBus() {
-    wx.showToast({ title: '站点巴士开发中', icon: 'none' });
+    wx.showToast({ title: '批量开票开发中', icon: 'none' });
   },
   goDrive() {
-    wx.showToast({ title: '手机驾驭开发中', icon: 'none' });
+    wx.showToast({ title: '扫码开票开发中', icon: 'none' });
   },
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {

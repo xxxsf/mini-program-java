@@ -1,4 +1,4 @@
-// pages/boat/search/index.js
+// pages/invoice/search/index.js
 
 const QQ_MAP_KEY = ''; // 如需真实搜索，请填入腾讯位置服务 WebService KEY
 
@@ -35,9 +35,9 @@ Page({
     if (!QQ_MAP_KEY) {
       // 无 KEY 时提供示例数据，保证流程可用
       const demo = [
-        { id: 'd1', name: 'Bokus博库码头（温州点）', address: '浙江省温州市鹿城区文化街1号', location: { lat: 27.998, lng: 120.666 } },
-        { id: 'd2', name: '温州南门码头', address: '温州南门街道江边路88号', location: { lat: 27.999, lng: 120.671 } },
-        { id: 'd3', name: '三垟湿地码头', address: '温州三垟湿地公园北门', location: { lat: 27.990, lng: 120.680 } }
+        { id: 'd1', name: '温州博库服务站', address: '浙江省温州市鹿城区文化街1号', location: { lat: 27.998, lng: 120.666 } },
+        { id: 'd2', name: '温州南门服务站', address: '温州南门街道江边路88号', location: { lat: 27.999, lng: 120.671 } },
+        { id: 'd3', name: '三垟湿地服务站', address: '温州三垟湿地公园北门', location: { lat: 27.990, lng: 120.680 } }
       ];
       this.setData({ results: this.withDistance(demo) });
       return;
@@ -124,6 +124,6 @@ Page({
 
   goRoute(item) {
     const q = encodeURIComponent(JSON.stringify(item));
-    wx.navigateTo({ url: `/pages/boat/route/index?dest=${q}` });
+    wx.navigateTo({ url: `/pages/invoice/route/index?dest=${q}` });
   }
 });
