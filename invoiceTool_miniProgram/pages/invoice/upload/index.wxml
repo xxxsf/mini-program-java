@@ -1,0 +1,31 @@
+<!--pages/invoice/upload/index.wxml-->
+<view class="container">
+  <view class="upload-content">
+    <view class="title">如何选择本地文件</view>
+
+    <view class="instruction">
+      <text class="instruction-text">轻触「选择文件」后，在「最近项目」中 选择要上传的文件。</text>
+    </view>
+
+    <view class="rules-section">
+      <text class="rules-title">选择本地文件说明：</text>
+      <view class="rule-item">
+        <text class="rule-dot">•</text>
+        <text class="rule-text">电子发票 (票据) PDF版式文件最大不能超过100K。</text>
+      </view>
+      <view class="rule-item">
+        <text class="rule-dot">•</text>
+        <text class="rule-text">最多可以选择10个电子发票 (票据) 文件。</text>
+      </view>
+      <view class="rule-item">
+        <text class="rule-dot">•</text>
+        <text class="rule-text">文件将上传到云端处理，请保持网络通畅。</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-area">
+    <text class="consent-text">你同意并授权将选中文件添加到微信卡包</text>
+    <button class="select-file-btn" bindtap="onSelectFile">选择文件</button>
+  </view>
+</view>

@@ -1,28 +1,29 @@
-//index.js
-//获取应用实例
 var app = getApp();
-var util = require('../../utils/util.js');
 
 Page({
+  data: { userInfo: {} },
+
   onShow: function () {
-    var that = this;
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 2 });
-    }
-    that.setData({
-      userInfo:app.globalData.userInfo
-    });
-
-    util.req('info/mycount',{sk:app.globalData.sk},function(data){
-      that.setData({infoCount:data.data});
-    })
-
-    util.req('appointment/mycount', { sk: app.globalData.sk }, function (data) {
-      that.setData({ appointmentCount: data.data });
-    })
-
-    
-
+    this.setData({ userInfo: app.globalData.userInfo || {} });
   },
 
-})
+  goInfo: function () {
+    wx.navigateTo({ url: '/pages/my/info' });
+  },
+
+  goMyInvoices: function () {
+    wx.navigateTo({ url: '/pages/myInvoices/index' });
+  },
+
+  goHeaders: function () {
+    wx.navigateTo({ url: '/pages/home/index' });
+  },
+
+  onLogout: function () {
+    wx.removeStorageSync('sk');
+    wx.removeStorageSync('userInfo');
+    app.globalData.sk = null;
+    app.globalData.userInfo = null;
+    wx.reLaunch({ url: '/pages/toLogin/toLogin' });
+  }
+});

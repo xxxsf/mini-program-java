@@ -1,0 +1,236 @@
+page { background: #f5f5f5; }
+
+.page { min-height: 100vh; }
+
+/* 绿色头部 */
+.header {
+  background: linear-gradient(135deg, #07C160, #06AD56);
+  padding: 40rpx 0 60rpx;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 120rpx;
+}
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.action-icon {
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-circle {
+  width: 80rpx;
+  height: 80rpx;
+  border: 3rpx solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: #fff;
+  line-height: 80rpx;
+  text-align: center;
+}
+.action-img {
+  width: 56rpx;
+  height: 56rpx;
+}
+.action-label {
+  color: #fff;
+  font-size: 26rpx;
+  margin-top: 12rpx;
+}
+
+/* 邮箱关联栏 */
+.email-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 24rpx;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+}
+.email-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+}
+.email-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+}
+.email-btn {
+  background: #07C160;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 28rpx;
+  border-radius: 8rpx;
+}
+
+/* Banner */
+.banner {
+  margin: 0 24rpx 24rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.banner-img {
+  width: 100%;
+  height: 200rpx;
+}
+
+/* 发票抬头 */
+.section {
+  background: #fff;
+  margin: 0 24rpx 24rpx;
+  border-radius: 12rpx;
+  padding: 24rpx;
+}
+.section-title {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 16rpx;
+}
+.header-add {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.header-add-icon {
+  width: 44rpx;
+  height: 44rpx;
+  border: 2rpx solid #07C160;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #07C160;
+  font-size: 32rpx;
+  margin-right: 16rpx;
+  line-height: 44rpx;
+  text-align: center;
+}
+.header-add-text {
+  font-size: 30rpx;
+  color: #333;
+}
+.header-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.header-item:last-child { border-bottom: none; }
+.header-info { flex: 1; }
+.header-name {
+  font-size: 30rpx;
+  color: #333;
+  display: block;
+}
+.header-tax {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+  display: block;
+}
+.header-arrow {
+  color: #ccc;
+  font-size: 28rpx;
+}
+
+/* 常见问题 */
+.faq {
+  text-align: center;
+  padding: 40rpx 0 60rpx;
+}
+.faq-text {
+  color: #07C160;
+  font-size: 28rpx;
+}
+
+/* 来源弹窗 */
+.mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+}
+.source-sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 0 32rpx 60rpx;
+  z-index: 101;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.source-sheet.show { transform: translateY(0); }
+.sheet-header {
+  display: flex;
+  align-items: flex-start;
+  padding: 32rpx 0 24rpx;
+}
+.sheet-close {
+  font-size: 40rpx;
+  color: #333;
+  margin-right: 24rpx;
+  line-height: 1;
+}
+.sheet-title-wrap { flex: 1; }
+.sheet-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  display: block;
+}
+.sheet-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+  display: block;
+}
+.sheet-option {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.sheet-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+.sheet-label {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+}
+.sheet-arrow {
+  color: #ccc;
+  font-size: 28rpx;
+}
+.sheet-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx 0 0;
+  gap: 20rpx;
+}
+.sheet-link {
+  color: #07C160;
+  font-size: 26rpx;
+}
+.sheet-sep {
+  color: #ddd;
+  font-size: 26rpx;
+}

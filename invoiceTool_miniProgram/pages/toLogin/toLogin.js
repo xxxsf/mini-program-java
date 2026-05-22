@@ -23,7 +23,7 @@ Page({
             app.setUserInfo(data.user);
             app.setSk(data.sk);
             wx.reLaunch({
-              url: '/pages/boat/index',
+              url: '/pages/home/index',
             })
           } else {
             wx.showToast({
