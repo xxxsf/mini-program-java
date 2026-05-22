@@ -1,4 +1,4 @@
-var baseURL = 'http://localhost:8080/';
+var baseURL = 'https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com/';
 var rootDocment = baseURL + 'api/';
 
 var wxAppinfo = {
