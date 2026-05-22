@@ -20,7 +20,7 @@ const baseURL = 'http://localhost:8080/';
 var rootDocment = baseURL+'api/';
 
 var wxAppinfo = {
-  'name': '个人小程序测试',
+  'name': '发票管理工具',
   'logo': '/img/logo.png'
 };
 

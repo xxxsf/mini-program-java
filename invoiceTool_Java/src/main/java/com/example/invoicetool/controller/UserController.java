@@ -26,8 +26,8 @@ public class UserController {
     public Map<String, Object> login(@RequestParam String code,
                                      @RequestParam String appid,
                                      @RequestParam String appsecret,
-                                     @RequestParam String encryptedData,
-                                     @RequestParam String iv) {
+                                     @RequestParam(required = false) String encryptedData,
+                                     @RequestParam(required = false) String iv) {
         Map<String, Object> result = new HashMap<>();
 
         // 1) code2session 获取 openid & session_key
@@ -40,12 +40,14 @@ public class UserController {
             return result;
         }
 
-        // 2) 解密用户信息
-        Map<String, Object> userInfo = weChatService.decryptUserInfo(encryptedData, sessionKey, iv);
-        if (userInfo.containsKey("error")) {
-            result.put("status", 0);
-            result.put("msg", "用户信息解密失败: " + userInfo.get("error"));
-            return result;
+        // 2) 解密用户信息（如果提供了 encryptedData 和 iv）
+        Map<String, Object> userInfo = null;
+        if (encryptedData != null && !encryptedData.isEmpty()
+                && iv != null && !iv.isEmpty()) {
+            userInfo = weChatService.decryptUserInfo(encryptedData, sessionKey, iv);
+            if (userInfo.containsKey("error")) {
+                userInfo = null;
+            }
         }
 
         // 3) 落库到 xcx_user（按 openId upsert）
@@ -54,13 +56,17 @@ public class UserController {
             user = new User();
             user.setOpenId(openId);
         }
-        user.setNickName((String) userInfo.get("nickName"));
-        user.setAvatarUrl((String) userInfo.get("avatarUrl"));
-        user.setGender(String.valueOf(userInfo.get("gender"))); // gender 可能是数字，统一为字符串
-        user.setCity((String) userInfo.get("city"));
-        user.setProvince((String) userInfo.get("province"));
-        user.setCountry((String) userInfo.get("country"));
-        user.setLanguage((String) userInfo.get("language"));
+        if (userInfo != null) {
+            user.setNickName((String) userInfo.get("nickName"));
+            user.setAvatarUrl((String) userInfo.get("avatarUrl"));
+            user.setGender(String.valueOf(userInfo.get("gender")));
+            user.setCity((String) userInfo.get("city"));
+            user.setProvince((String) userInfo.get("province"));
+            user.setCountry((String) userInfo.get("country"));
+            user.setLanguage((String) userInfo.get("language"));
+        } else if (user.getNickName() == null) {
+            user.setNickName("微信用户");
+        }
 
         userRepository.save(user);
 

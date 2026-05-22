@@ -3,58 +3,42 @@ var util = require('../../utils/util.js');
 
 Page({
   data: {
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
     appInfo: {},
     login: false
   },
   onLoad: function (options) {
     var that = this;
-    var vdata = {};
-    // wx.getSetting({
-    //   success: function (res) {
-    //     console.log(res)
-    //     if (res.authSetting['scope.userInfo']) {
-    //       wx.switchTab({
-//         url: '/pages/boat/index',
-    //       })
-    //     }
-    //     return false;
-    //   }
-    // })
-
     that.setData({
       appInfo: util.wxAppinfo
     });
-
   },
   getUserProfile: function (e) {
     var that = this;
-    var userinfo = e.detail;
-    console.log('sss')
-    wx.getUserProfile({
-      lang: 'en',
-      desc: '用于完善会员资料',
-      success: function (userinfo) {
-        console.log(userinfo)
-        wx.login({
-          success: function (res) {
-            util.req('user/login', {
-              "code": res.code,
-              "encryptedData": userinfo.encryptedData,
-              "iv": userinfo.iv
-            }, function (data) {
-              app.setUserInfo(data.user);
-              app.setSk(data.sk);
-              wx.reLaunch({
-  url: '/pages/boat/index',
-              })
+    wx.login({
+      success: function (res) {
+        util.req('user/login', {
+          "code": res.code
+        }, function (data) {
+          if (data && data.status == 1) {
+            app.setUserInfo(data.user);
+            app.setSk(data.sk);
+            wx.reLaunch({
+              url: '/pages/boat/index',
+            })
+          } else {
+            wx.showToast({
+              title: (data && data.msg) || '登录失败',
+              icon: 'none'
             })
           }
         })
       },
       fail: function (res) {
-        console.log(res)
-        // that.loginFail();
+        console.log('wx.login fail', res)
+        wx.showToast({
+          title: '登录失败，请重试',
+          icon: 'none'
+        })
       }
     })
   }
