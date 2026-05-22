@@ -1,0 +1,133 @@
+<!--pages/invoice/myInvoices/index.wxml-->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" placeholder="搜索收款方、付款方名称" bindinput="onSearchInput" value="{{searchText}}" />
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item" bindtap="onFilterTime">
+      <text class="filter-text">时间</text>
+      <text class="filter-arrow">▾</text>
+    </view>
+    <view class="filter-item" bindtap="onFilterStatus">
+      <text class="filter-text">状态</text>
+      <text class="filter-arrow">▾</text>
+    </view>
+    <view class="filter-item" bindtap="onFilterType">
+      <text class="filter-text">类型</text>
+      <text class="filter-arrow">▾</text>
+    </view>
+    <view class="batch-btn" bindtap="onToggleBatch">
+      <text class="batch-text">{{batchMode ? '取消' : '批量选择'}}</text>
+    </view>
+  </view>
+
+  <!-- 促销横幅 -->
+  <view class="promo-banner" wx:if="{{!batchMode}}">
+    <view class="promo-content">
+      <view class="promo-text-area">
+        <text class="promo-title">购在中国</text>
+        <text class="promo-subtitle">有奖发票</text>
+      </view>
+      <view class="promo-btn">立即参与</view>
+    </view>
+  </view>
+
+  <!-- QQ邮箱关联 -->
+  <view class="email-bar" wx:if="{{!batchMode}}">
+    <text class="email-icon">✉</text>
+    <text class="email-text">关联QQ邮箱，自动同步邮箱发票。</text>
+    <view class="email-btn">关联</view>
+  </view>
+
+  <!-- 添加发票 -->
+  <view class="add-invoice-bar" bindtap="onAddInvoice">
+    <text class="add-icon">⊕</text>
+    <text class="add-text">添加发票</text>
+  </view>
+
+  <!-- 发票列表 -->
+  <view class="invoice-list" wx:if="{{filteredInvoices.length > 0}}">
+    <view class="invoice-item" wx:for="{{filteredInvoices}}" wx:key="id" bindtap="onInvoiceTap" data-id="{{item.id}}">
+      <view class="checkbox-wrap" wx:if="{{batchMode}}" catchtap="onToggleSelect" data-id="{{item.id}}">
+        <view class="checkbox {{item.selected ? 'checked' : ''}}">
+          <text wx:if="{{item.selected}}" class="check-mark">✓</text>
+        </view>
+      </view>
+      <view class="invoice-content">
+        <view class="invoice-top">
+          <text class="invoice-tag" wx:if="{{item.category}}">{{item.category}}</text>
+          <text class="invoice-company">{{item.sellerName}}</text>
+        </view>
+        <view class="invoice-detail-row">
+          <text class="detail-label">金额</text>
+          <text class="detail-value amount">¥{{item.amount}}</text>
+        </view>
+        <view class="invoice-detail-row">
+          <text class="detail-label">时间</text>
+          <text class="detail-value">{{item.dateStr}}</text>
+        </view>
+        <view class="invoice-detail-row">
+          <text class="detail-label">付款方</text>
+          <text class="detail-value">{{item.buyerName}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredInvoices.length === 0}}">
+    <text class="empty-icon">📄</text>
+    <text class="empty-text">暂无发票记录</text>
+    <text class="empty-hint">点击"添加发票"导入你的发票</text>
+  </view>
+
+  <!-- 批量操作栏 -->
+  <view class="batch-action-bar" wx:if="{{batchMode}}">
+    <view class="batch-select-all" bindtap="onSelectAll">
+      <view class="checkbox {{allSelected ? 'checked' : ''}}">
+        <text wx:if="{{allSelected}}" class="check-mark">✓</text>
+      </view>
+      <text>全选</text>
+    </view>
+    <view class="batch-actions">
+      <view class="batch-action-btn delete" bindtap="onBatchDelete">
+        <text>删除 ({{selectedCount}})</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选弹窗 - 时间 -->
+  <view class="filter-modal-mask" wx:if="{{showTimeFilter}}" bindtap="onCloseFilter"></view>
+  <view class="filter-modal {{showTimeFilter ? 'show' : ''}}" wx:if="{{showTimeFilter}}">
+    <view class="filter-option {{timeFilter === '' ? 'active' : ''}}" bindtap="onSelectTimeFilter" data-value="">全部</view>
+    <view class="filter-option {{timeFilter === 'week' ? 'active' : ''}}" bindtap="onSelectTimeFilter" data-value="week">最近一周</view>
+    <view class="filter-option {{timeFilter === 'month' ? 'active' : ''}}" bindtap="onSelectTimeFilter" data-value="month">最近一月</view>
+    <view class="filter-option {{timeFilter === 'quarter' ? 'active' : ''}}" bindtap="onSelectTimeFilter" data-value="quarter">最近三月</view>
+    <view class="filter-option {{timeFilter === 'year' ? 'active' : ''}}" bindtap="onSelectTimeFilter" data-value="year">最近一年</view>
+  </view>
+
+  <!-- 筛选弹窗 - 状态 -->
+  <view class="filter-modal-mask" wx:if="{{showStatusFilter}}" bindtap="onCloseFilter"></view>
+  <view class="filter-modal {{showStatusFilter ? 'show' : ''}}" wx:if="{{showStatusFilter}}">
+    <view class="filter-option {{statusFilter === '' ? 'active' : ''}}" bindtap="onSelectStatusFilter" data-value="">全部</view>
+    <view class="filter-option {{statusFilter === 'normal' ? 'active' : ''}}" bindtap="onSelectStatusFilter" data-value="normal">正常</view>
+    <view class="filter-option {{statusFilter === 'reimbursed' ? 'active' : ''}}" bindtap="onSelectStatusFilter" data-value="reimbursed">已报销</view>
+    <view class="filter-option {{statusFilter === 'void' ? 'active' : ''}}" bindtap="onSelectStatusFilter" data-value="void">已作废</view>
+  </view>
+
+  <!-- 筛选弹窗 - 类型 -->
+  <view class="filter-modal-mask" wx:if="{{showTypeFilter}}" bindtap="onCloseFilter"></view>
+  <view class="filter-modal {{showTypeFilter ? 'show' : ''}}" wx:if="{{showTypeFilter}}">
+    <view class="filter-option {{typeFilter === '' ? 'active' : ''}}" bindtap="onSelectTypeFilter" data-value="">全部</view>
+    <view class="filter-option {{typeFilter === '酒店行业' ? 'active' : ''}}" bindtap="onSelectTypeFilter" data-value="酒店行业">酒店行业</view>
+    <view class="filter-option {{typeFilter === '餐饮行业' ? 'active' : ''}}" bindtap="onSelectTypeFilter" data-value="餐饮行业">餐饮行业</view>
+    <view class="filter-option {{typeFilter === '交通出行' ? 'active' : ''}}" bindtap="onSelectTypeFilter" data-value="交通出行">交通出行</view>
+    <view class="filter-option {{typeFilter === '其他' ? 'active' : ''}}" bindtap="onSelectTypeFilter" data-value="其他">其他</view>
+  </view>
+</view>

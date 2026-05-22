@@ -1,0 +1,42 @@
+<!--pages/invoice/login/index.wxml-->
+<view class="container">
+  <view class="login-header">
+    <view class="app-logo">
+      <text class="logo-icon">📄</text>
+    </view>
+    <text class="app-name">微信发票助手</text>
+    <text class="app-desc">轻松管理你的发票</text>
+  </view>
+
+  <view class="login-content">
+    <!-- 头像选择 -->
+    <view class="avatar-section">
+      <text class="section-label">头像</text>
+      <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <image class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
+      </button>
+    </view>
+
+    <!-- 昵称输入 -->
+    <view class="nickname-section">
+      <text class="section-label">昵称</text>
+      <input type="nickname" class="nickname-input" placeholder="请输入昵称" value="{{nickname}}" bindchange="onNicknameChange" />
+    </view>
+  </view>
+
+  <view class="login-footer">
+    <button class="login-btn" bindtap="onLogin">微信用户登录</button>
+
+    <view class="agreement">
+      <view class="checkbox-wrap" bindtap="onToggleAgreement">
+        <view class="agreement-checkbox {{agreed ? 'checked' : ''}}">
+          <text wx:if="{{agreed}}" class="check-icon">✓</text>
+        </view>
+      </view>
+      <text class="agreement-text">我已阅读并同意</text>
+      <text class="agreement-link" bindtap="onViewAgreement">《用户协议》</text>
+      <text class="agreement-text">和</text>
+      <text class="agreement-link" bindtap="onViewPrivacy">《隐私政策》</text>
+    </view>
+  </view>
+</view>
