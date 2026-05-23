@@ -25,9 +25,8 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates && \
     update-ca-certificates
 
-# Add a non-root user
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+# Create upload directory
+RUN mkdir -p /tmp/uploads && chmod 777 /tmp/uploads
 
 # Copy the built JAR file from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
