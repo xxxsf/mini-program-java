@@ -21,6 +21,10 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
+# Install CA certificates for SSL connections
+RUN apk add --no-cache ca-certificates && \
+    update-ca-certificates
+
 # Add a non-root user
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
