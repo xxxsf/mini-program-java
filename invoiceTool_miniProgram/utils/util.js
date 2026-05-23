@@ -14,6 +14,7 @@
 // 手动切换（如需强制指定，取消下面注释）：
 // var baseURL = 'http://localhost:8080/';
 var baseURL = 'https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com/';
+var rootDocment = baseURL + 'api/';
 
 var wxAppinfo = {
   'name': '微信发票助手',
