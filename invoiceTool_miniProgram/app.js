@@ -53,6 +53,17 @@ App({
     this.loadInvoices()
   },
 
+  setUserInfo: function (userInfo) {
+    this.globalData.userInfo = userInfo
+    wx.setStorageSync('userInfo', userInfo)
+  },
+
+  setSk: function (sk) {
+    this.globalData.sk = sk
+    this.globalData.isLoggedIn = true
+    wx.setStorageSync('sk', sk)
+  },
+
   logout: function () {
     this.globalData.userInfo = null
     this.globalData.sk = ''
