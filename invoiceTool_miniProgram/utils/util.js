@@ -1,5 +1,12 @@
 // 自动判断环境：开发者工具用 localhost，生产用云托管
-var baseURL = (typeof __wxConfig !== 'undefined' && __wxConfig.platform === 'devtools') 
+var isDevtools = false;
+try {
+  isDevtools = (typeof __wxConfig !== 'undefined' && __wxConfig.platform === 'devtools');
+} catch (e) {
+  isDevtools = false;
+}
+
+var baseURL = isDevtools 
   ? 'http://localhost:8080/' 
   : 'https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com/';
 var rootDocment = baseURL + 'api/';
