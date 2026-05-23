@@ -4,7 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
+import javax.net.ssl.*;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.security.cert.X509Certificate;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +17,46 @@ import java.util.Map;
 @Service
 public class WeChatService {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createSSLTrustingRestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private RestTemplate createSSLTrustingRestTemplate() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+            // Create an all-trusting host name verifier
+            HostnameVerifier allHostsValid = new HostnameVerifier() {
+                public boolean verify(String hostname, SSLSession session) { return true; }
+            };
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory() {
+                @Override
+                protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+                    if (connection instanceof HttpsURLConnection) {
+                        ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
+                        ((HttpsURLConnection) connection).setHostnameVerifier(allHostsValid);
+                    }
+                    super.prepareConnection(connection, httpMethod);
+                }
+            };
+
+            return new RestTemplate(requestFactory);
+        } catch (Exception e) {
+            System.err.println("[WeChatService] Failed to create SSL-trusting RestTemplate: " + e.getMessage());
+            return new RestTemplate();
+        }
+    }
 
     public Map<String, String> code2Session(String appid, String appsecret, String code) {
         String url = String.format(
