@@ -10,6 +10,13 @@ Page({
   onShow: function () {
     var headers = wx.getStorageSync('invoice_headers') || [];
     this.setData({ headers: headers });
+
+    // 强制登录检查
+    var sk = wx.getStorageSync('sk');
+    if (!sk) {
+      wx.reLaunch({ url: '/pages/toLogin/toLogin' });
+      return;
+    }
   },
 
   onAddInvoice: function () {

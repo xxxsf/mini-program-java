@@ -1,7 +1,4 @@
 <view id="main" v-if="!login">
-  <view id="head">
-    <image src='{{appInfo.logo}}'></image>
-  </view>
   <view id="title">
     <view class='text-align'><text>{{appInfo.name}}</text></view>
     <view class='text-align'><text>欢迎您</text></view>
