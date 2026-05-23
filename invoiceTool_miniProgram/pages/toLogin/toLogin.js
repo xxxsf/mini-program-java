@@ -22,12 +22,15 @@ Page({
         // 再调用登录获取 code
         wx.login({
           success: function (res) {
+            console.log('wx.login 成功，code:', res.code);
             if (res.code) {
+              console.log('开始发送登录请求到后端...');
               util.req('user/login', {
                 "code": res.code,
                 "encryptedData": userRes.encryptedData,
                 "iv": userRes.iv
               }, function (data) {
+                console.log('后端返回登录结果:', data);
                 if (data && data.status == 1) {
                   app.setUserInfo(data.user);
                   app.setSk(data.sk);
