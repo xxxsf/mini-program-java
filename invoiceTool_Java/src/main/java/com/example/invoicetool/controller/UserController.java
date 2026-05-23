@@ -35,21 +35,25 @@ public class UserController {
                                      @RequestParam(required = false) String encryptedData,
                                      @RequestParam(required = false) String iv) {
         Map<String, Object> result = new HashMap<>();
-
-        // 1) code2session 获取 openid & session_key
-        if (appsecret == null || appsecret.trim().isEmpty()) {
-            result.put("status", 0);
-            result.put("msg", "后端未配置微信 appsecret");
-            return result;
-        }
-        Map<String, String> session = weChatService.code2Session(appid, appsecret, code);
-        String openId = session.get("openid");
-        String sessionKey = session.get("session_key");
-        if (openId == null || sessionKey == null) {
-            result.put("status", 0);
-            result.put("msg", "微信登录失败: " + session.getOrDefault("raw", "code2session 无返回"));
-            return result;
-        }
+        try {
+            // 1) code2session 获取 openid & session_key
+            System.out.println("[Login] 开始登录，code=" + code + ", appid=" + appid);
+            if (appsecret == null || appsecret.trim().isEmpty()) {
+                System.out.println("[Login] 错误：后端未配置微信 appsecret");
+                result.put("status", 0);
+                result.put("msg", "后端未配置微信 appsecret");
+                return result;
+            }
+            Map<String, String> session = weChatService.code2Session(appid, appsecret, code);
+            System.out.println("[Login] 微信返回: " + session);
+            String openId = session.get("openid");
+            String sessionKey = session.get("session_key");
+            if (openId == null || sessionKey == null) {
+                System.out.println("[Login] 错误：微信返回无效，openid=" + openId + ", sessionKey=" + sessionKey);
+                result.put("status", 0);
+                result.put("msg", "微信登录失败: " + session.getOrDefault("raw", "code2session 无返回"));
+                return result;
+            }
 
         // 2) 解密用户信息（如果提供了 encryptedData 和 iv）
         Map<String, Object> userInfo = null;
@@ -88,6 +92,13 @@ public class UserController {
         result.put("user", user);
         result.put("sk", sk);
         return result;
+        } catch (Exception e) {
+            System.out.println("[Login] 异常: " + e.getMessage());
+            e.printStackTrace();
+            result.put("status", 0);
+            result.put("msg", "登录异常: " + e.getMessage());
+            return result;
+        }
     }
 
     @PostMapping("/editUser")
