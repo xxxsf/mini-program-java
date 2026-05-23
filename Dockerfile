@@ -17,13 +17,9 @@ COPY invoiceTool_Java/src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
-
-# Install CA certificates for SSL connections
-RUN apk add --no-cache ca-certificates && \
-    update-ca-certificates
 
 # Create upload directory
 RUN mkdir -p /tmp/uploads && chmod 777 /tmp/uploads
