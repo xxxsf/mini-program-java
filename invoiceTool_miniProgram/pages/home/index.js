@@ -31,6 +31,10 @@ Page({
     wx.navigateTo({ url: '/pages/myInvoices/index' });
   },
 
+  goToMy: function () {
+    wx.navigateTo({ url: '/pages/my/index' });
+  },
+
   // 从微信聊天导入 PDF 发票
   onSourceChat: function () {
     var that = this;

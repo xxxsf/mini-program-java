@@ -60,5 +60,11 @@ Page({
         });
       }
     });
+  },
+
+  onLogout: function () {
+    wx.removeStorageSync('sk');
+    wx.removeStorageSync('userInfo');
+    wx.showToast({ title: '已退出', icon: 'none' });
   }
 })

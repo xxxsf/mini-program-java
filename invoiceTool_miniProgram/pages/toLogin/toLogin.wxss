@@ -9,3 +9,5 @@
 
 .loginbutton{width: 260px;border-radius: 5px;background: #0d76dc;color: #fff;margin: 20px auto;}
 .icon{width: 20px;height:20px;vertical-align:middle;}
+.logout-link{text-align: center;margin-top: 40px;}
+.logout-link text{color: #bbb;font-size: 12px;}

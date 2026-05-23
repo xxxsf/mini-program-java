@@ -11,3 +11,5 @@
   <image src="/img/wechat.png" class='icon'></image>
   微信授权登录
 </button>
+
+<view class='logout-link' bindtap="onLogout"><text>退出当前账号</text></view>
