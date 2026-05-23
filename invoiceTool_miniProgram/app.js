@@ -2,6 +2,15 @@ var util = require('./utils/util.js')
 
 App({
   onLaunch: function () {
+    // 初始化微信云托管环境
+    if (wx.cloud) {
+      wx.cloud.init({
+        env: 'yncv-260962', // 您的云托管环境 ID
+        traceUser: true
+      })
+    } else {
+      console.error('当前微信基础库不支持云托管，请升级基础库')
+    }
     this.checkLogin()
     this.loadInvoiceHeaders()
     this.loadInvoices()
