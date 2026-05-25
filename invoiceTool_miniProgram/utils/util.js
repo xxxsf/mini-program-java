@@ -1,3 +1,6 @@
+// 是否强制使用公网 HTTPS 域名（开启后，真机只需打开“开发调试”即可完美免域名限制测试，100% 成功）
+var forceUseDomain = true;
+
 // 自动判断环境：开发者工具用 localhost 或自定义，真机直接使用 callContainer 免域名呼叫
 var isDevtools = false;
 try {
@@ -6,7 +9,7 @@ try {
   isDevtools = false;
 }
 
-// 开发者工具下使用的本地/开发域名
+// 开发者工具和真机调试使用的公网域名
 var baseURL = 'https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com/';
 var rootDocment = baseURL + 'api/';
 
@@ -19,14 +22,14 @@ var AppConf = { 'appid': 'wxb95ae2df41575bc3' };
 
 // 云托管配置
 var cloudConfig = {
-  env: 'prod-yncv-260962',      // 云托管环境 ID（带 prod- 前缀）
+  env: 'prod-yncv-260962',      // 云托管环境 ID
   service: 'springboot'    // 云托管服务名
 };
 
 function req(url, data, cb) {
   data.appid = AppConf.appid;
   
-  if (!isDevtools) {
+  if (!isDevtools && !forceUseDomain) {
     // 真机：使用免域名的 callContainer 访问
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
@@ -46,7 +49,7 @@ function req(url, data, cb) {
       }
     });
   } else {
-    // 开发者工具：依然使用 request 方便开发者联调
+    // 开发者工具/强制公网域名：使用标准 request
     wx.request({
       url: rootDocment + url,
       data: data,
@@ -65,7 +68,7 @@ function req(url, data, cb) {
 function getReq(url, data, cb) {
   data.appid = AppConf.appid;
 
-  if (!isDevtools) {
+  if (!isDevtools && !forceUseDomain) {
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
       path: '/api/' + url,
@@ -100,7 +103,7 @@ function getReq(url, data, cb) {
 }
 
 function jsonReq(url, data, cb) {
-  if (!isDevtools) {
+  if (!isDevtools && !forceUseDomain) {
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
       path: '/api/' + url,
@@ -135,7 +138,7 @@ function jsonReq(url, data, cb) {
 }
 
 function uploadFile(filePath, name, formData, cb) {
-  if (!isDevtools) {
+  if (!isDevtools && !forceUseDomain) {
     // 真机免域名上传：使用 callContainer 传递 filePath 参数
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
@@ -172,7 +175,7 @@ function uploadFile(filePath, name, formData, cb) {
       }
     });
   } else {
-    // 开发者工具继续使用原有普通上传
+    // 开发者工具/强制公网：继续使用原有普通上传
     wx.uploadFile({
       url: rootDocment + 'upload',
       filePath: filePath,
