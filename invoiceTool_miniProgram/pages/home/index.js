@@ -4,7 +4,10 @@ var util = require('../../utils/util.js');
 Page({
   data: {
     headers: [],
-    showSourceSheet: false
+    showSourceSheet: false,
+    email: '',
+    emailInput: '',
+    showEmailModal: false
   },
 
   onShow: function () {
@@ -25,6 +28,13 @@ Page({
         // 离线兜底
         var headers = wx.getStorageSync('invoice_headers') || [];
         that.setData({ headers: headers });
+      }
+    });
+
+    // 检查并拉取用户的绑定邮箱
+    util.req('user/vaild_sk', { sk: sk }, function (res) {
+      if (res && res.status == 1 && res.email) {
+        that.setData({ email: res.email, emailInput: res.email });
       }
     });
   },
@@ -192,7 +202,40 @@ Page({
   },
 
   onLinkEmail: function () {
-    wx.showToast({ title: '邮箱关联功能开发中', icon: 'none' });
+    this.setData({ showSourceSheet: false, showEmailModal: true });
+  },
+
+  onCloseEmailModal: function () {
+    this.setData({ showEmailModal: false });
+  },
+
+  onEmailInput: function (e) {
+    this.setData({ emailInput: e.detail.value.trim() });
+  },
+
+  onSaveEmail: function () {
+    var that = this;
+    var email = this.data.emailInput;
+    if (!email || email.indexOf('@') === -1) {
+      wx.showToast({ title: '请输入正确的邮箱格式', icon: 'none' });
+      return;
+    }
+
+    var sk = wx.getStorageSync('sk');
+    wx.showLoading({ title: '正在绑定云端...' });
+
+    util.req('user/bindEmail', { sk: sk, email: email }, function (res) {
+      wx.hideLoading();
+      if (res && res.status == 1) {
+        wx.showToast({ title: '关联成功', icon: 'success' });
+        that.setData({
+          email: email,
+          showEmailModal: false
+        });
+      } else {
+        wx.showToast({ title: (res && res.msg) || '绑定失败', icon: 'none' });
+      }
+    });
   },
 
   onOtherSource: function () {

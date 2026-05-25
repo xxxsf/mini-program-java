@@ -27,7 +27,7 @@
   <!-- 关联邮箱 -->
   <view class="email-bar" bindtap="onLinkEmail">
     <image class="email-icon" src="/img/email.png" mode="aspectFit" />
-    <text class="email-text">{{email ? '已关联邮箱：' + email : '关联QQ邮箱，自动同步邮箱发票。'}}</text>
+    <text class="email-text">{{email ? '已关联邮箱：' + email : '关联收件邮箱，自动同步账单。'}}</text>
     <view class="email-btn">{{email ? '修改' : '关联'}}</view>
   </view>
 
@@ -134,8 +134,8 @@
   <!-- 关联邮箱对话框 -->
   <view class="modal-overlay" wx:if="{{showEmailModal}}">
     <view class="modal-content">
-      <view class="modal-title">关联QQ邮箱</view>
-      <input class="modal-input" placeholder="请输入您的邮箱地址" bindinput="onEmailInput" value="{{emailInput}}" />
+      <view class="modal-title">关联收件邮箱</view>
+      <input class="modal-input" placeholder="请输入您的邮箱地址 (支持各类邮箱)" bindinput="onEmailInput" value="{{emailInput}}" />
       <button class="modal-btn" bindtap="onSaveEmail">立即关联</button>
       <button class="modal-btn cancel" bindtap="onCloseEmailModal">取消</button>
     </view>
