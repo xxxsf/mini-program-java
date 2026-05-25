@@ -204,11 +204,98 @@ function formatTime(date) {
   return y + '年' + m + '月' + d + '日';
 }
 
+function downloadFile(fileUrl, cb) {
+  var path = fileUrl;
+  if (path.indexOf(baseURL) === 0) {
+    path = '/' + path.substring(baseURL.length);
+  } else if (path.indexOf('http') !== 0) {
+    if (path.indexOf('/') !== 0) {
+      path = '/' + path;
+    }
+  } else {
+    // 外部链接，直接使用原生下载
+    wx.downloadFile({
+      url: fileUrl,
+      success: function (res) {
+        if (res.statusCode === 200 && res.tempFilePath) {
+          cb && cb(res.tempFilePath);
+        } else {
+          cb && cb(false);
+        }
+      },
+      fail: function () {
+        cb && cb(false);
+      }
+    });
+    return;
+  }
+
+  // 保证路径正确，剔除多余的 //
+  path = path.replace(/\/+/g, '/');
+
+  if (!isDevtools && !forceUseDomain) {
+    // 真机走免域名云托管 callContainer
+    wx.cloud.callContainer({
+      config: { env: cloudConfig.env },
+      path: path,
+      header: {
+        'X-WX-SERVICE': cloudConfig.service
+      },
+      method: 'GET',
+      responseType: 'arraybuffer', // 获取二进制 buffer
+      success: function (res) {
+        if (res.statusCode === 200 && res.data) {
+          var fs = wx.getFileSystemManager();
+          var ext = 'zip';
+          if (path.indexOf('.') !== -1) {
+            ext = path.split('.').pop();
+          }
+          var tempPath = wx.env.USER_DATA_PATH + '/temp_dl_' + Date.now() + '.' + ext;
+          try {
+            fs.writeFileSync(tempPath, res.data, 'binary');
+            cb && cb(tempPath);
+          } catch (e) {
+            console.error('[Download] write error:', e);
+            cb && cb(false);
+          }
+        } else {
+          cb && cb(false);
+        }
+      },
+      fail: function (err) {
+        console.error('[CallContainer] download error:', err);
+        cb && cb(false);
+      }
+    });
+  } else {
+    // 开发者工具 / 公网域名走原生
+    var downloadUrl = baseURL + (path.indexOf('/') === 0 ? path.substring(1) : path);
+    // 保证 URL 协议无误
+    downloadUrl = downloadUrl.replace(/([^:])\/+/g, '$1/');
+    
+    wx.downloadFile({
+      url: downloadUrl,
+      success: function (res) {
+        if (res.statusCode === 200 && res.tempFilePath) {
+          cb && cb(res.tempFilePath);
+        } else {
+          cb && cb(false);
+        }
+      },
+      fail: function (err) {
+        console.error('wx.downloadFile error:', err);
+        cb && cb(false);
+      }
+    });
+  }
+}
+
 module.exports = {
   req: req,
   getReq: getReq,
   jsonReq: jsonReq,
   uploadFile: uploadFile,
+  downloadFile: downloadFile,
   formatTime: formatTime,
   wxAppinfo: wxAppinfo,
   baseURL: baseURL

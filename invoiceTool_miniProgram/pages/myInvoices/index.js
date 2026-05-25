@@ -299,49 +299,39 @@ Page({
 
     wx.showLoading({ title: '正在下载打包文件...' });
 
-    // 先通过网络下载到手机临时目录
-    wx.downloadFile({
-      url: fileUrl,
-      success: function (res) {
-        wx.hideLoading();
-        if (res.statusCode === 200 && res.tempFilePath) {
-          var tempPath = res.tempFilePath;
-          
-          // 调用官方微信好友转发文件接口
-          if (wx.shareFileMessage) {
-            wx.shareFileMessage({
-              filePath: tempPath,
-              fileName: '含' + that.data.selectedCount + '张发票的文件.zip',
-              success: function () {
-                wx.showToast({ title: '分享文件成功', icon: 'success' });
-                that.onCloseExportModal();
-                that.onExitBatch();
-              },
-              fail: function (err) {
-                console.error('Share fail:', err);
-                wx.showToast({ title: '已取消分享', icon: 'none' });
-              }
-            });
-          } else {
-            // 如果基础库过低，采用打开文档预览保存模式
-            wx.openDocument({
-              filePath: tempPath,
-              fileType: 'zip',
-              showMenu: true,
-              success: function () {
-                wx.showToast({ title: '文件已打开，可点右上角分享', icon: 'none' });
-                that.onCloseExportModal();
-              }
-            });
-          }
+    // 使用我们高度优化的通用多模式下载引擎
+    util.downloadFile(fileUrl, function (tempPath) {
+      wx.hideLoading();
+      if (tempPath) {
+        // 调用官方微信好友转发文件接口
+        if (wx.shareFileMessage) {
+          wx.shareFileMessage({
+            filePath: tempPath,
+            fileName: '含' + that.data.selectedCount + '张发票的文件.zip',
+            success: function () {
+              wx.showToast({ title: '分享文件成功', icon: 'success' });
+              that.onCloseExportModal();
+              that.onExitBatch();
+            },
+            fail: function (err) {
+              console.error('Share fail:', err);
+              wx.showToast({ title: '已取消分享', icon: 'none' });
+            }
+          });
         } else {
-          wx.showToast({ title: '文件下载失败，请重试', icon: 'none' });
+          // 如果基础库过低，采用打开文档预览保存模式
+          wx.openDocument({
+            filePath: tempPath,
+            fileType: 'zip',
+            showMenu: true,
+            success: function () {
+              wx.showToast({ title: '文件已打开，可点右上角分享', icon: 'none' });
+              that.onCloseExportModal();
+            }
+          });
         }
-      },
-      fail: function (err) {
-        wx.hideLoading();
-        console.error('Download error:', err);
-        wx.showToast({ title: '下载失败: ' + (err.errMsg || ''), icon: 'none' });
+      } else {
+        wx.showToast({ title: '文件下载失败，请重试', icon: 'none' });
       }
     });
   },
@@ -485,29 +475,24 @@ Page({
       var isImage = invoice.fileName && invoice.fileName.match(/\.(jpg|jpeg|png|gif)$/i);
       
       wx.showLoading({ title: '正在下载原件...' });
-      wx.downloadFile({
-        url: 'https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com' + invoice.filePath,
-        success: function (res) {
-          wx.hideLoading();
-          if (res.tempFilePath) {
-            if (isImage) {
-              wx.previewImage({
-                urls: [res.tempFilePath],
-                current: res.tempFilePath
-              });
-            } else {
-              wx.openDocument({
-                filePath: res.tempFilePath,
-                fileType: 'pdf',
-                fail: function () {
-                  wx.showToast({ title: '无法打开此发票文件', icon: 'none' });
-                }
-              });
-            }
+      util.downloadFile(invoice.filePath, function (tempPath) {
+        wx.hideLoading();
+        if (tempPath) {
+          if (isImage) {
+            wx.previewImage({
+              urls: [tempPath],
+              current: tempPath
+            });
+          } else {
+            wx.openDocument({
+              filePath: tempPath,
+              fileType: 'pdf',
+              fail: function () {
+                wx.showToast({ title: '无法打开此发票文件', icon: 'none' });
+              }
+            });
           }
-        },
-        fail: function () {
-          wx.hideLoading();
+        } else {
           wx.showToast({ title: '发票详情 (离线视图)', icon: 'none' });
         }
       });
