@@ -120,11 +120,17 @@ page { background: #f5f5f5; }
   padding: 4rpx 12rpx;
   border-radius: 4rpx;
   margin-right: 12rpx;
+  flex-shrink: 0; /* 防止被长文件名挤压 */
+  white-space: nowrap; /* 保证标签内的字始终横向单行显示 */
 }
 .card-company {
   font-size: 30rpx;
   color: #333;
   font-weight: bold;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* 太长的发票名或商户名自动截断，显示省略号 */
 }
 .card-row {
   display: flex;
