@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,14 +27,17 @@ public class UploadController {
 
     @PostMapping
     public Map<String, Object> upload(@RequestParam("file") MultipartFile file, @RequestParam String sk) {
+        System.out.println("[Upload] 收到文件上传请求. 文件名: " + (file != null ? file.getOriginalFilename() : "null") + ", 大小: " + (file != null ? file.getSize() : 0) + ", sk: " + sk);
         Map<String, Object> result = new HashMap<>();
         User user = authService.requireUser(sk);
         if (user == null) {
+            System.out.println("[Upload] 登录失效或未找到用户. sk: " + sk);
             result.put("status", 0);
             result.put("msg", "登录已失效");
             return result;
         }
-        if (file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
+            System.out.println("[Upload] 上传文件为空.");
             result.put("status", 0);
             result.put("msg", "上传失败，请选择文件");
             return result;
@@ -51,6 +53,7 @@ public class UploadController {
         }
         try {
             file.transferTo(dest);
+            System.out.println("[Upload] 文件成功保存至本地: " + dest.getAbsolutePath());
             long now = System.currentTimeMillis();
             String displayName = originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", "");
             Invoice invoice = new Invoice();
@@ -67,14 +70,19 @@ public class UploadController {
             invoice.setFilePath("/uploads/" + fileName);
             invoice.setCreateTime(now);
             invoice.setUpdateTime(now);
+            
+            System.out.println("[Upload] 开始保存发票到数据库...");
             invoiceRepository.save(invoice);
+            System.out.println("[Upload] 数据库保存成功. Invoice ID: " + invoice.getId());
+            
             result.put("status", 1);
             result.put("msg", "上传成功");
             result.put("data", invoice);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.out.println("[Upload] 发生异常: " + e.getMessage());
             e.printStackTrace();
             result.put("status", 0);
-            result.put("msg", "上传失败");
+            result.put("msg", "上传失败: " + e.getMessage());
         }
         return result;
     }

@@ -150,8 +150,14 @@ function uploadFile(filePath, name, formData, cb) {
       success: function (res) {
         var data = false;
         try {
-          data = JSON.parse(res.data);
+          // callContainer 在返回 json 时，res.data 已经是解析好的 Object 对象，不需要再次 JSON.parse
+          if (typeof res.data === 'string') {
+            data = JSON.parse(res.data);
+          } else {
+            data = res.data;
+          }
         } catch (e) {
+          console.error('[CallContainer] parse response fail:', e);
           data = false;
         }
         return typeof cb == 'function' && cb(data);
