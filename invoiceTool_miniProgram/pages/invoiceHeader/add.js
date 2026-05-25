@@ -50,6 +50,16 @@ Page({
 
     wx.showLoading({ title: '正在识别中...' });
 
+    // 辅助清洗函数：清除行首的 bullet (•)、*、-、数字序号、冒号、空格等噪音字符
+    var cleanField = function (val) {
+      if (!val) return '';
+      // 1. 去除行首的 • 、*、-、以及数字编号（如 1. 2. 等）
+      var cleaned = val.replace(/^[•\s\-\*\d\.．]+/g, '');
+      // 2. 去除行首的各种冒号（包括中文 ：和英文 :）
+      cleaned = cleaned.replace(/^[:：\s]+/g, '');
+      return cleaned.trim();
+    };
+
     var parsedData = {
       name: '',
       taxNo: '',
@@ -67,62 +77,71 @@ Page({
       if (!line) continue;
 
       // 智能识别名称
-      if (line.match(/(名称|单位名称|抬头名称|公司名称|名称:|公司:|抬头:|单位:)/)) {
-        parsedData.name = line.replace(/(名称|单位名称|抬头名称|公司名称|名称:|公司:|抬头:|单位:|:：)/g, '').trim();
+      if (line.match(/(名称|单位名称|抬头名称|公司名称|抬头:)/)) {
+        var rawVal = line.replace(/(名称|单位名称|抬头名称|公司名称|公司|抬头|单位|:：)/g, '');
+        parsedData.name = cleanField(rawVal);
       }
       // 智能识别税号
-      else if (line.match(/(税号|纳税人识别号|信用代码|统一社会信用代码|纳税人识别号:|税号:)/)) {
-        parsedData.taxNo = line.replace(/(税号|纳税人识别号|信用代码|统一社会信用代码|纳税人识别号:|税号:|:：)/g, '').trim();
+      else if (line.match(/(税号|纳税人识别号|信用代码|统一社会信用代码)/)) {
+        var rawVal = line.replace(/(纳税人识别号|统一社会信用代码|信用代码|税号|:：)/g, '');
+        parsedData.taxNo = cleanField(rawVal);
       }
       // 智能识别地址
-      else if (line.match(/(地址|单位地址|公司地址|注册地址|地址:)/)) {
-        parsedData.address = line.replace(/(地址|单位地址|公司地址|注册地址|地址:|:：)/g, '').trim();
+      else if (line.match(/(地址|单位地址|公司地址|注册地址)/)) {
+        var rawVal = line.replace(/(单位地址|公司地址|注册地址|地址|:：)/g, '');
+        parsedData.address = cleanField(rawVal);
       }
       // 智能识别电话
-      else if (line.match(/(电话|联系电话|电话号码|公司电话|电话:)/)) {
-        parsedData.phone = line.replace(/(电话|联系电话|电话号码|公司电话|电话:|:：)/g, '').trim();
+      else if (line.match(/(电话|联系电话|电话号码|公司电话)/)) {
+        var rawVal = line.replace(/(联系电话|电话号码|公司电话|电话|:：)/g, '');
+        parsedData.phone = cleanField(rawVal);
       }
       // 智能识别开户行
-      else if (line.match(/(开户行|开户银行|开户行:|银行:|开户行名称)/)) {
-        parsedData.bank = line.replace(/(开户行|开户银行|开户行:|银行:|开户行名称|:：)/g, '').trim();
+      else if (line.match(/(开户行|开户银行|开户行名称)/)) {
+        var rawVal = line.replace(/(开户行名称|开户银行|开户行|银行|:：)/g, '');
+        parsedData.bank = cleanField(rawVal);
       }
       // 智能识别银行账号
-      else if (line.match(/(账号|银行账号|银行账户|账户|账号:)/)) {
-        parsedData.bankAccount = line.replace(/(账号|银行账号|银行账户|账户|账号:|:：)/g, '').trim();
+      else if (line.match(/(账号|银行账号|银行账户|账户)/)) {
+        // 防止银行行号（支付系统行号）混淆，优先提取纯数字的长账号
+        if (line.indexOf('行号') === -1) {
+          var rawVal = line.replace(/(银行账号|银行账户|账号|账户|:：)/g, '');
+          parsedData.bankAccount = cleanField(rawVal);
+        }
       }
     }
 
-    // 2. 兜底正则匹配（如果某些单行没有明显的冒号引导词，通过强特征正则直接捞取）
+    // 2. 兜底强特征正则匹配（如果某些单行没有明显的引导词，通过正则直接捞取）
     
     // 兜底匹配税号 (标准 15位, 18位 或 20位大写字母和数字组合)
     if (!parsedData.taxNo) {
-      var taxMatch = text.match(/[A-Z0-9]{15,20}/);
+      var taxMatch = text.match(/\b[A-Z0-9]{15,20}\b/);
       if (taxMatch) {
         parsedData.taxNo = taxMatch[0];
       }
     }
 
-    // 兜底匹配银行账号 (12位到25位的纯数字/含空格组合)
+    // 兜底匹配银行账号 (12位到25位的纯数字，且不属于手机号 11 位)
     if (!parsedData.bankAccount) {
-      var cleanTextForAccount = text.replace(/[^0-9]/g, ' '); // 移除非数字
-      var accounts = cleanTextForAccount.match(/\b\d{12,25}\b/g);
+      // 剔除非数字字符
+      var cleanNumText = text.replace(/[^0-9\n]/g, ' '); 
+      var accounts = cleanNumText.match(/\b\d{12,25}\b/g);
       if (accounts) {
-        // 过滤掉可能是手机号或税号的纯数字
-        for (var k = 0; i < accounts.length; k++) {
-          var possibleAccount = accounts[k];
-          if (possibleAccount.length !== 18 && possibleAccount.length !== 11) {
-            parsedData.bankAccount = possibleAccount;
-            break;
-          }
-        }
+        parsedData.bankAccount = accounts[0];
       }
     }
 
-    // 兜底匹配电话号码 (固定电话 xxx-xxxxxxx 或 手机号 1xxxxxxxxxx)
+    // 兜底匹配电话号码：只在真正可能包含电话的单行中，匹配固定电话或手机号，避免错吸银行卡中段
     if (!parsedData.phone) {
-      var phoneMatch = text.match(/((\d{3,4}-\d{7,8})|1[3-9]\d{9})/);
-      if (phoneMatch) {
-        parsedData.phone = phoneMatch[0];
+      for (var j = 0; j < lines.length; j++) {
+        var pl = lines[j];
+        if (pl.match(/(电话|联系电话|手机|公司电话|座机|Tel|TEL|phone|PHONE)/i)) {
+          var phoneMatch = pl.match(/((\d{3,4}-\d{7,8})|1[3-9]\d{9})/);
+          if (phoneMatch) {
+            parsedData.phone = phoneMatch[0];
+            break;
+          }
+        }
       }
     }
 
@@ -132,7 +151,8 @@ Page({
         return l.match(/(公司|集团|分公司|厂|大学|学院|局|所|院|医院|合伙|商行|部|中心)/);
       });
       if (nameLines.length > 0) {
-        parsedData.name = nameLines[0].replace(/(名称|单位名称|抬头名称|公司名称|名称:|公司:|抬头:|:：)/g, '').trim();
+        var rawName = nameLines[0].replace(/(名称|单位名称|抬头名称|公司名称|抬头|单位|:：)/g, '');
+        parsedData.name = cleanField(rawName);
       }
     }
 
