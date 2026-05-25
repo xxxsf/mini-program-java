@@ -1,6 +1,15 @@
 <view class="page">
   <view class="title">填写发票抬头信息</view>
 
+  <!-- 智能粘贴并识别区域 -->
+  <view class="smart-box">
+    <view class="smart-title">📋 智能解析发票抬头（支持一键粘贴拆分）</view>
+    <textarea class="smart-input" placeholder="请在此粘贴发票整段文本（包含名称、税号、地址、电话、开户行、账号），系统将自动拆分并填充下方表单。" value="{{smartText}}" bindinput="onSmartInput" />
+    <view class="smart-btn-row">
+      <button class="smart-btn" bindtap="onSmartParse">智能一键填充</button>
+    </view>
+  </view>
+
   <view class="form">
     <view class="form-row">
       <text class="form-label">名称</text>
@@ -28,5 +37,5 @@
     </view>
   </view>
 
-  <button class="save-btn" bindtap="onSave">保存</button>
+  <button class="save-btn {{name ? 'active' : ''}}" bindtap="onSave">保存</button>
 </view>
