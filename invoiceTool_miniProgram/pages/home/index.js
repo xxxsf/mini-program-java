@@ -71,15 +71,23 @@ Page({
     var that = this;
     if (index >= files.length) {
       wx.hideLoading();
-      wx.showToast({
-        title: '成功导入 ' + successCount + ' 张发票',
-        icon: successCount > 0 ? 'success' : 'none',
-        duration: 1500
-      });
-
-      setTimeout(function () {
-        wx.navigateTo({ url: '/pages/myInvoices/index' });
-      }, 1500);
+      
+      if (successCount > 0) {
+        wx.showToast({
+          title: '成功导入 ' + successCount + ' 张发票',
+          icon: 'success',
+          duration: 2000
+        });
+        setTimeout(function () {
+          wx.navigateTo({ url: '/pages/myInvoices/index' });
+        }, 1500);
+      } else {
+        wx.showModal({
+          title: '导入失败',
+          content: '发票上传至服务器失败，请检查网络或登录状态后重试。',
+          showCancel: false
+        });
+      }
       return;
     }
 
@@ -87,28 +95,42 @@ Page({
     var sk = wx.getStorageSync('sk');
 
     util.uploadFile(file.path, 'file', { sk: sk }, function (data) {
-      // 同时写入本地缓存，确保无缝展示
-      var invoices = wx.getStorageSync('my_invoices') || [];
-      var now = new Date();
-      var localInvoice = {
-        id: (data && data.data && data.data.id) || (Date.now().toString() + '_' + index),
-        source: 'wechat_chat',
-        fileName: file.name,
-        filePath: file.path,
-        fileSize: file.size,
-        industry: (data && data.data && data.data.category) || '待识别',
-        company: (data && data.data && data.data.sellerName) || file.name.replace(/\.pdf$/i, ''),
-        amount: (data && data.data && data.data.amount) || '待识别',
-        date: util.formatTime(now),
-        payer: (data && data.data && data.data.buyerName) || '待识别',
-        createTime: now.getTime(),
-        status: 'success'
-      };
-      invoices.unshift(localInvoice);
-      wx.setStorageSync('my_invoices', invoices);
+      if (data && data.status == 1) {
+        // 后端真正保存成功，才写入本地缓存，确保展示
+        var invoices = wx.getStorageSync('my_invoices') || [];
+        var now = new Date();
+        var localInvoice = {
+          id: (data.data && data.data.id) || (Date.now().toString() + '_' + index),
+          source: 'wechat_chat',
+          fileName: file.name,
+          filePath: file.path,
+          fileSize: file.size,
+          industry: (data.data && data.data.category) || '待识别',
+          company: (data.data && data.data.sellerName) || file.name.replace(/\.pdf$/i, ''),
+          amount: (data.data && data.data.amount) || '待识别',
+          date: util.formatTime(now),
+          payer: (data.data && data.data.buyerName) || '待识别',
+          createTime: now.getTime(),
+          status: 'success'
+        };
+        invoices.unshift(localInvoice);
+        wx.setStorageSync('my_invoices', invoices);
 
-      // 递归上传下一个
-      that.uploadFilesToServer(files, index + 1, data && data.status == 1 ? successCount + 1 : successCount);
+        // 递归上传下一个（成功数 + 1）
+        that.uploadFilesToServer(files, index + 1, successCount + 1);
+      } else {
+        // 上传失败：提示具体原因，并停止后续上传
+        wx.hideLoading();
+        var errorMsg = (data && data.msg) || '上传网络异常';
+        wx.showModal({
+          title: '上传失败',
+          content: '第 ' + (index + 1) + ' 张发票导入失败原因: ' + errorMsg,
+          showCancel: false,
+          success: function() {
+            // 发生错误，终止递归上传
+          }
+        });
+      }
     });
   },
 
