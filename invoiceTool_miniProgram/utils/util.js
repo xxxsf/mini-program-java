@@ -19,7 +19,7 @@ var AppConf = { 'appid': 'wxb95ae2df41575bc3' };
 
 // 云托管配置
 var cloudConfig = {
-  env: 'yncv-260962',      // 云托管环境 ID
+  env: 'prod-yncv-260962',      // 云托管环境 ID（带 prod- 前缀）
   service: 'springboot'    // 云托管服务名
 };
 
@@ -164,7 +164,11 @@ function uploadFile(filePath, name, formData, cb) {
       },
       fail: function (err) {
         console.error('[CallContainer] upload fail:', err);
-        return typeof cb == 'function' && cb(false);
+        var errMsg = '微信底层网络异常';
+        if (err) {
+          errMsg = err.errMsg || JSON.stringify(err) || errMsg;
+        }
+        return typeof cb == 'function' && cb({ status: 0, msg: errMsg });
       }
     });
   } else {

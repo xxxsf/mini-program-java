@@ -5,7 +5,7 @@ App({
     // 初始化微信云托管环境
     if (wx.cloud) {
       wx.cloud.init({
-        env: 'yncv-260962', // 您的云托管环境 ID
+        env: 'prod-yncv-260962', // 您的云托管环境 ID（必须带 prod- 前缀）
         traceUser: true
       })
     } else {
