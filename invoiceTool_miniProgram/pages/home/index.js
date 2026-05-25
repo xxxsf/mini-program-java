@@ -51,46 +51,64 @@ Page({
           return;
         }
 
-        wx.showLoading({ title: '正在导入...' });
-
-        var invoices = wx.getStorageSync('my_invoices') || [];
-        var now = new Date();
-
-        for (var i = 0; i < files.length; i++) {
-          var file = files[i];
-          var invoice = {
-            id: Date.now().toString() + '_' + i,
-            source: 'wechat_chat',
-            fileName: file.name,
-            filePath: file.path,
-            fileSize: file.size,
-            industry: '待识别',
-            company: file.name.replace(/\.pdf$/i, ''),
-            amount: '待识别',
-            date: util.formatTime(now),
-            payer: '待识别',
-            createTime: now.getTime(),
-            status: 'pending'
-          };
-          invoices.unshift(invoice);
+        var sk = wx.getStorageSync('sk');
+        if (!sk) {
+          wx.showToast({ title: '请先登录', icon: 'none' });
+          return;
         }
 
-        wx.setStorageSync('my_invoices', invoices);
-        wx.hideLoading();
-
-        wx.showToast({
-          title: '成功导入 ' + files.length + ' 张发票',
-          icon: 'success',
-          duration: 1500
-        });
-
-        setTimeout(function () {
-          wx.navigateTo({ url: '/pages/myInvoices/index' });
-        }, 1500);
+        wx.showLoading({ title: '正在导入...' });
+        that.uploadFilesToServer(files, 0, 0);
       },
       fail: function () {
         wx.showToast({ title: '未选择文件', icon: 'none' });
       }
+    });
+  },
+
+  // 递归上传文件到云端后端
+  uploadFilesToServer: function (files, index, successCount) {
+    var that = this;
+    if (index >= files.length) {
+      wx.hideLoading();
+      wx.showToast({
+        title: '成功导入 ' + successCount + ' 张发票',
+        icon: successCount > 0 ? 'success' : 'none',
+        duration: 1500
+      });
+
+      setTimeout(function () {
+        wx.navigateTo({ url: '/pages/myInvoices/index' });
+      }, 1500);
+      return;
+    }
+
+    var file = files[index];
+    var sk = wx.getStorageSync('sk');
+
+    util.uploadFile(file.path, 'file', { sk: sk }, function (data) {
+      // 同时写入本地缓存，确保无缝展示
+      var invoices = wx.getStorageSync('my_invoices') || [];
+      var now = new Date();
+      var localInvoice = {
+        id: (data && data.data && data.data.id) || (Date.now().toString() + '_' + index),
+        source: 'wechat_chat',
+        fileName: file.name,
+        filePath: file.path,
+        fileSize: file.size,
+        industry: (data && data.data && data.data.category) || '待识别',
+        company: (data && data.data && data.data.sellerName) || file.name.replace(/\.pdf$/i, ''),
+        amount: (data && data.data && data.data.amount) || '待识别',
+        date: util.formatTime(now),
+        payer: (data && data.data && data.data.buyerName) || '待识别',
+        createTime: now.getTime(),
+        status: 'success'
+      };
+      invoices.unshift(localInvoice);
+      wx.setStorageSync('my_invoices', invoices);
+
+      // 递归上传下一个
+      that.uploadFilesToServer(files, index + 1, data && data.status == 1 ? successCount + 1 : successCount);
     });
   },
 
