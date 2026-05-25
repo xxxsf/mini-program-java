@@ -52,10 +52,10 @@ page { background: #fff; }
 
 /* 智能识别模块样式 */
 .smart-box {
-  background: #F8F9FA;
-  border: 2rpx dashed #CED4DA;
+  /* background: #F8F9FA; */
+  /* border: 2rpx dashed #CED4DA; */
   border-radius: 16rpx;
-  padding: 24rpx;
+  /* padding: 24rpx; */
   margin-bottom: 40rpx;
 }
 .smart-title {

@@ -14,12 +14,12 @@
         </view>
         <text class="action-label">我的发票</text>
       </view>
-      <view class="action-item" bindtap="goToMy">
+      <!-- <view class="action-item" bindtap="goToMy">
         <view class="action-icon">
           <text class="icon-circle">我</text>
         </view>
         <text class="action-label">我的</text>
-      </view>
+      </view> -->
     </view>
   </view>
 

@@ -8,15 +8,25 @@ Page({
   },
 
   onShow: function () {
-    var headers = wx.getStorageSync('invoice_headers') || [];
-    this.setData({ headers: headers });
-
+    var that = this;
     // 强制登录检查
     var sk = wx.getStorageSync('sk');
     if (!sk) {
       wx.reLaunch({ url: '/pages/toLogin/toLogin' });
       return;
     }
+
+    // 从云端加载发票抬头列表，并更新本地缓存
+    util.req('invoiceHeader/list', { sk: sk }, function (res) {
+      if (res && res.status == 1) {
+        that.setData({ headers: res.data || [] });
+        wx.setStorageSync('invoice_headers', res.data || []);
+      } else {
+        // 离线兜底
+        var headers = wx.getStorageSync('invoice_headers') || [];
+        that.setData({ headers: headers });
+      }
+    });
   },
 
   onAddInvoice: function () {

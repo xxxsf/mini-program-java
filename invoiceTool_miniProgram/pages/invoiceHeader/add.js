@@ -177,9 +177,15 @@ Page({
       return;
     }
 
-    var headers = wx.getStorageSync('invoice_headers') || [];
+    var sk = wx.getStorageSync('sk');
+    if (!sk) {
+      wx.showToast({ title: '登录已失效，请重新登录', icon: 'none' });
+      return;
+    }
+
+    wx.showLoading({ title: '正在同步到云端...' });
+
     var item = {
-      id: data.id || String(Date.now()),
       name: data.name.trim(),
       taxNo: data.taxNo.trim(),
       address: data.address.trim(),
@@ -187,16 +193,31 @@ Page({
       bank: data.bank.trim(),
       bankAccount: data.bankAccount.trim()
     };
-
-    if (data.isEdit) {
-      var idx = headers.findIndex(function (h) { return h.id === data.id; });
-      if (idx >= 0) headers[idx] = item;
-    } else {
-      headers.push(item);
+    if (data.isEdit && data.id) {
+      // 数据库 ID 是整数
+      item.id = parseInt(data.id);
     }
 
-    wx.setStorageSync('invoice_headers', headers);
-    wx.showToast({ title: '保存成功', icon: 'success' });
-    setTimeout(function () { wx.navigateBack(); }, 1000);
+    var util = require('../../utils/util.js');
+    util.jsonReq('invoiceHeader/save?sk=' + sk, item, function (res) {
+      wx.hideLoading();
+      if (res && res.status == 1) {
+        wx.showToast({ title: '保存成功', icon: 'success' });
+        setTimeout(function () { wx.navigateBack(); }, 1000);
+      } else {
+        // 网络请求失败，离线兜底写入本地缓存
+        var headers = wx.getStorageSync('invoice_headers') || [];
+        var fallbackItem = { ...item, id: data.id || String(Date.now()) };
+        if (data.isEdit) {
+          var idx = headers.findIndex(function (h) { return h.id === data.id; });
+          if (idx >= 0) headers[idx] = fallbackItem;
+        } else {
+          headers.push(fallbackItem);
+        }
+        wx.setStorageSync('invoice_headers', headers);
+        wx.showToast({ title: '保存成功（本地暂存）', icon: 'success' });
+        setTimeout(function () { wx.navigateBack(); }, 1000);
+      }
+    });
   }
 });
