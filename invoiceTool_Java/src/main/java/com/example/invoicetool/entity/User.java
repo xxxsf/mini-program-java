@@ -38,6 +38,8 @@ public class User {
     private String vehicle;
     @Column(name = "name")
     private String name;
+    @Column(name = "email")
+    private String email;
 
     public Integer getId() {
         return id;
@@ -141,5 +143,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

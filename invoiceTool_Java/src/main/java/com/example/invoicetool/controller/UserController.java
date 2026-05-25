@@ -125,9 +125,31 @@ public class UserController {
     @PostMapping("/vaild_sk")
     public Map<String, Object> vaildSk(@RequestParam String sk) {
         boolean isValid = authService.isValid(sk);
+        User user = authService.requireUser(sk);
 
         Map<String, Object> result = new HashMap<>();
         result.put("status", isValid ? 1 : 0);
+        if (isValid && user != null) {
+            result.put("email", user.getEmail());
+        }
+        return result;
+    }
+
+    @PostMapping("/bindEmail")
+    public Map<String, Object> bindEmail(@RequestParam String sk, @RequestParam String email) {
+        Map<String, Object> result = new HashMap<>();
+        User user = authService.requireUser(sk);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("msg", "登录已失效");
+            return result;
+        }
+        user.setEmail(email);
+        userRepository.save(user);
+        
+        result.put("status", 1);
+        result.put("msg", "绑定邮箱成功");
+        result.put("email", email);
         return result;
     }
 }
