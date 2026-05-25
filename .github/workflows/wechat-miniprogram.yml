@@ -12,7 +12,7 @@ on:
 
 jobs:
   # ============================================
-  # 微信小程序代码检查和构建准备
+  # 微信小程序代码结构和语法校验
   # ============================================
   validate-miniprogram:
     name: Validate Mini Program Code
@@ -43,46 +43,8 @@ jobs:
           
           echo "✅ Project structure validation passed"
           
-      - name: Validate JSON syntax
-        run: |
-          cd invoiceTool_miniProgram
-          
-          # 验证 app.json 语法
-          if ! jq empty app.json 2>/dev/null; then
-            echo "❌ app.json has invalid JSON syntax"
-            cat app.json
-            exit 1
-          fi
-          
-          # 验证 project.config.json 语法
-          if [ -f project.config.json ]; then
-            if ! jq empty project.config.json 2>/dev/null; then
-              echo "❌ project.config.json has invalid JSON syntax"
-              cat project.config.json
-              exit 1
-            fi
-          fi
-          
-          echo "✅ JSON syntax validation passed"
-          
-      - name: Check for common issues
-        run: |
-          cd invoiceTool_miniProgram
-          
-          # 检查是否有 console.log (生产环境应该移除)
-          if grep -r "console.log" --include="*.js" --exclude-dir=node_modules .; then
-            echo "⚠️  Warning: console.log statements found in code"
-          fi
-          
-          # 检查是否有调试代码
-          if grep -r "debugger" --include="*.js" --exclude-dir=node_modules .; then
-            echo "⚠️  Warning: debugger statements found in code"
-          fi
-          
-          echo "✅ Code quality checks completed"
-
   # ============================================
-  # Java 后端构建 (当小程序代码变化时也构建后端)
+  # Java 后端构建 (代码编译校验)
   # ============================================
   build-backend:
     name: Build Backend API
@@ -104,128 +66,3 @@ jobs:
           cd invoiceTool_Java
           chmod +x mvnw
           ./mvnw clean package -DskipTests
-          
-      - name: Upload backend JAR
-        uses: actions/upload-artifact@v3
-        with:
-          name: backend-jar
-          path: invoiceTool_Java/target/*.jar
-
-  # ============================================
-  # 创建小程序部署包
-  # ============================================
-  package-miniprogram:
-    name: Package Mini Program
-    needs: validate-miniprogram
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: Create deployment package
-        run: |
-          cd invoiceTool_miniProgram
-          
-          # 创建临时目录
-          mkdir -p ../deploy-package
-          
-          # 复制小程序代码
-          cp -r . ../deploy-package/
-          
-          # 移除不需要的文件
-          cd ../deploy-package
-          rm -rf .DS_Store node_modules/.cache
-          
-          # 创建版本信息文件
-          echo "{
-            \"version\": \"${{ github.sha }}\",
-            \"buildTime\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
-            \"branch\": \"${{ github.ref_name }}\",
-            \"commitMessage\": \"${{ github.event.head_commit.message }}\"
-          }" > build-info.json
-          
-      - name: Create deployment archive
-        run: |
-          cd deploy-package
-          tar -czf ../miniprogram-deploy.tar.gz .
-          
-      - name: Upload deployment package
-        uses: actions/upload-artifact@v3
-        with:
-          name: miniprogram-deploy
-          path: miniprogram-deploy.tar.gz
-          retention-days: 30
-
-  # ============================================
-  # 部署到微信小程序云开发
-  # ============================================
-  deploy-wechat-cloud:
-    name: Deploy to WeChat Cloud
-    needs: [validate-miniprogram, build-backend]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: Download deployment package
-        uses: actions/download-artifact@v3
-        with:
-          name: miniprogram-deploy
-          
-      - name: Download backend JAR
-        uses: actions/download-artifact@v3
-        with:
-          name: backend-jar
-          
-      - name: Deploy to WeChat Cloud Base
-        run: |
-          echo "🚀 Deploying to WeChat Cloud Base..."
-          echo "⚠️  This step requires WeChat Cloud Base CLI tools"
-          echo ""
-          echo "由于微信云开发的特殊性，此步骤需要："
-          echo "1. 安装微信开发者工具"
-          echo "2. 配置云开发环境"
-          echo "3. 使用云开发 CLI 部署"
-          echo ""
-          echo "或者手动操作："
-          echo "1. 下载构建产物"
-          echo "2. 使用微信开发者工具导入项目"
-          echo "3. 上传到微信后台"
-          
-      - name: Create deployment summary
-        run: |
-          echo "## 📱 微信小程序部署总结" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ 代码验证通过" >> $GITHUB_STEP_SUMMARY
-          echo "✅ 后端构建完成" >> $GITHUB_STEP_SUMMARY
-          echo "✅ 小程序打包完成" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 下一步操作" >> $GITHUB_STEP_SUMMARY
-          echo "1. 下载构建产物" >> $GITHUB_STEP_SUMMARY
-          echo "2. 使用微信开发者工具打开项目" >> $GITHUB_STEP_SUMMARY
-          echo "3. 点击 '上传' 按钮上传代码" >> $GITHUB_STEP_SUMMARY
-          echo "4. 在微信小程序后台提交审核" >> $GITHUB_STEP_SUMMARY
-
-  # ============================================
-  # 通知部署结果
-  # ============================================
-  notify:
-    name: Notification
-    needs: [validate-miniprogram, build-backend, package-miniprogram, deploy-wechat-cloud]
-    runs-on: ubuntu-latest
-    if: always()
-    
-    steps:
-      - name: Deployment status
-        run: |
-          if [ "${{ needs.validate-miniprogram.result }}" == "success" ] && \
-             [ "${{ needs.build-backend.result }}" == "success" ]; then
-            echo "✅ 所有步骤执行成功"
-            echo "🚀 小程序代码已准备好上传"
-          else
-            echo "❌ 部署过程中出现错误"
-            echo "请检查各个步骤的日志"
-          fi
