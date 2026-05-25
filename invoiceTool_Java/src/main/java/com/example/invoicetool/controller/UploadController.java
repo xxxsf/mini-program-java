@@ -26,8 +26,15 @@ public class UploadController {
     private InvoiceRepository invoiceRepository;
 
     @PostMapping
-    public Map<String, Object> upload(@RequestParam("file") MultipartFile file, @RequestParam String sk) {
+    public Map<String, Object> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam String sk,
+            @RequestParam(required = false) String sellerName,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) BigDecimal amount) {
         System.out.println("[Upload] 收到文件上传请求. 文件名: " + (file != null ? file.getOriginalFilename() : "null") + ", 大小: " + (file != null ? file.getSize() : 0) + ", sk: " + sk);
+        System.out.println("[Upload] 前端传入的解析字段 - 商家: " + sellerName + ", 分类: " + category + ", 金额: " + amount);
+        
         Map<String, Object> result = new HashMap<>();
         User user = authService.requireUser(sk);
         if (user == null) {
@@ -55,14 +62,19 @@ public class UploadController {
             file.transferTo(dest);
             System.out.println("[Upload] 文件成功保存至本地: " + dest.getAbsolutePath());
             long now = System.currentTimeMillis();
-            String displayName = originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", "");
+            
+            // 默认兜底商家名称
+            String finalSeller = sellerName != null && !sellerName.trim().isEmpty() ? sellerName : (originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", ""));
+            String finalCategory = category != null && !category.trim().isEmpty() ? category : "其他";
+            BigDecimal finalAmount = amount != null ? amount : BigDecimal.ZERO;
+
             Invoice invoice = new Invoice();
             invoice.setUserId(user.getId());
-            invoice.setSellerName(displayName);
+            invoice.setSellerName(finalSeller);
             invoice.setBuyerName("个人");
-            invoice.setAmount(BigDecimal.ZERO);
+            invoice.setAmount(finalAmount);
             invoice.setDate(now);
-            invoice.setCategory("其他");
+            invoice.setCategory(finalCategory);
             invoice.setStatus("normal");
             invoice.setInvoiceNo("FP" + now);
             invoice.setFileName(originalFileName);

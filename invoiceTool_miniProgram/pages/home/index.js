@@ -94,7 +94,48 @@ Page({
     var file = files[index];
     var sk = wx.getStorageSync('sk');
 
-    util.uploadFile(file.path, 'file', { sk: sk }, function (data) {
+    // 智能文件名识别解析（例如：餐饮费-529.00元-湖州福宴餐饮服务有限公司.pdf）
+    var fileName = file.name || "";
+    var category = "其他";
+    var parsedAmount = "";
+    var sellerName = fileName.replace(/\.pdf$/i, '');
+
+    // 模式一：分段式 餐饮费-529.00元-湖州福宴...
+    var parts = fileName.split('-');
+    if (parts.length >= 3) {
+      category = parts[0];
+      var amtPart = parts[1];
+      if (amtPart.indexOf('元') !== -1) {
+        parsedAmount = amtPart.replace('元', '');
+      } else {
+        parsedAmount = amtPart;
+      }
+      sellerName = parts[2].replace(/\.pdf$/i, '');
+    } else {
+      // 模式二：名字中提取 XX元 字符
+      var match = fileName.match(/([\d\.]+)元/);
+      if (match) {
+        parsedAmount = match[1];
+        // 尝试分隔提取商家名称
+        var parts2 = fileName.split('-');
+        if (parts2.length >= 2) {
+          sellerName = parts2[parts2.length - 1].replace(/\.pdf$/i, '');
+        }
+      }
+    }
+
+    var uploadData = {
+      sk: sk,
+      sellerName: sellerName,
+      category: category
+    };
+    
+    // 如果提取到了有效金额，则作为参数传递
+    if (parsedAmount && !isNaN(parseFloat(parsedAmount))) {
+      uploadData.amount = parseFloat(parsedAmount);
+    }
+
+    util.uploadFile(file.path, 'file', uploadData, function (data) {
       if (data && data.status == 1) {
         // 后端真正保存成功，才写入本地缓存，确保展示
         var invoices = wx.getStorageSync('my_invoices') || [];
@@ -105,9 +146,9 @@ Page({
           fileName: file.name,
           filePath: file.path,
           fileSize: file.size,
-          industry: (data.data && data.data.category) || '待识别',
-          company: (data.data && data.data.sellerName) || file.name.replace(/\.pdf$/i, ''),
-          amount: (data.data && data.data.amount) || '待识别',
+          industry: (data.data && data.data.category) || category || '待识别',
+          company: (data.data && data.data.sellerName) || sellerName || file.name.replace(/\.pdf$/i, ''),
+          amount: (data.data && data.data.amount !== undefined) ? data.data.amount : (parsedAmount || '待识别'),
           date: util.formatTime(now),
           payer: (data.data && data.data.buyerName) || '待识别',
           createTime: now.getTime(),
