@@ -27,42 +27,52 @@
   <!-- 关联邮箱 -->
   <view class="email-bar" bindtap="onLinkEmail">
     <image class="email-icon" src="/img/email.png" mode="aspectFit" />
-    <text class="email-text">关联QQ邮箱，自动同步邮箱发票。</text>
-    <view class="email-btn">关联</view>
+    <text class="email-text">{{email ? '已关联邮箱：' + email : '关联QQ邮箱，自动同步邮箱发票。'}}</text>
+    <view class="email-btn">{{email ? '修改' : '关联'}}</view>
   </view>
 
   <!-- 添加发票入口 -->
-  <view class="add-entry" bindtap="onAddInvoice">
+  <view class="add-entry" bindtap="onAddInvoice" wx:if="{{!isBatch}}">
     <text class="add-icon">+</text>
     <text class="add-text">添加发票</text>
   </view>
 
   <!-- 发票列表 -->
   <block wx:for="{{filteredList}}" wx:key="id">
-    <view class="invoice-card" bindtap="onInvoiceDetail" data-id="{{item.id}}">
-      <view class="card-top">
-        <view class="card-tag">{{item.source === 'wechat_chat' ? '微信聊天' : item.source === 'local_album' ? '相册导入' : item.source === 'local_camera' ? '拍照导入' : item.source === 'local_file' ? '本地文件' : item.industry || '其他'}}</view>
-        <text class="card-company">{{item.company || item.fileName}}</text>
+    <view class="invoice-card {{isBatch ? 'batch-mode' : ''}} {{selectedIds[item.id] ? 'selected' : ''}}" bindtap="onCardTap" data-id="{{item.id}}">
+      
+      <!-- 选择打勾圈圈 (仅在批量模式下显示) -->
+      <view class="check-box-wrapper" wx:if="{{isBatch}}">
+        <icon class="check-icon" type="success" size="22" color="#3B5BDB" wx:if="{{selectedIds[item.id]}}" />
+        <view class="uncheck-circle" wx:else></view>
       </view>
-      <view class="card-row">
-        <text class="card-label">金额</text>
-        <text class="card-value amount">{{item.amount === '待识别' ? '待识别' : '¥' + item.amount}}</text>
+
+      <view class="card-body">
+        <view class="card-top">
+          <view class="card-tag">{{item.source === 'wechat_chat' ? '微信聊天' : item.source === 'local_album' ? '相册导入' : item.source === 'local_camera' ? '拍照导入' : item.source === 'local_file' ? '本地文件' : item.industry || '其他'}}</view>
+          <text class="card-company">{{item.company || item.fileName}}</text>
+        </view>
+        <view class="card-row">
+          <text class="card-label">金额</text>
+          <text class="card-value amount">{{item.amount === '待识别' ? '待识别' : '¥' + item.amount}}</text>
+        </view>
+        <view class="card-row">
+          <text class="card-label">时间</text>
+          <text class="card-value">{{item.date}}</text>
+        </view>
+        <view class="card-row" wx:if="{{item.payer}}">
+          <text class="card-label">付款方</text>
+          <text class="card-value">{{item.payer}}</text>
+        </view>
+        <view class="card-row" wx:if="{{item.fileName}}">
+          <text class="card-label">文件</text>
+          <text class="card-value file-name">{{item.fileName}}</text>
+        </view>
+        <view class="card-actions" wx:if="{{!isBatch}}">
+          <text class="card-delete" catchtap="onDeleteInvoice" data-id="{{item.id}}">删除</text>
+        </view>
       </view>
-      <view class="card-row">
-        <text class="card-label">时间</text>
-        <text class="card-value">{{item.date}}</text>
-      </view>
-      <view class="card-row" wx:if="{{item.payer}}">
-        <text class="card-label">付款方</text>
-        <text class="card-value">{{item.payer}}</text>
-      </view>
-      <view class="card-row" wx:if="{{item.fileName}}">
-        <text class="card-label">文件</text>
-        <text class="card-value file-name">{{item.fileName}}</text>
-      </view>
-      <view class="card-actions">
-        <text class="card-delete" catchtap="onDeleteInvoice" data-id="{{item.id}}">删除</text>
-      </view>
+
     </view>
   </block>
 
@@ -70,5 +80,64 @@
   <view class="empty" wx:if="{{filteredList.length === 0}}">
     <text class="empty-text">暂无发票</text>
     <text class="empty-hint">点击上方"添加发票"导入</text>
+  </view>
+
+  <view style="height: 240rpx;" wx:if="{{isBatch}}"></view>
+
+  <!-- 底部批量操作栏 -->
+  <view class="bottom-batch-bar" wx:if="{{isBatch}}">
+    <view class="batch-top-row">
+      <view class="batch-select-all" bindtap="onToggleSelectAll">
+        <icon type="success" size="22" color="#3B5BDB" wx:if="{{isAllSelected}}" />
+        <view class="uncheck-circle" wx:else></view>
+        <text class="batch-select-text">全选</text>
+        <text class="batch-count-text">已选择 {{selectedCount}} 张发票</text>
+      </view>
+      <view class="batch-close-btn" bindtap="onExitBatch">✕</view>
+    </view>
+    
+    <view class="batch-actions">
+      <view class="batch-action-btn" bindtap="onExportToChat">
+        <view class="action-icon-circle chat">💬</view>
+        <text>导出到聊天</text>
+      </view>
+      <view class="batch-action-btn" bindtap="onExportToEmail">
+        <view class="action-icon-circle email">✉️</view>
+        <text>导出到邮箱</text>
+      </view>
+      <view class="batch-action-btn delete" bindtap="onBatchDelete">
+        <view class="action-icon-circle trash">🗑️</view>
+        <text>删除</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导出成果发送对话框 -->
+  <view class="modal-overlay" wx:if="{{showExportModal}}">
+    <view class="modal-content">
+      <view class="modal-body-text">您选择的发票将生成含 {{selectedCount}} 张发票的文件和电子报销单表格，与所选发票原件一同发送至聊天。</view>
+      <view class="modal-items">
+        <view class="modal-item">
+          <view class="modal-item-icon pdf">PDF</view>
+          <text class="modal-item-title">含 {{selectedCount}} 张发票的文件.zip</text>
+        </view>
+        <view class="modal-item">
+          <view class="modal-item-icon xlsx">XLS</view>
+          <text class="modal-item-title">发票电子报销单.csv</text>
+        </view>
+      </view>
+      <button class="modal-btn" bindtap="onShareZipToChat">一键发送给好友</button>
+      <button class="modal-btn cancel" bindtap="onCloseExportModal">知道了</button>
+    </view>
+  </view>
+
+  <!-- 关联邮箱对话框 -->
+  <view class="modal-overlay" wx:if="{{showEmailModal}}">
+    <view class="modal-content">
+      <view class="modal-title">关联QQ邮箱</view>
+      <input class="modal-input" placeholder="请输入您的邮箱地址" bindinput="onEmailInput" value="{{emailInput}}" />
+      <button class="modal-btn" bindtap="onSaveEmail">立即关联</button>
+      <button class="modal-btn cancel" bindtap="onCloseEmailModal">取消</button>
+    </view>
   </view>
 </view>
