@@ -21,6 +21,7 @@ Page({
     // 弹窗状态
     showExportModal: false,
     showEmailModal: false,
+    showSourceSheet: false, // 添加发票来源选择
     email: '', // 关联的邮箱
     emailInput: '',
     generatedZipUrl: '', // 兼容字段，已废弃公网 URL 方式
@@ -589,7 +590,165 @@ Page({
     });
   },
 
+  // 通用登录拦截
+  requireLogin: function (cb) {
+    var sk = wx.getStorageSync('sk');
+    if (sk) {
+      if (typeof cb === 'function') cb();
+      return true;
+    }
+    wx.showModal({
+      title: '需要登录',
+      content: '该功能需登录后使用，是否前往登录？',
+      confirmText: '去登录',
+      cancelText: '再看看',
+      success: function (res) {
+        if (res.confirm) {
+          wx.navigateTo({ url: '/pages/toLogin/toLogin' });
+        }
+      }
+    });
+    return false;
+  },
+
   onAddInvoice: function () {
-    wx.navigateTo({ url: '/pages/home/index' });
+    if (!this.requireLogin()) return;
+    this.setData({ showSourceSheet: true });
+  },
+
+  closeSourceSheet: function () {
+    this.setData({ showSourceSheet: false });
+  },
+
+  // 从微信聊天导入 PDF 发票
+  onSourceChat: function () {
+    var that = this;
+    that.setData({ showSourceSheet: false });
+
+    wx.chooseMessageFile({
+      count: 10,
+      type: 'file',
+      extension: ['pdf'],
+      success: function (res) {
+        var files = res.tempFiles;
+        if (!files || files.length === 0) {
+          wx.showToast({ title: '未选择文件', icon: 'none' });
+          return;
+        }
+        that.uploadPdfFiles(files);
+      },
+      fail: function () {
+        wx.showToast({ title: '已取消选择', icon: 'none' });
+      }
+    });
+  },
+
+  // 从相册导入
+  onSourceAlbum: function () {
+    var that = this;
+    that.setData({ showSourceSheet: false });
+
+    wx.chooseMedia({
+      count: 9,
+      mediaType: ['image'],
+      sourceType: ['album'],
+      success: function (res) {
+        var files = res.tempFiles;
+        if (!files || files.length === 0) return;
+        that.uploadImageFiles(files);
+      },
+      fail: function () {
+        wx.showToast({ title: '已取消选择', icon: 'none' });
+      }
+    });
+  },
+
+  // 拍照导入
+  onSourceCamera: function () {
+    var that = this;
+    that.setData({ showSourceSheet: false });
+
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['camera'],
+      success: function (res) {
+        var files = res.tempFiles;
+        if (!files || files.length === 0) return;
+        that.uploadImageFiles(files);
+      },
+      fail: function () {
+        wx.showToast({ title: '已取消拍照', icon: 'none' });
+      }
+    });
+  },
+
+  // 上传 PDF 文件
+  uploadPdfFiles: function (files) {
+    var that = this;
+    var sk = wx.getStorageSync('sk');
+    if (!sk) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    var uploadedCount = 0;
+    var total = files.length;
+
+    wx.showLoading({ title: '上传中...' });
+
+    var uploadNext = function (index) {
+      if (index >= total) {
+        wx.hideLoading();
+        wx.showToast({ title: '成功添加 ' + uploadedCount + ' 张发票', icon: 'success' });
+        that.loadInvoices();
+        return;
+      }
+
+      var file = files[index];
+      util.uploadFile('/api/upload', file.path, file.name, { sk: sk }, function (res) {
+        if (res && res.status == 1) {
+          uploadedCount++;
+        }
+        uploadNext(index + 1);
+      });
+    };
+
+    uploadNext(0);
+  },
+
+  // 上传图片文件
+  uploadImageFiles: function (files) {
+    var that = this;
+    var sk = wx.getStorageSync('sk');
+    if (!sk) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    var uploadedCount = 0;
+    var total = files.length;
+
+    wx.showLoading({ title: '上传中...' });
+
+    var uploadNext = function (index) {
+      if (index >= total) {
+        wx.hideLoading();
+        wx.showToast({ title: '成功添加 ' + uploadedCount + ' 张发票', icon: 'success' });
+        that.loadInvoices();
+        return;
+      }
+
+      var file = files[index];
+      var fileName = 'invoice_' + Date.now() + '_' + index + '.jpg';
+      util.uploadFile('/api/upload', file.tempFilePath, fileName, { sk: sk }, function (res) {
+        if (res && res.status == 1) {
+          uploadedCount++;
+        }
+        uploadNext(index + 1);
+      });
+    };
+
+    uploadNext(0);
   }
 });

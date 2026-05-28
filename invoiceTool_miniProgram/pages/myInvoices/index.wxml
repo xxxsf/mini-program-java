@@ -140,4 +140,31 @@
       <button class="modal-btn cancel" bindtap="onCloseEmailModal">取消</button>
     </view>
   </view>
+
+  <!-- 添加发票来源弹窗 -->
+  <view class="mask" wx:if="{{showSourceSheet}}" bindtap="closeSourceSheet"></view>
+  <view class="source-sheet {{showSourceSheet ? 'show' : ''}}">
+    <view class="sheet-header">
+      <view class="sheet-close" bindtap="closeSourceSheet">×</view>
+      <view class="sheet-title-wrap">
+        <text class="sheet-title">选择发票来源</text>
+        <text class="sheet-desc">目前仅可识别pdf格式的发票</text>
+      </view>
+    </view>
+    <view class="sheet-option" bindtap="onSourceChat">
+      <image class="sheet-icon" src="/img/chat-icon.svg" mode="aspectFit" />
+      <text class="sheet-label">从微信聊天导入</text>
+      <text class="sheet-arrow">></text>
+    </view>
+    <view class="sheet-option" bindtap="onSourceAlbum">
+      <image class="sheet-icon" src="/img/file-icon.svg" mode="aspectFit" />
+      <text class="sheet-label">从相册导入</text>
+      <text class="sheet-arrow">></text>
+    </view>
+    <view class="sheet-option" bindtap="onSourceCamera">
+      <image class="sheet-icon" src="/img/camera-icon.svg" mode="aspectFit" />
+      <text class="sheet-label">拍照导入</text>
+      <text class="sheet-arrow">></text>
+    </view>
+  </view>
 </view>
