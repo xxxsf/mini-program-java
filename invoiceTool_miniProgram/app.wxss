@@ -27,7 +27,7 @@ view, text, image {
   color: #fff;
   border: none;
   border-radius: 8rpx;
-  font-size: 36rpx;
+  font-size: 40rpx;
   padding: 20rpx 0;
   text-align: center;
 }
@@ -41,7 +41,7 @@ view, text, image {
   color: #3B5BDB;
   border: 2rpx solid #3B5BDB;
   border-radius: 8rpx;
-  font-size: 36rpx;
+  font-size: 40rpx;
   padding: 20rpx 0;
   text-align: center;
 }
