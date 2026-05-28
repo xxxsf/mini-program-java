@@ -3,12 +3,20 @@ var app = getApp();
 Page({
   data: {
     headerId: '',
-    header: {}
+    header: {},
+    showActions: true, // 是否显示操作按钮（分享模式为false）
+    plainText: '' // 纯文本格式
   },
 
   onLoad: function (options) {
     if (options.id) {
-      this.setData({ headerId: options.id });
+      // 从分享场景打开时，隐藏操作按钮
+      var scene = options.scene || '';
+      var fromShare = options.from === 'share' || scene === '1044' || scene === '1007' || scene === '1008';
+      this.setData({ 
+        headerId: options.id,
+        showActions: !fromShare 
+      });
       this.loadHeaderDetail(options.id);
     }
   },
@@ -20,18 +28,44 @@ Page({
       return String(h.id) === String(id);
     });
 
-    if (header) {
-      this.setData({ header: header });
-    } else {
+    if (!header) {
       // 如果全局数据中没有，尝试从本地存储获取
       var localHeaders = wx.getStorageSync('invoice_headers') || [];
       header = localHeaders.find(function (h) {
         return String(h.id) === String(id);
       });
-      if (header) {
-        this.setData({ header: header });
-      }
     }
+
+    if (header) {
+      // 生成纯文本格式
+      var plainText = this.formatPlainText(header);
+      this.setData({ 
+        header: header,
+        plainText: plainText
+      });
+    }
+  },
+
+  // 生成纯文本格式
+  formatPlainText: function (h) {
+    var text = '';
+    text += '名称：' + (h.name || '') + '\n';
+    if (h.taxNo) {
+      text += '纳税人识别号：' + h.taxNo + '\n';
+    }
+    if (h.address) {
+      text += '地址：' + h.address + '\n';
+    }
+    if (h.phone) {
+      text += '电话：' + h.phone + '\n';
+    }
+    if (h.bank) {
+      text += '开户行：' + h.bank + '\n';
+    }
+    if (h.bankAccount) {
+      text += '银行账号：' + h.bankAccount + '\n';
+    }
+    return text;
   },
 
   // 分享给好友

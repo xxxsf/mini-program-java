@@ -46,6 +46,24 @@
   margin-left: 20rpx;
 }
 
+/* 纯文本卡片（分享模式） */
+.plain-text-card {
+  background: #fff;
+  margin: 0 30rpx 30rpx;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.plain-text {
+  font-size: 34rpx;
+  color: #333;
+  line-height: 1.8;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* 信息列表 */
 .info-list {
   display: flex;
