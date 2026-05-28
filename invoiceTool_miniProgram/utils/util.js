@@ -233,7 +233,8 @@ function downloadFile(fileUrl, cb) {
   // 保证路径正确，剔除多余的 //
   path = path.replace(/\/+/g, '/');
 
-  if (!isDevtools && !forceUseDomain) {
+  // 真机始终优先走 callContainer 二进制下载（免域名白名单），仅开发者工具走 wx.downloadFile
+  if (!isDevtools) {
     // 真机走免域名云托管 callContainer
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
