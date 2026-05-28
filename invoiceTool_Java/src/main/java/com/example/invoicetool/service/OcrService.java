@@ -100,32 +100,34 @@ public class OcrService {
                     System.out.println("[OCR] 字段: '" + info.getName() + "' = '" + info.getValue() + "'");
                 }
 
-                // 先遍历收集所有字段
+                // 先遍历收集所有字段 - 优先提取价税合计
                 for (TextVatInvoice info : infos) {
                     String name = info.getName();
                     String value = info.getValue();
 
                     if (name != null && value != null) {
-                        switch (name) {
-                            case "价税合计(小写)":
-                            case "价税合计（小写）":
-                                // 优先使用价税合计（含税总额）作为金额
-                                try {
-                                    String amountStr = value.replaceAll("[¥,￥,元,$]", "").trim();
-                                    result.put("amount", new BigDecimal(amountStr));
-                                    result.put("totalAmount", value);
-                                    logger.info("[OCR] 使用价税合计作为金额: " + amountStr);
-                                } catch (Exception e) {
-                                    logger.warning("[OCR] 价税合计解析失败: " + value);
-                                }
-                                break;
-                            case "价税合计(大写)":
-                            case "价税合计（大写）":
-                                result.put("totalAmountInWords", value);
-                                break;
+                        // 统一处理字段名（去除空格，统一符号）
+                        String normalizedName = name.trim().replace("（", "(").replace("）", ")");
+                        
+                        System.out.println("[OCR DEBUG] 检查字段: '" + normalizedName + "' = '" + value + "'");
+                        
+                        if (normalizedName.equals("价税合计(小写)") || normalizedName.equals("价税合计(小写)")) {
+                            // 优先使用价税合计（含税总额）作为金额
+                            try {
+                                String amountStr = value.replaceAll("[¥,￥,元,$]", "").trim();
+                                result.put("amount", new BigDecimal(amountStr));
+                                result.put("totalAmount", value);
+                                System.out.println("[OCR DEBUG] ✓ 使用价税合计作为金额: " + amountStr);
+                            } catch (Exception e) {
+                                System.out.println("[OCR DEBUG] ✗ 价税合计解析失败: " + value);
+                            }
+                        } else if (normalizedName.equals("价税合计(大写)")) {
+                            result.put("totalAmountInWords", value);
                         }
                     }
                 }
+
+                System.out.println("[OCR DEBUG] 优先字段处理后 amount=" + result.get("amount"));
 
                 // 第二次遍历处理其他字段（金额已优先处理）
                 for (TextVatInvoice info : infos) {
@@ -133,50 +135,37 @@ public class OcrService {
                     String value = info.getValue();
 
                     if (name != null && value != null) {
-                        switch (name) {
-                            case "合计金额":
-                            case "小写金额":
-                            case "金额":
-                                // 只有没有价税合计时才使用合计金额
-                                if (!result.containsKey("amount")) {
-                                    try {
-                                        String amountStr = value.replaceAll("[¥,￥,元,$]", "").trim();
-                                        result.put("amount", new BigDecimal(amountStr));
-                                        logger.info("[OCR] 使用合计金额作为金额: " + amountStr);
-                                    } catch (Exception e) {
-                                        logger.warning("[OCR] 金额解析失败: " + value);
-                                    }
+                        String normalizedName = name.trim().replace("（", "(").replace("）", ")");
+                        
+                        if (normalizedName.equals("合计金额") || normalizedName.equals("小写金额") || normalizedName.equals("金额")) {
+                            // 只有没有价税合计时才使用合计金额
+                            if (!result.containsKey("amount")) {
+                                try {
+                                    String amountStr = value.replaceAll("[¥,￥,元,$]", "").trim();
+                                    result.put("amount", new BigDecimal(amountStr));
+                                    System.out.println("[OCR DEBUG] 使用合计金额作为金额: " + amountStr);
+                                } catch (Exception e) {
+                                    System.out.println("[OCR DEBUG] 合计金额解析失败: " + value);
                                 }
-                                break;
-                            case "销售方名称":
-                            case "卖方名称":
-                            case "销售方":
-                                result.put("sellerName", value);
-                                break;
-                            case "购买方名称":
-                            case "买方名称":
-                            case "购买方":
-                                result.put("buyerName", value);
-                                break;
-                            case "开票日期":
-                            case "日期":
-                                result.put("invoiceDate", parseDate(value));
-                                break;
-                            case "发票号码":
-                                result.put("invoiceNo", value);
-                                break;
-                            case "发票代码":
-                                result.put("invoiceCode", value);
-                                break;
-                            case "税率":
-                                result.put("taxRate", value);
-                                break;
-                            case "税额":
-                                result.put("taxAmount", value);
-                                break;
-                            case "发票类型":
-                                result.put("invoiceType", value);
-                                break;
+                            } else {
+                                System.out.println("[OCR DEBUG] 跳过合计金额，已存在 amount=" + result.get("amount"));
+                            }
+                        } else if (normalizedName.equals("销售方名称") || normalizedName.equals("卖方名称") || normalizedName.equals("销售方")) {
+                            result.put("sellerName", value);
+                        } else if (normalizedName.equals("购买方名称") || normalizedName.equals("买方名称") || normalizedName.equals("购买方")) {
+                            result.put("buyerName", value);
+                        } else if (normalizedName.equals("开票日期") || normalizedName.equals("日期")) {
+                            result.put("invoiceDate", parseDate(value));
+                        } else if (normalizedName.equals("发票号码")) {
+                            result.put("invoiceNo", value);
+                        } else if (normalizedName.equals("发票代码")) {
+                            result.put("invoiceCode", value);
+                        } else if (normalizedName.equals("税率")) {
+                            result.put("taxRate", value);
+                        } else if (normalizedName.equals("税额")) {
+                            result.put("taxAmount", value);
+                        } else if (normalizedName.equals("发票类型")) {
+                            result.put("invoiceType", value);
                         }
                     }
                 }
