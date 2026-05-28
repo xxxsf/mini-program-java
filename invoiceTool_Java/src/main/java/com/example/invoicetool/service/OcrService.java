@@ -100,6 +100,34 @@ public class OcrService {
                     System.out.println("[OCR] 字段: '" + info.getName() + "' = '" + info.getValue() + "'");
                 }
 
+                // 先遍历收集所有字段
+                for (TextVatInvoice info : infos) {
+                    String name = info.getName();
+                    String value = info.getValue();
+
+                    if (name != null && value != null) {
+                        switch (name) {
+                            case "价税合计(小写)":
+                            case "价税合计（小写）":
+                                // 优先使用价税合计（含税总额）作为金额
+                                try {
+                                    String amountStr = value.replaceAll("[¥,￥,元,$]", "").trim();
+                                    result.put("amount", new BigDecimal(amountStr));
+                                    result.put("totalAmount", value);
+                                    logger.info("[OCR] 使用价税合计作为金额: " + amountStr);
+                                } catch (Exception e) {
+                                    logger.warning("[OCR] 价税合计解析失败: " + value);
+                                }
+                                break;
+                            case "价税合计(大写)":
+                            case "价税合计（大写）":
+                                result.put("totalAmountInWords", value);
+                                break;
+                        }
+                    }
+                }
+
+                // 第二次遍历处理其他字段（金额已优先处理）
                 for (TextVatInvoice info : infos) {
                     String name = info.getName();
                     String value = info.getValue();
@@ -109,12 +137,15 @@ public class OcrService {
                             case "合计金额":
                             case "小写金额":
                             case "金额":
-                                try {
-                                    // 去除货币符号和逗号
-                                    String amountStr = value.replaceAll("[¥,￥,元]", "").trim();
-                                    result.put("amount", new BigDecimal(amountStr));
-                                } catch (Exception e) {
-                                    logger.warning("[OCR] 金额解析失败: " + value);
+                                // 只有没有价税合计时才使用合计金额
+                                if (!result.containsKey("amount")) {
+                                    try {
+                                        String amountStr = value.replaceAll("[¥,￥,元,$]", "").trim();
+                                        result.put("amount", new BigDecimal(amountStr));
+                                        logger.info("[OCR] 使用合计金额作为金额: " + amountStr);
+                                    } catch (Exception e) {
+                                        logger.warning("[OCR] 金额解析失败: " + value);
+                                    }
                                 }
                                 break;
                             case "销售方名称":
@@ -143,27 +174,10 @@ public class OcrService {
                             case "税额":
                                 result.put("taxAmount", value);
                                 break;
-                            case "价税合计(大写)":
-                                result.put("totalAmountInWords", value);
-                                break;
-                            case "价税合计(小写)":
-                                result.put("totalAmount", value);
-                                break;
                             case "发票类型":
                                 result.put("invoiceType", value);
                                 break;
                         }
-                    }
-                }
-
-                // 如果没有单独的小写金额，尝试使用价税合计
-                if (!result.containsKey("amount") && result.containsKey("totalAmount")) {
-                    try {
-                        String totalAmt = (String) result.get("totalAmount");
-                        String amountStr = totalAmt.replaceAll("[¥,￥,元]", "").trim();
-                        result.put("amount", new BigDecimal(amountStr));
-                    } catch (Exception e) {
-                        logger.warning("[OCR] 价税合计解析失败");
                     }
                 }
 
