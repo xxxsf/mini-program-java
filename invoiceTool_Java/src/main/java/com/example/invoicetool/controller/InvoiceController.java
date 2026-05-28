@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -103,6 +104,8 @@ public class InvoiceController {
 
     @PostMapping("/export")
     public Map<String, Object> export(@RequestParam String sk, @RequestParam String ids) {
+        // 仅做预检：校验登录、统计本次将打包的发票数。
+        // 真正打包/下载交给 /exportZip 流式接口，避免云托管多实例不共享 /tmp 导致下载失败。
         Map<String, Object> result = new HashMap<>();
         User user = authService.requireUser(sk);
         if (user == null) {
@@ -110,56 +113,84 @@ public class InvoiceController {
             result.put("msg", "登录已失效");
             return result;
         }
-        
-        String[] idArray = ids.split(",");
-        long now = System.currentTimeMillis();
-        String zipName = "export_" + now + ".zip";
-        String zipPath = "/tmp/uploads/" + zipName;
-        
-        try {
-            java.io.File zipFile = new java.io.File(zipPath);
-            if (!zipFile.getParentFile().exists()) {
-                zipFile.getParentFile().mkdirs();
-            }
-            
-            java.io.FileOutputStream fos = new java.io.FileOutputStream(zipFile);
-            java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(fos);
-            
-            int count = 0;
-            for (String idStr : idArray) {
-                if (idStr.trim().isEmpty()) continue;
+
+        int count = 0;
+        for (String idStr : ids.split(",")) {
+            if (idStr.trim().isEmpty()) continue;
+            try {
                 Integer id = Integer.parseInt(idStr.trim());
                 java.util.Optional<Invoice> opt = invoiceRepository.findById(id);
                 if (opt.isPresent() && opt.get().getUserId().equals(user.getId())) {
-                    Invoice inv = opt.get();
                     count++;
-                    
-                    // 将实际的发票 PDF 文件打包到 ZIP 里
-                    String fileSrc = inv.getFilePath(); // 例如 /uploads/xxxx.pdf
-                    if (fileSrc != null) {
-                        String localPath = "/tmp" + fileSrc;
-                        java.io.File localFile = new java.io.File(localPath);
-                        if (localFile.exists()) {
-                            zos.putNextEntry(new java.util.zip.ZipEntry(inv.getFileName() != null ? inv.getFileName() : localFile.getName()));
-                            byte[] bytes = java.nio.file.Files.readAllBytes(localFile.toPath());
-                            zos.write(bytes);
-                            zos.closeEntry();
-                        } else {
-                            // 如果服务器文件缺失，则模拟创建一个 PDF 以便测试打包全流程
-                            zos.putNextEntry(new java.util.zip.ZipEntry(inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf")));
-                            zos.write("Mock PDF content for testing".getBytes());
-                            zos.closeEntry();
-                        }
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (count == 0) {
+            result.put("status", 0);
+            result.put("msg", "没有可导出的发票");
+            return result;
+        }
+
+        result.put("status", 1);
+        result.put("msg", "预检通过");
+        result.put("count", count);
+        // 兼容字段：前端只用来标记"已准备好可分享"，真正下载走 /exportZip
+        result.put("url", "ready");
+        return result;
+    }
+
+    /**
+     * 流式导出 ZIP：把打包好的二进制直接写入响应体，避免容器多实例 /tmp 不共享。
+     * 前端通过 wx.cloud.callContainer / wx.request (responseType:'arraybuffer') 一次性拿到二进制再写入本地临时文件。
+     */
+    @PostMapping("/exportZip")
+    public void exportZip(@RequestParam String sk, @RequestParam String ids, HttpServletResponse response) {
+        User user = authService.requireUser(sk);
+        if (user == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String[] idArray = ids.split(",");
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=\"invoices.zip\"");
+
+        try (java.io.OutputStream out = response.getOutputStream();
+             java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(out)) {
+
+            for (String idStr : idArray) {
+                if (idStr.trim().isEmpty()) continue;
+                Integer id;
+                try {
+                    id = Integer.parseInt(idStr.trim());
+                } catch (NumberFormatException e) { continue; }
+                java.util.Optional<Invoice> opt = invoiceRepository.findById(id);
+                if (!opt.isPresent() || !opt.get().getUserId().equals(user.getId())) continue;
+
+                Invoice inv = opt.get();
+                String fileSrc = inv.getFilePath(); // 例如 /uploads/xxxx.pdf
+                String entryName = inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf");
+                zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                if (fileSrc != null) {
+                    java.io.File localFile = new java.io.File("/tmp" + fileSrc);
+                    if (localFile.exists()) {
+                        zos.write(java.nio.file.Files.readAllBytes(localFile.toPath()));
+                    } else {
+                        // 服务器原件缺失时写占位内容，保证下载链路可通
+                        zos.write(("Mock PDF content for invoice " + id).getBytes("UTF-8"));
                     }
                 }
+                zos.closeEntry();
             }
-            
-            // 自动生成一张标准的 “发票电子报销单.csv”，Excel 直接可读
+
+            // 报销单 CSV（Excel 兼容）
             zos.putNextEntry(new java.util.zip.ZipEntry("发票电子报销单.csv"));
             StringBuilder csv = new StringBuilder("发票分类,销售方(商家),付款方,金额,开票时间,发票文件\n");
             for (String idStr : idArray) {
                 if (idStr.trim().isEmpty()) continue;
-                Integer id = Integer.parseInt(idStr.trim());
+                Integer id;
+                try { id = Integer.parseInt(idStr.trim()); } catch (NumberFormatException e) { continue; }
                 Invoice inv = invoiceRepository.findById(id).orElse(null);
                 if (inv != null && inv.getUserId().equals(user.getId())) {
                     csv.append(inv.getCategory() != null ? inv.getCategory() : "其他").append(",")
@@ -170,23 +201,13 @@ public class InvoiceController {
                        .append(inv.getFileName() != null ? inv.getFileName() : "无文件").append("\n");
                 }
             }
-            zos.write(csv.toString().getBytes("GBK")); // 用 GBK 保证 Excel 打开中文不乱码
+            zos.write(csv.toString().getBytes("GBK"));
             zos.closeEntry();
-            
-            zos.close();
-            fos.close();
-            
-            result.put("status", 1);
-            result.put("msg", "导出成功");
-            result.put("url", "https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com/uploads/" + zipName);
-            result.put("count", count);
+            zos.finish();
         } catch (Exception e) {
             e.printStackTrace();
-            result.put("status", 0);
-            result.put("msg", "打包导出失败: " + e.getMessage());
+            try { response.sendError(500, "打包失败: " + e.getMessage()); } catch (Exception ignored) {}
         }
-        
-        return result;
     }
 
     @PostMapping("/sendEmail")

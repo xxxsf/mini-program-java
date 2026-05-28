@@ -23,7 +23,10 @@ Page({
     showEmailModal: false,
     email: '', // 关联的邮箱
     emailInput: '',
-    generatedZipUrl: '' // 云端导出的 ZIP 文件公网下载地址
+    generatedZipUrl: '', // 兼容字段，已废弃公网 URL 方式
+    exportSk: '',   // 当前批次校验用 sk（导出预检通过后缓存）
+    exportIds: '',  // 当前批次发票 ID 串
+    exportCount: 0  // 本批次预检通过的发票数
   },
 
   onShow: function () {
@@ -280,9 +283,12 @@ Page({
     // 呼叫云端打包压缩服务
     util.req('invoice/export', { sk: sk, ids: ids }, function (res) {
       wx.hideLoading();
-      if (res && res.status == 1 && res.url) {
+      if (res && res.status == 1) {
         that.setData({
-          generatedZipUrl: res.url,
+          generatedZipUrl: res.url || 'ready',
+          exportSk: sk,
+          exportIds: ids,
+          exportCount: res.count || that.data.selectedCount,
           showExportModal: true
         });
       } else {
@@ -291,49 +297,133 @@ Page({
     });
   },
 
-  // 微信官方极强 API：wx.shareFileMessage 实现直接在手机中一键弹出好友列表发送文件！
+  // 一次性请求后端 /invoice/exportZip 拿到二进制 ZIP，写到本地后再转发好友
+  // 该流程不依赖容器 /tmp 文件，避免云托管多实例不共享导致下载失败
   onShareZipToChat: function () {
     var that = this;
-    var fileUrl = this.data.generatedZipUrl;
-    if (!fileUrl) return;
+    var sk = this.data.exportSk || wx.getStorageSync('sk');
+    var ids = this.data.exportIds;
+    if (!sk || !ids) {
+      wx.showToast({ title: '会话已失效，请重新打包', icon: 'none' });
+      return;
+    }
 
     wx.showLoading({ title: '正在下载打包文件...' });
 
-    // 使用我们高度优化的通用多模式下载引擎
-    util.downloadFile(fileUrl, function (tempPath) {
-      wx.hideLoading();
-      if (tempPath) {
-        // 调用官方微信好友转发文件接口
-        if (wx.shareFileMessage) {
-          wx.shareFileMessage({
-            filePath: tempPath,
-            fileName: '含' + that.data.selectedCount + '张发票的文件.zip',
-            success: function () {
-              wx.showToast({ title: '分享文件成功', icon: 'success' });
-              that.onCloseExportModal();
-              that.onExitBatch();
-            },
-            fail: function (err) {
-              console.error('Share fail:', err);
-              wx.showToast({ title: '已取消分享', icon: 'none' });
-            }
-          });
-        } else {
-          // 如果基础库过低，采用打开文档预览保存模式
-          wx.openDocument({
-            filePath: tempPath,
-            fileType: 'zip',
-            showMenu: true,
-            success: function () {
-              wx.showToast({ title: '文件已打开，可点右上角分享', icon: 'none' });
-              that.onCloseExportModal();
-            }
-          });
-        }
-      } else {
+    that._fetchZipBinary(sk, ids, function (arrayBuffer) {
+      if (!arrayBuffer) {
+        wx.hideLoading();
         wx.showToast({ title: '文件下载失败，请重试', icon: 'none' });
+        return;
+      }
+      // 写入本地临时文件
+      var fs = wx.getFileSystemManager();
+      var tempPath = wx.env.USER_DATA_PATH + '/invoices_' + Date.now() + '.zip';
+      try {
+        fs.writeFileSync(tempPath, arrayBuffer, 'binary');
+      } catch (e) {
+        wx.hideLoading();
+        console.error('write zip error:', e);
+        wx.showToast({ title: '文件写入失败', icon: 'none' });
+        return;
+      }
+      wx.hideLoading();
+
+      var fileName = '含' + (that.data.exportCount || that.data.selectedCount) + '张发票的文件.zip';
+      // shareFileMessage 不支持 .zip，会 fail；统一走 openDocument 让用户在文档界面分享
+      if (wx.shareFileMessage) {
+        wx.shareFileMessage({
+          filePath: tempPath,
+          fileName: fileName,
+          success: function () {
+            wx.showToast({ title: '分享文件成功', icon: 'success' });
+            that.onCloseExportModal();
+            that.onExitBatch();
+          },
+          fail: function (err) {
+            console.warn('shareFileMessage fail, fallback to openDocument:', err);
+            wx.openDocument({
+              filePath: tempPath,
+              fileType: 'zip',
+              showMenu: true,
+              success: function () {
+                wx.showToast({ title: '请点右上角分享给好友', icon: 'none' });
+                that.onCloseExportModal();
+              },
+              fail: function () {
+                wx.showToast({ title: '已取消分享', icon: 'none' });
+              }
+            });
+          }
+        });
+      } else {
+        wx.openDocument({
+          filePath: tempPath,
+          fileType: 'zip',
+          showMenu: true,
+          success: function () {
+            wx.showToast({ title: '请点右上角分享给好友', icon: 'none' });
+            that.onCloseExportModal();
+          }
+        });
       }
     });
+  },
+
+  // 内部方法：调用后端 /api/invoice/exportZip 流式拉取 ZIP 二进制
+  _fetchZipBinary: function (sk, ids, cb) {
+    var isDevtools = false;
+    try { isDevtools = (typeof __wxConfig !== 'undefined' && __wxConfig.platform === 'devtools'); } catch (e) {}
+
+    var forceUseDomain = true; // 与 util.js 中 forceUseDomain 保持一致
+
+    if (!isDevtools && !forceUseDomain) {
+      // 真机免域名走云托管 callContainer
+      wx.cloud.callContainer({
+        config: { env: 'prod-yncv-260962' },
+        path: '/api/invoice/exportZip',
+        header: {
+          'X-WX-SERVICE': 'springboot',
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        method: 'POST',
+        data: { sk: sk, ids: ids },
+        responseType: 'arraybuffer',
+        success: function (res) {
+          if (res.statusCode === 200 && res.data) {
+            cb(res.data);
+          } else {
+            console.error('exportZip non-200:', res.statusCode);
+            cb(false);
+          }
+        },
+        fail: function (err) {
+          console.error('exportZip callContainer fail:', err);
+          cb(false);
+        }
+      });
+    } else {
+      // 开发者工具 / 强制公网域名走 wx.request
+      wx.request({
+        url: util.baseURL + 'api/invoice/exportZip',
+        method: 'POST',
+        header: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        data: { sk: sk, ids: ids },
+        responseType: 'arraybuffer',
+        success: function (res) {
+          if (res.statusCode === 200 && res.data) {
+            cb(res.data);
+          } else {
+            console.error('exportZip non-200:', res.statusCode);
+            cb(false);
+          }
+        },
+        fail: function (err) {
+          console.error('exportZip request fail:', err);
+          cb(false);
+        }
+      });
+    }
   },
 
   onCloseExportModal: function () {
