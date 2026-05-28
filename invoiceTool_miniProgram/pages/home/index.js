@@ -12,20 +12,21 @@ Page({
 
   onShow: function () {
     var that = this;
-    // 强制登录检查
     var sk = wx.getStorageSync('sk');
+
+    // 未登录：允许浏览首页（符合微信审核要求），仅展示离线缓存抬头
     if (!sk) {
-      wx.reLaunch({ url: '/pages/toLogin/toLogin' });
+      var headers = wx.getStorageSync('invoice_headers') || [];
+      that.setData({ headers: headers, email: '' });
       return;
     }
 
-    // 从云端加载发票抬头列表，并更新本地缓存
+    // 已登录：从云端加载发票抬头列表，并更新本地缓存
     util.req('invoiceHeader/list', { sk: sk }, function (res) {
       if (res && res.status == 1) {
         that.setData({ headers: res.data || [] });
         wx.setStorageSync('invoice_headers', res.data || []);
       } else {
-        // 离线兜底
         var headers = wx.getStorageSync('invoice_headers') || [];
         that.setData({ headers: headers });
       }
@@ -39,7 +40,29 @@ Page({
     });
   },
 
+  // 通用登录拦截：未登录时弹窗引导用户去登录页
+  requireLogin: function (cb) {
+    var sk = wx.getStorageSync('sk');
+    if (sk) {
+      if (typeof cb === 'function') cb();
+      return true;
+    }
+    wx.showModal({
+      title: '需要登录',
+      content: '该功能需登录后使用，是否前往登录？',
+      confirmText: '去登录',
+      cancelText: '再看看',
+      success: function (res) {
+        if (res.confirm) {
+          wx.navigateTo({ url: '/pages/toLogin/toLogin' });
+        }
+      }
+    });
+    return false;
+  },
+
   onAddInvoice: function () {
+    if (!this.requireLogin()) return;
     this.setData({ showSourceSheet: true });
   },
 
@@ -48,6 +71,7 @@ Page({
   },
 
   onMyInvoices: function () {
+    if (!this.requireLogin()) return;
     wx.navigateTo({ url: '/pages/myInvoices/index' });
   },
 
@@ -198,11 +222,17 @@ Page({
   // 从手机本地导入（跳转到本地导入页面）
   onSourceLocal: function () {
     this.setData({ showSourceSheet: false });
+    if (!this.requireLogin()) return;
     wx.navigateTo({ url: '/pages/addInvoice/index' });
   },
 
   onLinkEmail: function () {
-    this.setData({ showSourceSheet: false, showEmailModal: true });
+    var that = this;
+    if (!this.requireLogin()) {
+      this.setData({ showSourceSheet: false });
+      return;
+    }
+    that.setData({ showSourceSheet: false, showEmailModal: true });
   },
 
   onCloseEmailModal: function () {
@@ -243,10 +273,12 @@ Page({
   },
 
   onAddHeader: function () {
+    if (!this.requireLogin()) return;
     wx.navigateTo({ url: '/pages/invoiceHeader/add' });
   },
 
   onEditHeader: function (e) {
+    if (!this.requireLogin()) return;
     var id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: '/pages/invoiceHeader/add?id=' + id });
   },
