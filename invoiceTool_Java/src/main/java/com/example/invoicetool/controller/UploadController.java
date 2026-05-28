@@ -66,10 +66,16 @@ public class UploadController {
             Map<String, Object> ocrResult = new HashMap<>();
             boolean isPdf = originalFileName != null && originalFileName.toLowerCase().endsWith(".pdf");
             
+            // DEBUG: 检查OCR服务状态
+            System.out.println("[Upload] 文件类型: " + (isPdf ? "PDF" : "非PDF") + 
+                              ", OCR可用: " + ocrService.isAvailable());
+            
             if (isPdf && ocrService.isAvailable()) {
                 System.out.println("[Upload] 开始OCR识别PDF发票...");
                 ocrResult = ocrService.recognizeInvoice(fileBytes);
                 System.out.println("[Upload] OCR识别结果: " + ocrResult);
+            } else {
+                System.out.println("[Upload] 跳过OCR: isPdf=" + isPdf + ", ocrAvailable=" + ocrService.isAvailable());
             }
             
             // 优先使用OCR识别结果，其次使用前端传入参数，最后使用默认值
