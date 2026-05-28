@@ -159,6 +159,11 @@ public class InvoiceController {
         try (java.io.OutputStream out = response.getOutputStream();
              java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(out)) {
 
+            int packed = 0;
+            java.util.List<Integer> missing = new java.util.ArrayList<>();
+            // 防止同名文件覆盖：同名时自动加 (id) 后缀
+            java.util.Set<String> usedNames = new java.util.HashSet<>();
+
             for (String idStr : idArray) {
                 if (idStr.trim().isEmpty()) continue;
                 Integer id;
@@ -169,46 +174,52 @@ public class InvoiceController {
                 if (!opt.isPresent() || !opt.get().getUserId().equals(user.getId())) continue;
 
                 Invoice inv = opt.get();
-                String entryName = inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf");
-                zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
                 byte[] bytes = inv.getFileData();
-                if (bytes != null && bytes.length > 0) {
-                    // 优先使用 DB 中的二进制原件（云托管多实例安全）
-                    zos.write(bytes);
-                } else {
-                    // 兼容旧数据：尝试 /tmp 本地文件（同实例时仍可用）
+                if (bytes == null || bytes.length == 0) {
+                    // 旧数据兜底：尝试同实例 /tmp 本地文件
                     String fileSrc = inv.getFilePath();
                     if (fileSrc != null) {
                         java.io.File localFile = new java.io.File("/tmp" + fileSrc);
                         if (localFile.exists()) {
-                            zos.write(java.nio.file.Files.readAllBytes(localFile.toPath()));
-                        } else {
-                            zos.write(("发票原件已丢失 (id=" + id + ")，请重新上传").getBytes("UTF-8"));
+                            bytes = java.nio.file.Files.readAllBytes(localFile.toPath());
                         }
                     }
                 }
+                if (bytes == null || bytes.length == 0) {
+                    // 没有可用原件，跳过此发票，避免在 zip 里塞入误导性的空白 PDF
+                    missing.add(id);
+                    continue;
+                }
+
+                String entryName = inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf");
+                if (usedNames.contains(entryName)) {
+                    int dot = entryName.lastIndexOf('.');
+                    if (dot > 0) {
+                        entryName = entryName.substring(0, dot) + "_" + id + entryName.substring(dot);
+                    } else {
+                        entryName = entryName + "_" + id;
+                    }
+                }
+                usedNames.add(entryName);
+                zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                zos.write(bytes);
+                zos.closeEntry();
+                packed++;
+            }
+
+            // 仅当存在丢失的旧数据时，附一个简短的说明 txt 提醒用户重传
+            if (!missing.isEmpty()) {
+                zos.putNextEntry(new java.util.zip.ZipEntry("README.txt"));
+                StringBuilder note = new StringBuilder();
+                note.append("以下发票原件缺失（旧数据，已跳过），请在小程序中重新上传后再导出：\n");
+                for (Integer mid : missing) {
+                    note.append("  - 发票 ID ").append(mid).append("\n");
+                }
+                note.append("\n本次成功打包 ").append(packed).append(" 张发票。\n");
+                zos.write(note.toString().getBytes("UTF-8"));
                 zos.closeEntry();
             }
 
-            // 报销单 CSV（Excel 兼容）
-            zos.putNextEntry(new java.util.zip.ZipEntry("发票电子报销单.csv"));
-            StringBuilder csv = new StringBuilder("发票分类,销售方(商家),付款方,金额,开票时间,发票文件\n");
-            for (String idStr : idArray) {
-                if (idStr.trim().isEmpty()) continue;
-                Integer id;
-                try { id = Integer.parseInt(idStr.trim()); } catch (NumberFormatException e) { continue; }
-                Invoice inv = invoiceRepository.findById(id).orElse(null);
-                if (inv != null && inv.getUserId().equals(user.getId())) {
-                    csv.append(inv.getCategory() != null ? inv.getCategory() : "其他").append(",")
-                       .append(inv.getSellerName() != null ? inv.getSellerName() : "待识别").append(",")
-                       .append(inv.getBuyerName() != null ? inv.getBuyerName() : "个人").append(",")
-                       .append(inv.getAmount() != null ? inv.getAmount() : "0.00").append(",")
-                       .append(new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(inv.getCreateTime()))).append(",")
-                       .append(inv.getFileName() != null ? inv.getFileName() : "无文件").append("\n");
-                }
-            }
-            zos.write(csv.toString().getBytes("GBK"));
-            zos.closeEntry();
             zos.finish();
         } catch (Exception e) {
             e.printStackTrace();
