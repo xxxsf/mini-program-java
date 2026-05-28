@@ -706,7 +706,7 @@ Page({
       }
 
       var file = files[index];
-      util.uploadFile('/api/upload', file.path, file.name, { sk: sk }, function (res) {
+      util.uploadFile(file.path, file.name, { sk: sk }, function (res) {
         if (res && res.status == 1) {
           uploadedCount++;
         }
@@ -741,7 +741,7 @@ Page({
 
       var file = files[index];
       var fileName = 'invoice_' + Date.now() + '_' + index + '.jpg';
-      util.uploadFile('/api/upload', file.tempFilePath, fileName, { sk: sk }, function (res) {
+      util.uploadFile(file.tempFilePath, fileName, { sk: sk }, function (res) {
         if (res && res.status == 1) {
           uploadedCount++;
         }
