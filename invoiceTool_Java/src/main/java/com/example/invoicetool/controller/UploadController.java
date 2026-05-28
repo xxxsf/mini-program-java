@@ -4,6 +4,7 @@ import com.example.invoicetool.entity.Invoice;
 import com.example.invoicetool.entity.User;
 import com.example.invoicetool.repository.InvoiceRepository;
 import com.example.invoicetool.service.AuthService;
+import com.example.invoicetool.service.OcrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,8 @@ public class UploadController {
     private AuthService authService;
     @Autowired
     private InvoiceRepository invoiceRepository;
+    @Autowired
+    private OcrService ocrService;
 
     @PostMapping
     public Map<String, Object> upload(
@@ -59,20 +62,54 @@ public class UploadController {
             System.out.println("[Upload] 读取到文件字节数: " + fileBytes.length + ", 将存入 DB");
             long now = System.currentTimeMillis();
             
-            // 默认兜底商家名称
-            String finalSeller = sellerName != null && !sellerName.trim().isEmpty() ? sellerName : (originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", ""));
-            String finalCategory = category != null && !category.trim().isEmpty() ? category : "其他";
-            BigDecimal finalAmount = amount != null ? amount : BigDecimal.ZERO;
+            // ========== OCR 自动识别发票内容 ==========
+            Map<String, Object> ocrResult = new HashMap<>();
+            boolean isPdf = originalFileName != null && originalFileName.toLowerCase().endsWith(".pdf");
+            
+            if (isPdf && ocrService.isAvailable()) {
+                System.out.println("[Upload] 开始OCR识别PDF发票...");
+                ocrResult = ocrService.recognizeInvoice(fileBytes);
+                System.out.println("[Upload] OCR识别结果: " + ocrResult);
+            }
+            
+            // 优先使用OCR识别结果，其次使用前端传入参数，最后使用默认值
+            String finalSeller = sellerName != null && !sellerName.trim().isEmpty() 
+                ? sellerName 
+                : (ocrResult.containsKey("sellerName") ? (String) ocrResult.get("sellerName") : null);
+            
+            if (finalSeller == null || finalSeller.isEmpty()) {
+                finalSeller = originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", "");
+            }
+            
+            String finalBuyerName = ocrResult.containsKey("buyerName") 
+                ? (String) ocrResult.get("buyerName") 
+                : "个人";
+            
+            BigDecimal finalAmount = amount != null 
+                ? amount 
+                : (ocrResult.containsKey("amount") ? (BigDecimal) ocrResult.get("amount") : BigDecimal.ZERO);
+            
+            Long finalDate = ocrResult.containsKey("invoiceDate") 
+                ? (Long) ocrResult.get("invoiceDate") 
+                : now;
+            
+            String finalInvoiceNo = ocrResult.containsKey("invoiceNo") 
+                ? (String) ocrResult.get("invoiceNo") 
+                : "FP" + now;
+            
+            String finalCategory = category != null && !category.trim().isEmpty() 
+                ? category 
+                : "其他";
 
             Invoice invoice = new Invoice();
             invoice.setUserId(user.getId());
             invoice.setSellerName(finalSeller);
-            invoice.setBuyerName("个人");
+            invoice.setBuyerName(finalBuyerName);
             invoice.setAmount(finalAmount);
-            invoice.setDate(now);
+            invoice.setDate(finalDate);
             invoice.setCategory(finalCategory);
             invoice.setStatus("normal");
-            invoice.setInvoiceNo("FP" + now);
+            invoice.setInvoiceNo(finalInvoiceNo);
             invoice.setFileName(originalFileName);
             invoice.setFileSize(file.getSize());
             invoice.setFilePath("/uploads/" + fileName);
