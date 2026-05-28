@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,15 +51,12 @@ public class UploadController {
 
         String originalFileName = file.getOriginalFilename();
         String suffixName = originalFileName != null && originalFileName.lastIndexOf(".") >= 0 ? originalFileName.substring(originalFileName.lastIndexOf(".")) : ".pdf";
-        String filePath = "/tmp/uploads/";
         String fileName = UUID.randomUUID() + suffixName;
-        File dest = new File(filePath + fileName);
-        if (!dest.getParentFile().exists()) {
-            dest.getParentFile().mkdirs();
-        }
         try {
-            file.transferTo(dest);
-            System.out.println("[Upload] 文件成功保存至本地: " + dest.getAbsolutePath());
+            // 直接读取上传字节存入 DB（LONGBLOB），不再依赖容器本地 /tmp，
+            // 彻底规避云托管多实例 /tmp 不共享导致原件丢失问题。
+            byte[] fileBytes = file.getBytes();
+            System.out.println("[Upload] 读取到文件字节数: " + fileBytes.length + ", 将存入 DB");
             long now = System.currentTimeMillis();
             
             // 默认兜底商家名称
@@ -80,6 +76,7 @@ public class UploadController {
             invoice.setFileName(originalFileName);
             invoice.setFileSize(file.getSize());
             invoice.setFilePath("/uploads/" + fileName);
+            invoice.setFileData(fileBytes);
             invoice.setCreateTime(now);
             invoice.setUpdateTime(now);
             

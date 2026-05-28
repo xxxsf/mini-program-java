@@ -169,16 +169,22 @@ public class InvoiceController {
                 if (!opt.isPresent() || !opt.get().getUserId().equals(user.getId())) continue;
 
                 Invoice inv = opt.get();
-                String fileSrc = inv.getFilePath(); // 例如 /uploads/xxxx.pdf
                 String entryName = inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf");
                 zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
-                if (fileSrc != null) {
-                    java.io.File localFile = new java.io.File("/tmp" + fileSrc);
-                    if (localFile.exists()) {
-                        zos.write(java.nio.file.Files.readAllBytes(localFile.toPath()));
-                    } else {
-                        // 服务器原件缺失时写占位内容，保证下载链路可通
-                        zos.write(("Mock PDF content for invoice " + id).getBytes("UTF-8"));
+                byte[] bytes = inv.getFileData();
+                if (bytes != null && bytes.length > 0) {
+                    // 优先使用 DB 中的二进制原件（云托管多实例安全）
+                    zos.write(bytes);
+                } else {
+                    // 兼容旧数据：尝试 /tmp 本地文件（同实例时仍可用）
+                    String fileSrc = inv.getFilePath();
+                    if (fileSrc != null) {
+                        java.io.File localFile = new java.io.File("/tmp" + fileSrc);
+                        if (localFile.exists()) {
+                            zos.write(java.nio.file.Files.readAllBytes(localFile.toPath()));
+                        } else {
+                            zos.write(("发票原件已丢失 (id=" + id + ")，请重新上传").getBytes("UTF-8"));
+                        }
                     }
                 }
                 zos.closeEntry();

@@ -1,10 +1,14 @@
 package com.example.invoicetool.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
@@ -36,6 +40,12 @@ public class Invoice {
     private Long fileSize;
     @Column(name = "file_path")
     private String filePath;
+    // 发票原件二进制内容：直接存数据库，规避云托管多实例 /tmp 不共享问题
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @Column(name = "file_data", columnDefinition = "LONGBLOB")
+    private byte[] fileData;
     @Column(name = "create_time")
     private Long createTime;
     @Column(name = "update_time")
@@ -65,6 +75,8 @@ public class Invoice {
     public void setFileSize(Long fileSize) { this.fileSize = fileSize; }
     public String getFilePath() { return filePath; }
     public void setFilePath(String filePath) { this.filePath = filePath; }
+    public byte[] getFileData() { return fileData; }
+    public void setFileData(byte[] fileData) { this.fileData = fileData; }
     public Long getCreateTime() { return createTime; }
     public void setCreateTime(Long createTime) { this.createTime = createTime; }
     public Long getUpdateTime() { return updateTime; }
