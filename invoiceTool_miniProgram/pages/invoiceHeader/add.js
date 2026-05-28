@@ -8,7 +8,8 @@ Page({
     bank: '',
     bankAccount: '',
     smartText: '',
-    isEdit: false
+    isEdit: false,
+    privacyAgreed: false
   },
 
   onLoad: function (options) {
@@ -170,10 +171,27 @@ Page({
     wx.showToast({ title: '识别填充成功', icon: 'success' });
   },
 
+  onPrivacyChange: function () {
+    this.setData({ privacyAgreed: !this.data.privacyAgreed });
+  },
+
+  onViewPrivacy: function () {
+    wx.showModal({
+      title: '隐私政策',
+      content: '本小程序收集您的发票抬头信息（包括名称、税号、地址、电话、开户行及账号），仅用于帮助您管理和开具发票。\n\n1. 数据用途：仅用于发票管理功能\n2. 数据存储：数据仅存储在您的设备和我们的服务器，用于同步功能\n3. 数据共享：我们不会向任何第三方共享或出售您的信息\n4. 数据安全：我们采取安全措施保护您的数据\n5. 用户权利：您可以随时删除您的数据',
+      showCancel: false,
+      confirmText: '我知道了'
+    });
+  },
+
   onSave: function () {
     var data = this.data;
     if (!data.name.trim()) {
       wx.showToast({ title: '请填写抬头名称', icon: 'none' });
+      return;
+    }
+    if (!data.privacyAgreed) {
+      wx.showToast({ title: '请先同意隐私政策', icon: 'none' });
       return;
     }
 

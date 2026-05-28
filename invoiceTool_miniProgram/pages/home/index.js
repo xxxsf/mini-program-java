@@ -277,10 +277,10 @@ Page({
     wx.navigateTo({ url: '/pages/invoiceHeader/add' });
   },
 
-  onEditHeader: function (e) {
+  onHeaderTap: function (e) {
     if (!this.requireLogin()) return;
     var id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: '/pages/invoiceHeader/add?id=' + id });
+    wx.navigateTo({ url: '/pages/invoice/headerDetail/index?id=' + id });
   },
 
   onFaq: function () {

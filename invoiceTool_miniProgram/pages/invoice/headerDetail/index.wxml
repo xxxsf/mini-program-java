@@ -1,0 +1,44 @@
+<view class="container">
+  <view class="page-title">发票抬头详情</view>
+
+  <view class="header-card">
+    <view class="card-header">
+      <text class="company-name">{{header.name}}</text>
+      <text class="tag">{{header.taxNo ? '企业' : '个人'}}</text>
+    </view>
+
+    <view class="info-list">
+      <view class="info-item" wx:if="{{header.taxNo}}">
+        <text class="label">纳税人识别号</text>
+        <text class="value">{{header.taxNo}}</text>
+      </view>
+      <view class="info-item" wx:if="{{header.address}}">
+        <text class="label">单位地址</text>
+        <text class="value">{{header.address}}</text>
+      </view>
+      <view class="info-item" wx:if="{{header.phone}}">
+        <text class="label">电话号码</text>
+        <text class="value">{{header.phone}}</text>
+      </view>
+      <view class="info-item" wx:if="{{header.bank}}">
+        <text class="label">开户银行</text>
+        <text class="value">{{header.bank}}</text>
+      </view>
+      <view class="info-item" wx:if="{{header.bankAccount}}">
+        <text class="label">银行账户</text>
+        <text class="value">{{header.bankAccount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-area">
+    <button class="action-btn share-btn" open-type="share">分享给好友</button>
+    <button class="action-btn copy-btn" bindtap="onCopy">复制完整信息</button>
+    <button class="action-btn edit-btn" bindtap="onEdit">编辑</button>
+  </view>
+
+  <view class="delete-area">
+    <text class="delete-btn" bindtap="onDelete">删除此抬头</text>
+  </view>
+</view>

@@ -61,7 +61,7 @@ Page({
 
   onHeaderTap: function (e) {
     var id = e.currentTarget.dataset.id
-    wx.navigateTo({ url: '/pages/invoice/headerAdd/index?id=' + id })
+    wx.navigateTo({ url: '/pages/invoice/headerDetail/index?id=' + id })
   },
 
   onFaq: function () {

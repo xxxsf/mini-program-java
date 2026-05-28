@@ -33,6 +33,48 @@ page { background: #fff; }
   color: #ccc;
 }
 
+/* 隐私政策区域 */
+.privacy-section {
+  padding: 40rpx 0;
+}
+
+.privacy-checkbox {
+  display: flex;
+  align-items: flex-start;
+}
+
+.checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  border: 2rpx solid #999;
+  border-radius: 6rpx;
+  margin-right: 16rpx;
+  margin-top: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  background-color: #3B5BDB;
+  border-color: #3B5BDB;
+  color: #fff;
+  font-size: 24rpx;
+}
+
+.privacy-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.privacy-link {
+  color: #3B5BDB;
+  text-decoration: underline;
+}
+
 .save-btn {
   margin-top: 80rpx;
   width: 400rpx;

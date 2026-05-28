@@ -6,6 +6,7 @@
     "pages/invoice/myInvoices/index",
     "pages/invoice/upload/index",
     "pages/invoice/headerAdd/index",
+    "pages/invoice/headerDetail/index",
     "pages/invoice/detail/index",
     "pages/myInvoices/index",
     "pages/addInvoice/index",

@@ -40,7 +40,7 @@
     </view>
 
     <block wx:for="{{headers}}" wx:key="id">
-      <view class="header-item" bindtap="onEditHeader" data-id="{{item.id}}">
+      <view class="header-item" bindtap="onHeaderTap" data-id="{{item.id}}">
         <view class="header-info">
           <text class="header-name">{{item.name}}</text>
           <text class="header-tax" wx:if="{{item.taxNo}}">税号: {{item.taxNo}}</text>
