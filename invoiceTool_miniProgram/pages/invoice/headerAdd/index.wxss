@@ -72,6 +72,6 @@
 }
 
 .delete-btn {
-  font-size: 36rpx;
+  font-size: 40rpx;
   color: #fa5151;
 }
