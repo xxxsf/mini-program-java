@@ -92,15 +92,15 @@ public class OcrService {
 
             // 解析识别结果
             if (resp.getVatInvoiceInfos() != null && resp.getVatInvoiceInfos().length > 0) {
-                VatInvoiceInfo[] infos = resp.getVatInvoiceInfos();
+                TextVatInvoice[] infos = resp.getVatInvoiceInfos();
                 
                 // DEBUG: 打印所有识别到的字段
                 System.out.println("[OCR] ========== 识别到 " + infos.length + " 个字段 ==========");
-                for (VatInvoiceInfo info : infos) {
+                for (TextVatInvoice info : infos) {
                     System.out.println("[OCR] 字段: '" + info.getName() + "' = '" + info.getValue() + "'");
                 }
 
-                for (VatInvoiceInfo info : infos) {
+                for (TextVatInvoice info : infos) {
                     String name = info.getName();
                     String value = info.getValue();
 
