@@ -78,31 +78,37 @@ public class UploadController {
                 System.out.println("[Upload] 跳过OCR: isPdf=" + isPdf + ", ocrAvailable=" + ocrService.isAvailable());
             }
             
-            // 优先使用OCR识别结果，其次使用前端传入参数，最后使用默认值
-            String finalSeller = sellerName != null && !sellerName.trim().isEmpty() 
-                ? sellerName 
-                : (ocrResult.containsKey("sellerName") ? (String) ocrResult.get("sellerName") : null);
+            // ========== 优先使用OCR识别结果，其次使用前端传入参数，最后使用默认值 ==========
             
+            // 销售方名称：优先 OCR，其次前端参数，最后文件名
+            String finalSeller = ocrResult.containsKey("sellerName") && ocrResult.get("sellerName") != null
+                ? (String) ocrResult.get("sellerName")
+                : (sellerName != null && !sellerName.trim().isEmpty() ? sellerName : null);
             if (finalSeller == null || finalSeller.isEmpty()) {
                 finalSeller = originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", "");
             }
             
-            String finalBuyerName = ocrResult.containsKey("buyerName") 
-                ? (String) ocrResult.get("buyerName") 
+            // 购买方名称：优先 OCR
+            String finalBuyerName = ocrResult.containsKey("buyerName") && ocrResult.get("buyerName") != null
+                ? (String) ocrResult.get("buyerName")
                 : "个人";
             
-            BigDecimal finalAmount = amount != null 
-                ? amount 
-                : (ocrResult.containsKey("amount") ? (BigDecimal) ocrResult.get("amount") : BigDecimal.ZERO);
+            // 金额：优先 OCR，其次前端参数，最后 0
+            BigDecimal finalAmount = ocrResult.containsKey("amount") && ocrResult.get("amount") != null
+                ? (BigDecimal) ocrResult.get("amount")
+                : (amount != null ? amount : BigDecimal.ZERO);
             
-            Long finalDate = ocrResult.containsKey("invoiceDate") 
-                ? (Long) ocrResult.get("invoiceDate") 
+            // 开票日期：优先 OCR
+            Long finalDate = ocrResult.containsKey("invoiceDate") && ocrResult.get("invoiceDate") != null
+                ? (Long) ocrResult.get("invoiceDate")
                 : now;
             
-            String finalInvoiceNo = ocrResult.containsKey("invoiceNo") 
-                ? (String) ocrResult.get("invoiceNo") 
+            // 发票号码：优先 OCR
+            String finalInvoiceNo = ocrResult.containsKey("invoiceNo") && ocrResult.get("invoiceNo") != null
+                ? (String) ocrResult.get("invoiceNo")
                 : "FP" + now;
             
+            // 分类：使用前端参数或默认值
             String finalCategory = category != null && !category.trim().isEmpty() 
                 ? category 
                 : "其他";

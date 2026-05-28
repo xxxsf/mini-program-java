@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,28 @@ public class InvoiceController {
             return result;
         }
         List<Invoice> invoices = invoiceRepository.findByUserIdOrderByCreateTimeDesc(user.getId());
+        
+        // 手动构造返回数据，确保字段名与前端一致
+        List<Map<String, Object>> data = new ArrayList<>();
+        for (Invoice inv : invoices) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", inv.getId());
+            item.put("sellerName", inv.getSellerName());
+            item.put("buyerName", inv.getBuyerName());
+            item.put("amount", inv.getAmount() != null ? inv.getAmount().toString() : null);
+            item.put("invoiceDate", inv.getDate()); // Long 类型的时间戳
+            item.put("category", inv.getCategory());
+            item.put("status", inv.getStatus());
+            item.put("invoiceNo", inv.getInvoiceNo());
+            item.put("fileName", inv.getFileName());
+            item.put("filePath", inv.getFilePath());
+            item.put("fileSize", inv.getFileSize());
+            item.put("createTime", inv.getCreateTime());
+            data.add(item);
+        }
+        
         result.put("status", 1);
-        result.put("data", invoices);
+        result.put("data", data);
         return result;
     }
 

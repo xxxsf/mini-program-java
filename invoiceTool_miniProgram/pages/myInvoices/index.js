@@ -65,12 +65,32 @@ Page({
             var d = new Date(item.createTime);
             dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
           }
+          // 处理金额：转换为字符串，过滤无效值（如年份 2026）
+          var amountStr = '待识别';
+          if (item.amount !== undefined && item.amount !== null && item.amount !== '') {
+            var amt = String(item.amount).trim();
+            // 过滤明显错误的金额（如年份 2020-2030，或过大金额）
+            var amtNum = parseFloat(amt);
+            if (amt && !amt.match(/^202[0-9]$/) && amtNum > 0 && amtNum < 1000000) {
+              amountStr = amt;
+            }
+          }
+          // 处理标题：优先使用发票号码，其次是销售方，最后是文件名
+          var titleStr = '待识别';
+          if (item.invoiceNo && item.invoiceNo !== 'FP' + item.createTime) {
+            titleStr = '发票 ' + item.invoiceNo;
+          } else if (item.sellerName && !item.sellerName.match(/^\d+\.?\d*$/) && item.sellerName !== '待识别') {
+            // sellerName 不能是纯数字（避免金额错误赋值）
+            titleStr = item.sellerName;
+          } else if (item.fileName) {
+            titleStr = item.fileName.replace(/\.pdf$/i, '');
+          }
           return {
             id: String(item.id),
             source: 'wechat_chat',
             industry: item.category || '其他',
-            company: item.sellerName || '待识别',
-            amount: item.amount !== undefined ? item.amount : '待识别',
+            company: titleStr,
+            amount: amountStr,
             date: dateStr,
             payer: item.buyerName || '个人',
             fileName: item.fileName,
