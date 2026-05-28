@@ -379,7 +379,7 @@ page { background: #f5f5f5; }
 .modal-btn {
   background: #3B5BDB;
   color: #fff;
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: bold;
   height: 80rpx;
   line-height: 80rpx;
