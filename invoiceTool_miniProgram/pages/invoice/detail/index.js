@@ -1,4 +1,5 @@
 var app = getApp()
+var util = require('../../../utils/util.js')
 
 Page({
   data: {
@@ -45,6 +46,40 @@ Page({
             }, 1500)
           })
         }
+      }
+    })
+  },
+
+  // 查看原件
+  onViewOriginal: function () {
+    var invoice = this.data.invoice
+    if (!invoice || !invoice.filePath) {
+      wx.showToast({ title: '无原件文件', icon: 'none' })
+      return
+    }
+
+    var isImage = invoice.fileName && invoice.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+
+    wx.showLoading({ title: '正在下载原件...' })
+    util.downloadFile(invoice.filePath, function (tempPath) {
+      wx.hideLoading()
+      if (tempPath) {
+        if (isImage) {
+          wx.previewImage({
+            urls: [tempPath],
+            current: tempPath
+          })
+        } else {
+          wx.openDocument({
+            filePath: tempPath,
+            fileType: 'pdf',
+            fail: function () {
+              wx.showToast({ title: '无法打开此文件', icon: 'none' })
+            }
+          })
+        }
+      } else {
+        wx.showToast({ title: '下载失败', icon: 'none' })
       }
     })
   }

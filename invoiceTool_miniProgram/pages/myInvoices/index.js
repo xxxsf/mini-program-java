@@ -557,38 +557,10 @@ Page({
   // ===== 单张查看与单张删除 =====
 
   showInvoiceDetail: function (id) {
-    var invoice = this.data.invoices.find(item => item.id === id);
-    if (!invoice) return;
-
-    if (invoice.filePath) {
-      // 优先打开真实文件
-      var isImage = invoice.fileName && invoice.fileName.match(/\.(jpg|jpeg|png|gif)$/i);
-      
-      wx.showLoading({ title: '正在下载原件...' });
-      util.downloadFile(invoice.filePath, function (tempPath) {
-        wx.hideLoading();
-        if (tempPath) {
-          if (isImage) {
-            wx.previewImage({
-              urls: [tempPath],
-              current: tempPath
-            });
-          } else {
-            wx.openDocument({
-              filePath: tempPath,
-              fileType: 'pdf',
-              fail: function () {
-                wx.showToast({ title: '无法打开此发票文件', icon: 'none' });
-              }
-            });
-          }
-        } else {
-          wx.showToast({ title: '发票详情 (离线视图)', icon: 'none' });
-        }
-      });
-    } else {
-      wx.showToast({ title: '发票详情', icon: 'none' });
-    }
+    // 跳转到发票详情页
+    wx.navigateTo({
+      url: '/pages/invoice/detail/index?id=' + id
+    });
   },
 
   onDeleteInvoice: function (e) {

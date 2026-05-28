@@ -36,6 +36,7 @@
 
   <!-- 操作按钮 -->
   <view class="action-section">
+    <button class="action-btn view-btn" bindtap="onViewOriginal">查看原件</button>
     <button class="action-btn delete-btn" bindtap="onDelete">删除发票</button>
   </view>
 </view>
