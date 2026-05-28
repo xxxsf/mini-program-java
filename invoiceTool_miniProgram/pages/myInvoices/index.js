@@ -75,15 +75,15 @@ Page({
               amountStr = amt;
             }
           }
-          // 处理标题：优先使用发票号码，其次是销售方，最后是文件名
+          // 处理标题：优先使用销售方名称，其次是文件名，最后使用发票号码
           var titleStr = '待识别';
-          if (item.invoiceNo && item.invoiceNo !== 'FP' + item.createTime) {
-            titleStr = '发票 ' + item.invoiceNo;
-          } else if (item.sellerName && !item.sellerName.match(/^\d+\.?\d*$/) && item.sellerName !== '待识别') {
-            // sellerName 不能是纯数字（避免金额错误赋值）
+          if (item.sellerName && item.sellerName.trim() && !item.sellerName.match(/^\d+\.?\d*$/) && item.sellerName !== '待识别') {
+            // 优先使用销售方名称（不能是纯数字）
             titleStr = item.sellerName;
           } else if (item.fileName) {
             titleStr = item.fileName.replace(/\.pdf$/i, '');
+          } else if (item.invoiceNo && !item.invoiceNo.startsWith('FP')) {
+            titleStr = '发票 ' + item.invoiceNo;
           }
           return {
             id: String(item.id),
