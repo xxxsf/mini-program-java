@@ -25,12 +25,12 @@ page { background: #f5f5f5; }
 .form-row:last-child { border-bottom: none; }
 .label {
   width: 140rpx;
-  font-size: 30rpx;
+  font-size: 36rpx;
   color: #333;
 }
 .input {
   flex: 1;
-  font-size: 28rpx;
+  font-size: 34rpx;
   color: #333;
 }
 
