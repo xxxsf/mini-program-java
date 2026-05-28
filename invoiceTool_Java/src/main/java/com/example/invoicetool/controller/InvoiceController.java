@@ -263,63 +263,75 @@ public class InvoiceController {
             StringBuilder tableRows = new StringBuilder();
             java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
             int count = 0;
-            
+            int packed = 0;
+            java.util.List<Integer> missing = new java.util.ArrayList<>();
+            java.util.Set<String> usedNames = new java.util.HashSet<>();
+
             for (String idStr : idArray) {
                 if (idStr.trim().isEmpty()) continue;
-                Integer id = Integer.parseInt(idStr.trim());
+                Integer id;
+                try { id = Integer.parseInt(idStr.trim()); } catch (NumberFormatException e) { continue; }
                 java.util.Optional<Invoice> opt = invoiceRepository.findById(id);
-                if (opt.isPresent() && opt.get().getUserId().equals(user.getId())) {
-                    Invoice inv = opt.get();
-                    count++;
-                    totalAmount = totalAmount.add(inv.getAmount() != null ? inv.getAmount() : java.math.BigDecimal.ZERO);
-                    
-                    // 打包发票文件
+                if (!opt.isPresent() || !opt.get().getUserId().equals(user.getId())) continue;
+
+                Invoice inv = opt.get();
+                count++;
+                totalAmount = totalAmount.add(inv.getAmount() != null ? inv.getAmount() : java.math.BigDecimal.ZERO);
+
+                // 打包发票文件：优先 DB 二进制，兜底同实例 /tmp
+                byte[] bytes = inv.getFileData();
+                if (bytes == null || bytes.length == 0) {
                     String fileSrc = inv.getFilePath();
                     if (fileSrc != null) {
-                        String localPath = "/tmp" + fileSrc;
-                        java.io.File localFile = new java.io.File(localPath);
+                        java.io.File localFile = new java.io.File("/tmp" + fileSrc);
                         if (localFile.exists()) {
-                            zos.putNextEntry(new java.util.zip.ZipEntry(inv.getFileName() != null ? inv.getFileName() : localFile.getName()));
-                            byte[] bytes = java.nio.file.Files.readAllBytes(localFile.toPath());
-                            zos.write(bytes);
-                            zos.closeEntry();
-                        } else {
-                            zos.putNextEntry(new java.util.zip.ZipEntry(inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf")));
-                            zos.write("Mock PDF content for testing".getBytes());
-                            zos.closeEntry();
+                            bytes = java.nio.file.Files.readAllBytes(localFile.toPath());
                         }
                     }
-                    
-                    // 构建 HTML 报销报表表格行
-                    tableRows.append("<tr>")
-                             .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getCategory() != null ? inv.getCategory() : "其他").append("</td>")
-                             .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getSellerName() != null ? inv.getSellerName() : "待识别").append("</td>")
-                             .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getBuyerName() != null ? inv.getBuyerName() : "个人").append("</td>")
-                             .append("<td style='border:1px solid #dee2e6;padding:10px;color:#3b5bdb;font-weight:bold;'>¥").append(inv.getAmount() != null ? inv.getAmount() : "0.00").append("</td>")
-                             .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(inv.getCreateTime()))).append("</td>")
-                             .append("</tr>");
                 }
-            }
-            
-            // 自动生成发票电子报销单 CSV 并打包
-            zos.putNextEntry(new java.util.zip.ZipEntry("发票电子报销单.csv"));
-            StringBuilder csv = new StringBuilder("发票分类,销售方(商家),付款方,金额,开票时间,发票文件\n");
-            for (String idStr : idArray) {
-                if (idStr.trim().isEmpty()) continue;
-                Integer id = Integer.parseInt(idStr.trim());
-                Invoice inv = invoiceRepository.findById(id).orElse(null);
-                if (inv != null && inv.getUserId().equals(user.getId())) {
-                    csv.append(inv.getCategory() != null ? inv.getCategory() : "其他").append(",")
-                       .append(inv.getSellerName() != null ? inv.getSellerName() : "待识别").append(",")
-                       .append(inv.getBuyerName() != null ? inv.getBuyerName() : "个人").append(",")
-                       .append(inv.getAmount() != null ? inv.getAmount() : "0.00").append(",")
-                       .append(new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(inv.getCreateTime()))).append(",")
-                       .append(inv.getFileName() != null ? inv.getFileName() : "无文件").append("\n");
+                if (bytes != null && bytes.length > 0) {
+                    String entryName = inv.getFileName() != null ? inv.getFileName() : ("发票_" + id + ".pdf");
+                    if (usedNames.contains(entryName)) {
+                        int dot = entryName.lastIndexOf('.');
+                        if (dot > 0) {
+                            entryName = entryName.substring(0, dot) + "_" + id + entryName.substring(dot);
+                        } else {
+                            entryName = entryName + "_" + id;
+                        }
+                    }
+                    usedNames.add(entryName);
+                    zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                    zos.write(bytes);
+                    zos.closeEntry();
+                    packed++;
+                } else {
+                    // 没有可用原件，跳过此发票，避免在 zip 里塞入误导性的空白 PDF
+                    missing.add(id);
                 }
+
+                // 构建 HTML 报销报表表格行
+                tableRows.append("<tr>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getCategory() != null ? inv.getCategory() : "其他").append("</td>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getSellerName() != null ? inv.getSellerName() : "待识别").append("</td>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getBuyerName() != null ? inv.getBuyerName() : "个人").append("</td>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;color:#3b5bdb;font-weight:bold;'>¥").append(inv.getAmount() != null ? inv.getAmount() : "0.00").append("</td>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(inv.getCreateTime()))).append("</td>")
+                         .append("</tr>");
             }
-            zos.write(csv.toString().getBytes("GBK"));
-            zos.closeEntry();
-            
+
+            // 仅当存在丢失的旧数据时，附一个简短的说明 txt 提醒用户重传
+            if (!missing.isEmpty()) {
+                zos.putNextEntry(new java.util.zip.ZipEntry("README.txt"));
+                StringBuilder note = new StringBuilder();
+                note.append("以下发票原件缺失（旧数据，已跳过），请在小程序中重新上传后再导出：\n");
+                for (Integer mid : missing) {
+                    note.append("  - 发票 ID ").append(mid).append("\n");
+                }
+                note.append("\n本次成功打包 ").append(packed).append(" 张发票。\n");
+                zos.write(note.toString().getBytes("UTF-8"));
+                zos.closeEntry();
+            }
+
             zos.close();
             fos.close();
             
@@ -335,7 +347,7 @@ public class InvoiceController {
                 + "<h2 style='color:#3b5bdb; border-bottom: 2px solid #3b5bdb; padding-bottom: 10px;'>📬 发票电子报销投递报告</h2>"
                 + "<p>您好，" + (user.getNickName() != null ? user.getNickName() : "微信用户") + "！</p>"
                 + "<p>您从「发票小工具」小程序批量导出了 <b>" + count + "</b> 张发票，合并核算账单总金额共计：<b style='color:#3b5bdb; font-size: 18px;'>¥" + totalAmount + "</b> 元。</p>"
-                + "<p><b>📎 邮件附件</b> 包含了刚才打包的所有发票原件 PDF/图片，以及自动为您生成的发票电子报销明细表 (CSV 格式，支持 Excel、WPS 等软件直接打开)。</p>"
+                + "<p><b>📎 邮件附件</b> 包含了您刚才勾选的发票原件 PDF/图片压缩包，可解压后直接用于报销。</p>"
                 + "<h3 style='margin-top: 30px; color:#495057;'>📊 报销发票汇总明细：</h3>"
                 + "<table style='border-collapse:collapse; width:100%; font-size:14px; text-align:left; border:1px solid #dee2e6;'>"
                 + "<thead><tr style='background:#f8f9fa; border-bottom: 2px solid #dee2e6;'>"
