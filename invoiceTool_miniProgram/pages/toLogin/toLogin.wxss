@@ -7,7 +7,7 @@
 .font3{font-size: 14px;margin:5px 0px;}
 .font4{font-size: 15px;}
 
-.loginbutton{width: 520rpx;border-radius: 10rpx;background: #0d76dc;color: #fff;margin: 40rpx auto;font-size: 44rpx;padding: 24rpx 0;}
-.icon{width: 20px;height:20px;vertical-align:middle;}
+.loginbutton{width: 420rpx;border-radius: 8rpx;background: #0d76dc;color: #fff;margin: 40rpx auto;font-size: 32rpx;padding: 16rpx 0;display: flex;align-items: center;justify-content: center;}
+.icon{width: 18px;height:18px;margin-right: 8px;}
 .logout-link{text-align: center;margin-top: 40px;}
 .logout-link text{color: #bbb;font-size: 12px;}
