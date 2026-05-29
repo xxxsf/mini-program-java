@@ -4,30 +4,30 @@
   <!-- 都显示卡片 -->
   <view class="header-card" wx:if="{{header.name}}">
     <view class="card-header">
-      <text class="company-name">{{header.name}}</text>
+      <text class="company-name" selectable>{{header.name}}</text>
       <text class="tag">{{header.taxNo ? '企业' : '个人'}}</text>
     </view>
 
     <view class="info-list">
       <view class="info-item" wx:if="{{header.taxNo}}">
         <text class="label">纳税人识别号</text>
-        <text class="value">{{header.taxNo}}</text>
+        <text class="value" selectable>{{header.taxNo}}</text>
       </view>
       <view class="info-item" wx:if="{{header.address}}">
         <text class="label">单位地址</text>
-        <text class="value">{{header.address}}</text>
+        <text class="value" selectable>{{header.address}}</text>
       </view>
       <view class="info-item" wx:if="{{header.phone}}">
         <text class="label">电话号码</text>
-        <text class="value">{{header.phone}}</text>
+        <text class="value" selectable>{{header.phone}}</text>
       </view>
       <view class="info-item" wx:if="{{header.bank}}">
         <text class="label">开户银行</text>
-        <text class="value">{{header.bank}}</text>
+        <text class="value" selectable>{{header.bank}}</text>
       </view>
       <view class="info-item" wx:if="{{header.bankAccount}}">
         <text class="label">银行账户</text>
-        <text class="value">{{header.bankAccount}}</text>
+        <text class="value" selectable>{{header.bankAccount}}</text>
       </view>
     </view>
   </view>
