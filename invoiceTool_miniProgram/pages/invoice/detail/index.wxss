@@ -65,6 +65,24 @@
   color: #fa5151;
 }
 
+/* 纯文本卡片（分享模式） */
+.plain-text-card {
+  background: #fff;
+  margin: 30rpx;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.plain-text {
+  font-size: 34rpx;
+  color: #333;
+  line-height: 1.8;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 .action-section {
   padding: 60rpx 40rpx;
 }
@@ -84,6 +102,11 @@
 
 .view-btn {
   background-color: #3B5BDB;
+  color: #fff;
+}
+
+.share-btn {
+  background-color: #07C160;
   color: #fff;
 }
 
