@@ -7,11 +7,28 @@ Page({
     showSourceSheet: false,
     email: '',
     emailInput: '',
-    showEmailModal: false
+    showEmailModal: false,
+    loadingHeaders: false // 防止重复请求
+  },
+
+  onLoad: function () {
+    // 扫码进入时，onShow可能延迟执行，先在onLoad加载缓存数据
+    var headers = wx.getStorageSync('invoice_headers') || [];
+    this.setData({ headers: headers });
+    // 立即加载一次数据
+    this.loadHeaders();
   },
 
   onShow: function () {
+    // 每次显示页面时刷新数据
+    this.loadHeaders();
+  },
+
+  // 加载抬头列表（带防重复请求）
+  loadHeaders: function () {
     var that = this;
+    if (that.data.loadingHeaders) return; // 防止重复请求
+
     var sk = wx.getStorageSync('sk');
 
     // 未登录：允许浏览首页（符合微信审核要求），仅展示离线缓存抬头
@@ -21,14 +38,16 @@ Page({
       return;
     }
 
+    that.setData({ loadingHeaders: true });
+
     // 已登录：从云端加载发票抬头列表，并更新本地缓存
     util.req('invoiceHeader/list', { sk: sk }, function (res) {
       if (res && res.status == 1) {
-        that.setData({ headers: res.data || [] });
+        that.setData({ headers: res.data || [], loadingHeaders: false });
         wx.setStorageSync('invoice_headers', res.data || []);
       } else {
         var headers = wx.getStorageSync('invoice_headers') || [];
-        that.setData({ headers: headers });
+        that.setData({ headers: headers, loadingHeaders: false });
       }
     });
 
