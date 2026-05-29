@@ -1,21 +1,51 @@
 var app = getApp();
+var util = require('../../../utils/util.js');
 
 Page({
   data: {
     headerId: '',
     header: {},
-    showActions: true, // 是否显示操作按钮（分享模式为false）
-    plainText: '' // 纯文本格式
+    showActions: true,
+    plainText: ''
   },
 
   onLoad: function (options) {
-    if (options.id) {
-      // 从分享场景打开时，隐藏操作按钮
-      var scene = options.scene || '';
-      var fromShare = options.from === 'share' || scene === '1044' || scene === '1007' || scene === '1008';
+    // 检测是否从分享场景打开（scene码或分享数据参数）
+    var scene = options.scene || '';
+    var fromShareScene = options.from === 'share' || scene === '1044' || scene === '1007' || scene === '1008';
+    // 如果有分享数据参数，说明是从分享链接打开
+    var hasShareData = options.name !== undefined;
+    var isFromShare = fromShareScene || hasShareData;
+    
+    // 优先从分享链接参数中获取数据（被分享者场景）
+    var header = null;
+    if (hasShareData) {
+      // 从分享链接参数构建抬头数据
+      header = {
+        id: options.id,
+        name: decodeURIComponent(options.name || ''),
+        taxNo: decodeURIComponent(options.taxNo || ''),
+        address: decodeURIComponent(options.address || ''),
+        phone: decodeURIComponent(options.phone || ''),
+        bank: decodeURIComponent(options.bank || ''),
+        bankAccount: decodeURIComponent(options.bankAccount || '')
+      };
+    }
+    
+    if (header) {
+      // 从分享链接获取到数据
+      var plainText = this.formatPlainText(header);
+      this.setData({
+        headerId: options.id,
+        header: header,
+        plainText: plainText,
+        showActions: !isFromShare
+      });
+    } else if (options.id) {
+      // 没有分享数据，从本地/服务器加载
       this.setData({ 
         headerId: options.id,
-        showActions: !fromShare 
+        showActions: !isFromShare 
       });
       this.loadHeaderDetail(options.id);
     }
@@ -68,24 +98,41 @@ Page({
     return text;
   },
 
-  // 分享给好友
+  // 分享给好友 - 把完整数据编码到链接中
   onShareAppMessage: function () {
     var header = this.data.header;
     var title = header.name ? ('发票抬头：' + header.name) : '发票抬头详情';
+    
+    // 构建分享链接，包含完整数据
+    var path = '/pages/invoice/headerDetail/index?id=' + this.data.headerId;
+    path += '&name=' + encodeURIComponent(header.name || '');
+    path += '&taxNo=' + encodeURIComponent(header.taxNo || '');
+    path += '&address=' + encodeURIComponent(header.address || '');
+    path += '&phone=' + encodeURIComponent(header.phone || '');
+    path += '&bank=' + encodeURIComponent(header.bank || '');
+    path += '&bankAccount=' + encodeURIComponent(header.bankAccount || '');
 
     return {
       title: title,
-      path: '/pages/invoice/headerDetail/index?id=' + this.data.headerId,
+      path: path,
       imageUrl: '/img/share_header.png'
     };
   },
 
-  // 分享到朋友圈
+  // 分享到朋友圈 - 同样编码完整数据
   onShareTimeline: function () {
     var header = this.data.header;
+    var query = 'id=' + this.data.headerId;
+    query += '&name=' + encodeURIComponent(header.name || '');
+    query += '&taxNo=' + encodeURIComponent(header.taxNo || '');
+    query += '&address=' + encodeURIComponent(header.address || '');
+    query += '&phone=' + encodeURIComponent(header.phone || '');
+    query += '&bank=' + encodeURIComponent(header.bank || '');
+    query += '&bankAccount=' + encodeURIComponent(header.bankAccount || '');
+    
     return {
       title: header.name ? ('发票抬头：' + header.name) : '发票抬头详情',
-      query: 'id=' + this.data.headerId
+      query: query
     };
   },
 

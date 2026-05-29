@@ -10,34 +10,67 @@ Page({
   },
 
   onLoad: function (options) {
-    // 检测是否从分享场景打开
+    // 检测是否从分享场景打开（scene码或分享数据参数）
     var scene = options.scene || '';
-    var fromShare = options.from === 'share' || scene === '1044' || scene === '1007' || scene === '1008';
+    var fromShareScene = options.from === 'share' || scene === '1044' || scene === '1007' || scene === '1008';
+    // 如果有分享数据参数，说明是从分享链接打开
+    var hasShareData = options.amount !== undefined;
+    var isFromShare = fromShareScene || hasShareData;
     
-    if (options.id) {
-      var invoices = app.globalData.invoices
+    var inv = null;
+    
+    // 优先从分享链接参数获取数据
+    if (hasShareData) {
+      var dateStr = options.dateStr || '';
+      if (!dateStr && options.date) {
+        var d = new Date(parseInt(options.date));
+        dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+      }
+      
+      inv = {
+        id: options.id,
+        amount: decodeURIComponent(options.amount || '0'),
+        invoiceNo: decodeURIComponent(options.invoiceNo || ''),
+        dateStr: dateStr,
+        sellerName: decodeURIComponent(options.sellerName || ''),
+        buyerName: decodeURIComponent(options.buyerName || ''),
+        category: decodeURIComponent(options.category || '')
+      };
+    }
+    
+    if (inv) {
+      // 从分享链接获取数据
+      var plainText = this.formatInvoicePlainText(inv);
+      this.setData({
+        invoice: inv,
+        statusText: '正常',
+        showActions: !isFromShare,
+        plainText: plainText
+      });
+    } else if (options.id) {
+      // 从本地数据加载
+      var invoices = app.globalData.invoices || [];
       for (var i = 0; i < invoices.length; i++) {
         if (String(invoices[i].id) === String(options.id)) {
-          var inv = invoices[i]
-          var d = new Date(inv.date || inv.createTime)
-          inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'
+          inv = invoices[i];
+          var d = new Date(inv.date || inv.createTime);
+          inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
 
           var statusMap = {
             'normal': '正常',
             'reimbursed': '已报销',
             'void': '已作废'
-          }
+          };
 
-          // 生成纯文本
           var plainText = this.formatInvoicePlainText(inv);
 
           this.setData({
             invoice: inv,
             statusText: statusMap[inv.status] || '正常',
-            showActions: !fromShare,
+            showActions: !isFromShare,
             plainText: plainText
-          })
-          break
+          });
+          break;
         }
       }
     }
@@ -76,22 +109,43 @@ Page({
     })
   },
 
-  // 分享给好友
+  // 分享给好友 - 编码完整数据到链接
   onShareAppMessage: function () {
     var invoice = this.data.invoice;
     var title = invoice ? ('发票：¥' + invoice.amount + ' - ' + invoice.sellerName) : '发票详情';
+    
+    var path = '/pages/invoice/detail/index?id=' + (invoice ? invoice.id : '');
+    if (invoice) {
+      path += '&amount=' + encodeURIComponent(invoice.amount || '0');
+      path += '&invoiceNo=' + encodeURIComponent(invoice.invoiceNo || '');
+      path += '&dateStr=' + encodeURIComponent(invoice.dateStr || '');
+      path += '&sellerName=' + encodeURIComponent(invoice.sellerName || '');
+      path += '&buyerName=' + encodeURIComponent(invoice.buyerName || '');
+      path += '&category=' + encodeURIComponent(invoice.category || '');
+    }
+    
     return {
       title: title,
-      path: '/pages/invoice/detail/index?id=' + (invoice ? invoice.id : '')
+      path: path
     };
   },
 
-  // 分享到朋友圈
+  // 分享到朋友圈 - 编码完整数据
   onShareTimeline: function () {
     var invoice = this.data.invoice;
+    var query = 'id=' + (invoice ? invoice.id : '');
+    if (invoice) {
+      query += '&amount=' + encodeURIComponent(invoice.amount || '0');
+      query += '&invoiceNo=' + encodeURIComponent(invoice.invoiceNo || '');
+      query += '&dateStr=' + encodeURIComponent(invoice.dateStr || '');
+      query += '&sellerName=' + encodeURIComponent(invoice.sellerName || '');
+      query += '&buyerName=' + encodeURIComponent(invoice.buyerName || '');
+      query += '&category=' + encodeURIComponent(invoice.category || '');
+    }
+    
     return {
       title: invoice ? ('发票：¥' + invoice.amount) : '发票详情',
-      query: 'id=' + (invoice ? invoice.id : '')
+      query: query
     };
   },
 
