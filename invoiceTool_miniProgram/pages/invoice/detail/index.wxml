@@ -1,53 +1,46 @@
 <!--pages/invoice/detail/index.wxml-->
 <view class="container" wx:if="{{invoice}}">
 
-  <!-- 普通模式：显示卡片 -->
-  <block wx:if="{{showActions}}">
-    <!-- 发票金额区域 -->
-    <view class="amount-section">
-      <text class="amount-label">金额</text>
-      <text class="amount-value">¥{{invoice.amount}}</text>
-    </view>
-
-    <!-- 发票信息 -->
-    <view class="info-section">
-      <view class="info-item">
-        <text class="info-label">发票号码</text>
-        <text class="info-value">{{invoice.invoiceNo}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">开票日期</text>
-        <text class="info-value">{{invoice.dateStr}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">销售方</text>
-        <text class="info-value">{{invoice.sellerName}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">购买方</text>
-        <text class="info-value">{{invoice.buyerName}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">发票类型</text>
-        <text class="info-value">{{invoice.category}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">状态</text>
-        <text class="info-value status-{{invoice.status}}">{{statusText}}</text>
-      </view>
-    </view>
-  </block>
-
-  <!-- 分享模式：显示纯文本 -->
-  <view class="plain-text-card" wx:if="{{!showActions}}">
-    <text class="plain-text">{{plainText}}</text>
+  <!-- 都显示卡片 -->
+  <view class="amount-section">
+    <text class="amount-label">金额</text>
+    <text class="amount-value">¥{{invoice.amount}}</text>
   </view>
 
-  <!-- 操作按钮（仅普通模式显示） -->
-  <view class="action-section" wx:if="{{showActions}}">
+  <!-- 发票信息 -->
+  <view class="info-section">
+    <view class="info-item">
+      <text class="info-label">发票号码</text>
+      <text class="info-value">{{invoice.invoiceNo}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">开票日期</text>
+      <text class="info-value">{{invoice.dateStr}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">销售方</text>
+      <text class="info-value">{{invoice.sellerName}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">购买方</text>
+      <text class="info-value">{{invoice.buyerName}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">发票类型</text>
+      <text class="info-value">{{invoice.category}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">状态</text>
+      <text class="info-value status-{{invoice.status}}">{{statusText}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮：分享和查看原件对所有人可见 -->
+  <view class="action-section">
     <button class="action-btn share-btn" open-type="share">分享给好友</button>
     <button class="action-btn view-btn" bindtap="onViewOriginal">查看原件</button>
-    <button class="action-btn delete-btn" bindtap="onDelete">删除发票</button>
+    <!-- 仅所有者显示删除 -->
+    <button class="action-btn delete-btn" wx:if="{{showActions}}" bindtap="onDelete">删除发票</button>
   </view>
 </view>
 

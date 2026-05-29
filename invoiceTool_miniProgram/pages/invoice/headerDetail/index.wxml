@@ -1,8 +1,8 @@
 <view class="container">
   <view class="page-title">发票抬头详情</view>
 
-  <!-- 普通模式：显示卡片 -->
-  <view class="header-card" wx:if="{{showActions}}">
+  <!-- 都显示卡片 -->
+  <view class="header-card" wx:if="{{header.name}}">
     <view class="card-header">
       <text class="company-name">{{header.name}}</text>
       <text class="tag">{{header.taxNo ? '企业' : '个人'}}</text>
@@ -32,18 +32,15 @@
     </view>
   </view>
 
-  <!-- 分享模式：显示纯文本 -->
-  <view class="plain-text-card" wx:if="{{!showActions}}">
-    <text class="plain-text">{{plainText}}</text>
-  </view>
-
-  <!-- 操作按钮（仅普通模式显示） -->
-  <view class="action-area" wx:if="{{showActions}}">
+  <!-- 操作按钮：分享和复制对所有人可见 -->
+  <view class="action-area">
     <button class="action-btn share-btn" open-type="share">分享给好友</button>
     <button class="action-btn copy-btn" bindtap="onCopy">复制完整信息</button>
-    <button class="action-btn edit-btn" bindtap="onEdit">编辑</button>
+    <!-- 仅所有者显示编辑 -->
+    <button class="action-btn edit-btn" wx:if="{{showActions}}" bindtap="onEdit">编辑</button>
   </view>
 
+  <!-- 仅所有者显示删除 -->
   <view class="delete-area" wx:if="{{showActions}}">
     <text class="delete-btn" bindtap="onDelete">删除此抬头</text>
   </view>
