@@ -1,5 +1,6 @@
 // 是否强制使用公网 HTTPS 域名（开启后，真机只需打开“开发调试”即可完美免域名限制测试，100% 成功）
 var forceUseDomain = false;
+var forceUploadUseDomain = true;
 
 // 自动判断环境：开发者工具用 localhost 或自定义，真机直接使用 callContainer 免域名呼叫
 var isDevtools = false;
@@ -146,8 +147,8 @@ function jsonReq(url, data, cb) {
 }
 
 function uploadFile(filePath, name, formData, cb) {
-  console.log('[Upload] start, filePath:', filePath, 'name:', name, 'useCallContainer:', !isDevtools && !forceUseDomain);
-  if (!isDevtools && !forceUseDomain) {
+  console.log('[Upload] start, filePath:', filePath, 'name:', name, 'useCallContainer:', !isDevtools && !forceUseDomain && !forceUploadUseDomain);
+  if (!isDevtools && !forceUseDomain && !forceUploadUseDomain) {
     // 真机免域名上传：使用 callContainer 传递 filePath 参数
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
@@ -162,14 +163,15 @@ function uploadFile(filePath, name, formData, cb) {
       success: function (res) {
         var data = false;
         try {
-          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
-            return typeof cb == 'function' && cb({ status: 0, msg: '上传失败，云托管返回 ' + res.statusCode });
-          }
           // callContainer 在返回 json 时，res.data 已经是解析好的 Object 对象，不需要再次 JSON.parse
           if (typeof res.data === 'string') {
             data = JSON.parse(res.data);
           } else {
             data = res.data;
+          }
+          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+            var cloudMsg = data && data.msg ? data.msg : ('上传失败，云托管返回 ' + res.statusCode);
+            return typeof cb == 'function' && cb({ status: 0, msg: cloudMsg });
           }
           if (!data) {
             data = { status: 0, msg: '上传失败，云托管返回为空' };
@@ -201,10 +203,11 @@ function uploadFile(filePath, name, formData, cb) {
       success: function (res) {
         var data = false;
         try {
-          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
-            return typeof cb == 'function' && cb({ status: 0, msg: '上传失败，服务器返回 ' + res.statusCode });
-          }
           data = JSON.parse(res.data);
+          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+            var serverMsg = data && data.msg ? data.msg : ('上传失败，服务器返回 ' + res.statusCode);
+            return typeof cb == 'function' && cb({ status: 0, msg: serverMsg });
+          }
         } catch (e) {
           console.error('[Upload] parse response fail:', e, res);
           data = { status: 0, msg: '上传失败，服务器返回异常: ' + (res && res.data ? String(res.data).substring(0, 80) : e.message) };

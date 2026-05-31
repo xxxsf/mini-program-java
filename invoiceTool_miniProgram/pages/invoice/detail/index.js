@@ -48,32 +48,40 @@ Page({
         plainText: plainText
       });
     } else if (options.id) {
-      // 从本地数据加载
-      var invoices = app.globalData.invoices || [];
-      for (var i = 0; i < invoices.length; i++) {
-        if (String(invoices[i].id) === String(options.id)) {
-          inv = invoices[i];
-          var d = new Date(inv.date || inv.createTime);
-          inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
-
-          var statusMap = {
-            'normal': '正常',
-            'reimbursed': '已报销',
-            'void': '已作废'
-          };
-
-          var plainText = this.formatInvoicePlainText(inv);
-
-          this.setData({
-            invoice: inv,
-            statusText: statusMap[inv.status] || '正常',
-            showActions: !isFromShare,
-            plainText: plainText
-          });
-          break;
-        }
-      }
+      this.loadInvoiceDetail(options.id, isFromShare);
     }
+  },
+
+  loadInvoiceDetail: function (id, isFromShare) {
+    var that = this;
+    var sk = wx.getStorageSync('sk') || app.globalData.sk;
+    console.log('[InvoiceDetail] load from server, id:', id);
+    if (!sk) {
+      return;
+    }
+    wx.showLoading({ title: '加载中...' });
+    util.req('invoice/detail', { sk: sk, id: id }, function (data) {
+      wx.hideLoading();
+      if (data && data.status == 1 && data.data) {
+        var inv = data.data;
+        var d = new Date(inv.invoiceDate || inv.date || inv.createTime);
+        inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+        var statusMap = {
+          'normal': '正常',
+          'reimbursed': '已报销',
+          'void': '已作废'
+        };
+        var plainText = that.formatInvoicePlainText(inv);
+        that.setData({
+          invoice: inv,
+          statusText: statusMap[inv.status] || '正常',
+          showActions: !isFromShare,
+          plainText: plainText
+        });
+      } else {
+        wx.showToast({ title: (data && data.msg) || '发票不存在', icon: 'none' });
+      }
+    });
   },
 
   // 生成发票纯文本

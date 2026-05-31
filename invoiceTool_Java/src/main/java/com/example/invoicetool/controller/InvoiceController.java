@@ -69,6 +69,39 @@ public class InvoiceController {
         return result;
     }
 
+    @PostMapping("/detail")
+    public Map<String, Object> detail(@RequestParam String sk, @RequestParam Integer id) {
+        Map<String, Object> result = new HashMap<>();
+        User user = authService.requireUser(sk);
+        Invoice inv = id == null ? null : invoiceRepository.findById(id).orElse(null);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("msg", "登录已失效");
+            return result;
+        }
+        if (inv == null || !user.getId().equals(inv.getUserId())) {
+            result.put("status", 0);
+            result.put("msg", "发票不存在");
+            return result;
+        }
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", inv.getId());
+        item.put("sellerName", inv.getSellerName());
+        item.put("buyerName", inv.getBuyerName());
+        item.put("amount", inv.getAmount() != null ? inv.getAmount().toString() : null);
+        item.put("invoiceDate", inv.getDate());
+        item.put("category", inv.getCategory());
+        item.put("status", inv.getStatus());
+        item.put("invoiceNo", inv.getInvoiceNo());
+        item.put("fileName", inv.getFileName());
+        item.put("filePath", inv.getFilePath());
+        item.put("fileSize", inv.getFileSize());
+        item.put("createTime", inv.getCreateTime());
+        result.put("status", 1);
+        result.put("data", item);
+        return result;
+    }
+
     @PostMapping("/save")
     public Map<String, Object> save(@RequestParam String sk, @RequestBody Invoice invoice) {
         Map<String, Object> result = new HashMap<>();
