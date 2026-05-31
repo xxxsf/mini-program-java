@@ -22,15 +22,20 @@ var AppConf = { 'appid': 'wxb95ae2df41575bc3' };
 
 // 云托管配置
 var cloudConfig = {
-  env: 'prod-yncv-260962',      // 云托管环境 ID
-  service: 'springboot'    // 云托管服务名
+  env: 'prod-d8g4lh96w1851d968',      // 云托管环境 ID
+  service: 'springboot-yncv'    // 云托管服务名
 };
 
 function req(url, data, cb) {
   data.appid = AppConf.appid;
-  
+
   if (!isDevtools && !forceUseDomain) {
     // 真机：使用免域名的 callContainer 访问
+    if (!wx.cloud) {
+      console.error('[req] wx.cloud 未初始化');
+      return typeof cb == 'function' && cb(false);
+    }
+    console.log('[req] 使用 callContainer, env:', cloudConfig.env, 'service:', cloudConfig.service, 'url:', url);
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },
       path: '/api/' + url,
@@ -41,10 +46,13 @@ function req(url, data, cb) {
       method: 'POST',
       data: data,
       success: function (res) {
+        console.log('[CallContainer] success:', res);
         return typeof cb == 'function' && cb(res.data);
       },
       fail: function (err) {
-        console.error('[CallContainer] post fail:', err);
+        console.error('[CallContainer] fail:', err);
+        console.error('[CallContainer] err.errMsg:', err.errMsg);
+        console.error('[CallContainer] err.errCode:', err.errCode);
         return typeof cb == 'function' && cb(false);
       }
     });

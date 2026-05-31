@@ -396,15 +396,15 @@ Page({
     var isDevtools = false;
     try { isDevtools = (typeof __wxConfig !== 'undefined' && __wxConfig.platform === 'devtools'); } catch (e) {}
 
-    var forceUseDomain = true; // 与 util.js 中 forceUseDomain 保持一致
+    var forceUseDomain = false; // 与 util.js 中 forceUseDomain 保持一致
 
     if (!isDevtools && !forceUseDomain) {
       // 真机免域名走云托管 callContainer
       wx.cloud.callContainer({
-        config: { env: 'prod-yncv-260962' },
+        config: { env: 'prod-d8g4lh96w1851d968' },
         path: '/api/invoice/exportZip',
         header: {
-          'X-WX-SERVICE': 'springboot',
+          'X-WX-SERVICE': 'springboot-yncv',
           'content-type': 'application/x-www-form-urlencoded'
         },
         method: 'POST',
