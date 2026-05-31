@@ -146,6 +146,7 @@ function jsonReq(url, data, cb) {
 }
 
 function uploadFile(filePath, name, formData, cb) {
+  console.log('[Upload] start, filePath:', filePath, 'name:', name, 'useCallContainer:', !isDevtools && !forceUseDomain);
   if (!isDevtools && !forceUseDomain) {
     // 真机免域名上传：使用 callContainer 传递 filePath 参数
     wx.cloud.callContainer({
@@ -161,15 +162,23 @@ function uploadFile(filePath, name, formData, cb) {
       success: function (res) {
         var data = false;
         try {
+          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+            return typeof cb == 'function' && cb({ status: 0, msg: '上传失败，云托管返回 ' + res.statusCode });
+          }
           // callContainer 在返回 json 时，res.data 已经是解析好的 Object 对象，不需要再次 JSON.parse
           if (typeof res.data === 'string') {
             data = JSON.parse(res.data);
           } else {
             data = res.data;
           }
+          if (!data) {
+            data = { status: 0, msg: '上传失败，云托管返回为空' };
+          } else if (data.status != 1 && !data.msg) {
+            data.msg = '上传失败，后端未返回错误原因';
+          }
         } catch (e) {
-          console.error('[CallContainer] parse response fail:', e);
-          data = false;
+          console.error('[CallContainer] upload parse response fail:', e, res);
+          data = { status: 0, msg: '上传失败，云托管返回异常: ' + (res && res.data ? String(res.data).substring(0, 80) : e.message) };
         }
         return typeof cb == 'function' && cb(data);
       },
@@ -192,14 +201,19 @@ function uploadFile(filePath, name, formData, cb) {
       success: function (res) {
         var data = false;
         try {
+          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+            return typeof cb == 'function' && cb({ status: 0, msg: '上传失败，服务器返回 ' + res.statusCode });
+          }
           data = JSON.parse(res.data);
         } catch (e) {
-          data = false;
+          console.error('[Upload] parse response fail:', e, res);
+          data = { status: 0, msg: '上传失败，服务器返回异常: ' + (res && res.data ? String(res.data).substring(0, 80) : e.message) };
         }
         return typeof cb == 'function' && cb(data);
       },
-      fail: function () {
-        return typeof cb == 'function' && cb(false);
+      fail: function (err) {
+        console.error('[Upload] wx.uploadFile fail:', err);
+        return typeof cb == 'function' && cb({ status: 0, msg: (err && err.errMsg) || '上传网络异常' });
       }
     });
   }
