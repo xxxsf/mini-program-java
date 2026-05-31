@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import javax.mail.internet.MimeMessage;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -100,6 +101,50 @@ public class InvoiceController {
         result.put("status", 1);
         result.put("data", item);
         return result;
+    }
+
+    @GetMapping("/downloadOriginal")
+    public void downloadOriginal(@RequestParam String sk, @RequestParam Integer id, HttpServletResponse response) {
+        User user = authService.requireUser(sk);
+        Invoice inv = id == null ? null : invoiceRepository.findById(id).orElse(null);
+        if (user == null || inv == null || !user.getId().equals(inv.getUserId())) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        try {
+            byte[] bytes = inv.getFileData();
+            if (bytes == null || bytes.length == 0) {
+                String fileSrc = inv.getFilePath();
+                if (fileSrc != null) {
+                    java.io.File localFile = new java.io.File("/tmp" + fileSrc);
+                    if (localFile.exists()) {
+                        bytes = java.nio.file.Files.readAllBytes(localFile.toPath());
+                    }
+                }
+            }
+            if (bytes == null || bytes.length == 0) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            String fileName = inv.getFileName() != null ? inv.getFileName() : ("invoice_" + id + ".pdf");
+            String lowerName = fileName.toLowerCase();
+            String contentType = "application/octet-stream";
+            if (lowerName.endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (lowerName.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+            }
+            response.setContentType(contentType);
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + java.net.URLEncoder.encode(fileName, "UTF-8") + "\"");
+            response.setContentLength(bytes.length);
+            response.getOutputStream().write(bytes);
+            response.getOutputStream().flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/save")

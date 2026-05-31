@@ -31,7 +31,7 @@ Page({
         id: options.id,
         amount: decodeURIComponent(options.amount || '0'),
         invoiceNo: decodeURIComponent(options.invoiceNo || ''),
-        dateStr: dateStr,
+        dateStr: decodeURIComponent(dateStr || ''),
         sellerName: decodeURIComponent(options.sellerName || ''),
         buyerName: decodeURIComponent(options.buyerName || ''),
         category: decodeURIComponent(options.category || '')
@@ -160,7 +160,8 @@ Page({
   // 查看原件
   onViewOriginal: function () {
     var invoice = this.data.invoice
-    if (!invoice || !invoice.filePath) {
+    var sk = wx.getStorageSync('sk') || app.globalData.sk
+    if (!invoice || !invoice.id || !sk) {
       wx.showToast({ title: '无原件文件', icon: 'none' })
       return
     }
@@ -168,7 +169,7 @@ Page({
     var isImage = invoice.fileName && invoice.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
 
     wx.showLoading({ title: '正在下载原件...' })
-    util.downloadFile(invoice.filePath, function (tempPath) {
+    util.downloadFile('api/invoice/downloadOriginal?sk=' + encodeURIComponent(sk) + '&id=' + encodeURIComponent(invoice.id), function (tempPath) {
       wx.hideLoading()
       if (tempPath) {
         if (isImage) {
