@@ -296,8 +296,10 @@ public class InvoiceController {
                 if (!opt.isPresent() || !opt.get().getUserId().equals(user.getId())) continue;
 
                 Invoice inv = opt.get();
+                String sellerName = displaySellerName(inv);
+                java.math.BigDecimal amount = displayAmount(inv.getAmount());
                 count++;
-                totalAmount = totalAmount.add(inv.getAmount() != null ? inv.getAmount() : java.math.BigDecimal.ZERO);
+                totalAmount = totalAmount.add(amount);
 
                 // 打包发票文件：优先 DB 二进制，兜底同实例 /tmp
                 byte[] bytes = inv.getFileData();
@@ -333,9 +335,9 @@ public class InvoiceController {
                 // 构建 HTML 报销报表表格行
                 tableRows.append("<tr>")
                          .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getCategory() != null ? inv.getCategory() : "其他").append("</td>")
-                         .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getSellerName() != null ? inv.getSellerName() : "待识别").append("</td>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(sellerName).append("</td>")
                          .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(inv.getBuyerName() != null ? inv.getBuyerName() : "个人").append("</td>")
-                         .append("<td style='border:1px solid #dee2e6;padding:10px;color:#3b5bdb;font-weight:bold;'>¥").append(inv.getAmount() != null ? inv.getAmount() : "0.00").append("</td>")
+                         .append("<td style='border:1px solid #dee2e6;padding:10px;color:#3b5bdb;font-weight:bold;'>¥").append(amount).append("</td>")
                          .append("<td style='border:1px solid #dee2e6;padding:10px;'>").append(new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(inv.getCreateTime()))).append("</td>")
                          .append("</tr>");
             }
@@ -367,7 +369,7 @@ public class InvoiceController {
             String htmlContent = "<html><body style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>"
                 + "<h2 style='color:#3b5bdb; border-bottom: 2px solid #3b5bdb; padding-bottom: 10px;'>📬 发票电子报销投递报告</h2>"
                 + "<p>您好，" + (user.getNickName() != null ? user.getNickName() : "微信用户") + "！</p>"
-                + "<p>您从「发票小工具」小程序批量导出了 <b>" + count + "</b> 张发票，合并核算账单总金额共计：<b style='color:#3b5bdb; font-size: 18px;'>¥" + totalAmount + "</b> 元。</p>"
+                + "<p>您从「好票管家-发票助手」小程序批量导出了 <b>" + count + "</b> 张发票，合并核算账单总金额共计：<b style='color:#3b5bdb; font-size: 18px;'>¥" + totalAmount + "</b> 元。</p>"
                 + "<p><b>📎 邮件附件</b> 包含了您刚才勾选的发票原件 PDF/图片压缩包，可解压后直接用于报销。</p>"
                 + "<h3 style='margin-top: 30px; color:#495057;'>📊 报销发票汇总明细：</h3>"
                 + "<table style='border-collapse:collapse; width:100%; font-size:14px; text-align:left; border:1px solid #dee2e6;'>"
@@ -402,5 +404,32 @@ public class InvoiceController {
 
     private String value(String value, String fallback) {
         return value == null || value.trim().isEmpty() ? fallback : value.trim();
+    }
+
+    private String displaySellerName(Invoice invoice) {
+        String sellerName = invoice.getSellerName();
+        if (sellerName != null && !sellerName.trim().isEmpty() && !"待识别".equals(sellerName.trim()) && !sellerName.trim().matches("^\\d+\\.?\\d*$")) {
+            return sellerName.trim();
+        }
+        String fileName = invoice.getFileName();
+        if (fileName != null && !fileName.trim().isEmpty()) {
+            return fileName.trim().replaceAll("(?i)\\.pdf$", "");
+        }
+        String invoiceNo = invoice.getInvoiceNo();
+        if (invoiceNo != null && !invoiceNo.trim().isEmpty() && !invoiceNo.startsWith("FP")) {
+            return invoiceNo.trim();
+        }
+        return "待识别";
+    }
+
+    private java.math.BigDecimal displayAmount(java.math.BigDecimal amount) {
+        if (amount == null) {
+            return java.math.BigDecimal.ZERO;
+        }
+        String amountText = amount.stripTrailingZeros().toPlainString();
+        if (amountText.matches("^202[0-9]$") || amount.compareTo(java.math.BigDecimal.ZERO) <= 0 || amount.compareTo(new java.math.BigDecimal("1000000")) >= 0) {
+            return java.math.BigDecimal.ZERO;
+        }
+        return amount;
     }
 }
