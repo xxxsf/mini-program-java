@@ -60,9 +60,10 @@
     </block>
   </view>
 
-  <!-- 常见问题 -->
-  <view class="faq" bindtap="onFaq">
-    <text class="faq-text">常见问题</text>
+  <view class="footer-links">
+    <text class="footer-link" bindtap="onFaq">常见问题</text>
+    <text class="footer-sep">｜</text>
+    <text class="footer-link" bindtap="onShowFeedbackContact">问题反馈</text>
   </view>
 
   <view class="footer-text">进化树科技</view>

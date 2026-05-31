@@ -103,6 +103,15 @@ Page({
     });
   },
 
+  onShowFeedbackContact: function () {
+    wx.showModal({
+      title: '问题反馈',
+      content: '联系邮箱：evotree@foxmail.com',
+      showCancel: false,
+      confirmText: '知道了'
+    });
+  },
+
   goToMy: function () {
     wx.navigateTo({ url: '/pages/my/index' });
   },
