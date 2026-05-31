@@ -94,6 +94,15 @@ Page({
     wx.navigateTo({ url: '/pages/myInvoices/index' });
   },
 
+  onShowAdContact: function () {
+    wx.showModal({
+      title: '广告位招租',
+      content: '联系邮箱：evotree@foxmail.com',
+      showCancel: false,
+      confirmText: '知道了'
+    });
+  },
+
   goToMy: function () {
     wx.navigateTo({ url: '/pages/my/index' });
   },
