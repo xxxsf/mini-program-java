@@ -33,7 +33,7 @@ Page({
         invoiceNo: decodeURIComponent(options.invoiceNo || ''),
         dateStr: decodeURIComponent(dateStr || ''),
         sellerName: decodeURIComponent(options.sellerName || ''),
-        buyerName: decodeURIComponent(options.buyerName || ''),
+        buyerName: decodeURIComponent(options.buyerName || '') || '个人',
         category: decodeURIComponent(options.category || '')
       };
     }
@@ -64,6 +64,7 @@ Page({
       wx.hideLoading();
       if (data && data.status == 1 && data.data) {
         var inv = data.data;
+        inv.buyerName = inv.buyerName || '个人';
         var d = new Date(inv.invoiceDate || inv.date || inv.createTime);
         inv.dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
         var statusMap = {

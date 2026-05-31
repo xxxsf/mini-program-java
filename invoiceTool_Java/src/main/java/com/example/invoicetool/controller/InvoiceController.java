@@ -52,7 +52,7 @@ public class InvoiceController {
             Map<String, Object> item = new HashMap<>();
             item.put("id", inv.getId());
             item.put("sellerName", inv.getSellerName());
-            item.put("buyerName", inv.getBuyerName());
+            item.put("buyerName", inv.getBuyerName() != null && !inv.getBuyerName().trim().isEmpty() ? inv.getBuyerName() : "个人");
             item.put("amount", inv.getAmount() != null ? inv.getAmount().toString() : null);
             item.put("invoiceDate", inv.getDate()); // Long 类型的时间戳
             item.put("category", inv.getCategory());
@@ -88,7 +88,7 @@ public class InvoiceController {
         Map<String, Object> item = new HashMap<>();
         item.put("id", inv.getId());
         item.put("sellerName", inv.getSellerName());
-        item.put("buyerName", inv.getBuyerName());
+        item.put("buyerName", inv.getBuyerName() != null && !inv.getBuyerName().trim().isEmpty() ? inv.getBuyerName() : "个人");
         item.put("amount", inv.getAmount() != null ? inv.getAmount().toString() : null);
         item.put("invoiceDate", inv.getDate());
         item.put("category", inv.getCategory());

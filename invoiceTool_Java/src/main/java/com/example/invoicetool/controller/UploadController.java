@@ -92,6 +92,9 @@ public class UploadController {
             String finalBuyerName = ocrResult.containsKey("buyerName") && ocrResult.get("buyerName") != null
                 ? (String) ocrResult.get("buyerName")
                 : "个人";
+            if (finalBuyerName == null || finalBuyerName.trim().isEmpty()) {
+                finalBuyerName = "个人";
+            }
             
             // 金额：优先 OCR，其次前端参数，最后 0
             BigDecimal finalAmount = ocrResult.containsKey("amount") && ocrResult.get("amount") != null
