@@ -1,6 +1,10 @@
 page { background: #f5f5f5; }
 
-.page { min-height: 100vh; }
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
 /* 主题头部 */
 .header {
@@ -214,6 +218,13 @@ page { background: #f5f5f5; }
 .faq-text {
   color: #3B5BDB;
   font-size: 28rpx;
+}
+.footer-text {
+  text-align: center;
+  color: #c2c2c2;
+  font-size: 22rpx;
+  margin-top: auto;
+  padding: 24rpx 0 48rpx;
 }
 
 /* 来源弹窗 */

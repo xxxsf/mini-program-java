@@ -65,6 +65,8 @@
     <text class="faq-text">常见问题</text>
   </view>
 
+  <view class="footer-text">进化树科技</view>
+
   <!-- 添加发票来源弹窗 -->
   <view class="mask" wx:if="{{showSourceSheet}}" bindtap="closeSourceSheet"></view>
   <view class="source-sheet {{showSourceSheet ? 'show' : ''}}">
