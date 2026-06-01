@@ -150,10 +150,20 @@ public class OcrService {
                             } else {
                                 System.out.println("[OCR DEBUG] 跳过合计金额，已存在 amount=" + result.get("amount"));
                             }
-                        } else if (normalizedName.equals("销售方名称") || normalizedName.equals("卖方名称") || normalizedName.equals("销售方")) {
-                            result.put("sellerName", value);
-                        } else if (normalizedName.equals("购买方名称") || normalizedName.equals("买方名称") || normalizedName.equals("购买方")) {
-                            result.put("buyerName", value);
+                        } else if (normalizedName.contains("销售方") || normalizedName.contains("销方") || normalizedName.contains("卖方") || normalizedName.equals("销售方名称")) {
+                            if (normalizedName.contains("名称") || normalizedName.equals("销售方") || normalizedName.equals("卖方") || normalizedName.equals("销方")) {
+                                if (!result.containsKey("sellerName") || result.get("sellerName").toString().isEmpty()) {
+                                    result.put("sellerName", value);
+                                    System.out.println("[OCR DEBUG] ✓ 匹配销售方: field='" + normalizedName + "' value='" + value + "'");
+                                }
+                            }
+                        } else if (normalizedName.contains("购买方") || normalizedName.contains("购方") || normalizedName.contains("买方") || normalizedName.equals("购买方名称")) {
+                            if (normalizedName.contains("名称") || normalizedName.equals("购买方") || normalizedName.equals("买方") || normalizedName.equals("购方")) {
+                                if (!result.containsKey("buyerName") || result.get("buyerName").toString().isEmpty()) {
+                                    result.put("buyerName", value);
+                                    System.out.println("[OCR DEBUG] ✓ 匹配购买方: field='" + normalizedName + "' value='" + value + "'");
+                                }
+                            }
                         } else if (normalizedName.equals("开票日期") || normalizedName.equals("日期")) {
                             result.put("invoiceDate", parseDate(value));
                         } else if (normalizedName.equals("发票号码")) {
