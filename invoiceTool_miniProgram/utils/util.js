@@ -1,6 +1,6 @@
 // 是否强制使用公网 HTTPS 域名（开启后，真机只需打开“开发调试”即可完美免域名限制测试，100% 成功）
 var forceUseDomain = false;
-var forceUploadUseDomain = false;
+var forceUploadUseDomain = true;
 
 // 自动判断环境：开发者工具用 localhost 或自定义，真机直接使用 callContainer 免域名呼叫
 var isDevtools = false;
