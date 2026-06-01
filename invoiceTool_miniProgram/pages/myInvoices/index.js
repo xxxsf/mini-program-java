@@ -63,7 +63,9 @@ Page({
           var dateStr = '待识别';
           if (item.createTime) {
             var d = new Date(item.createTime);
-            dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+            var h = d.getHours().toString().padStart(2, '0');
+            var m = d.getMinutes().toString().padStart(2, '0');
+            dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + h + ':' + m;
           }
           // 处理金额：转换为字符串，过滤无效值（如年份 2026）
           var amountStr = '待识别';

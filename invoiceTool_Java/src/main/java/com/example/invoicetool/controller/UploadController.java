@@ -87,6 +87,10 @@ public class UploadController {
             if (finalSeller == null || finalSeller.isEmpty()) {
                 finalSeller = originalFileName == null ? "待识别" : originalFileName.replaceAll("(?i)\\.pdf$", "");
             }
+            // 兜底：临时文件名不作为销售方展示
+            if (finalSeller.startsWith("tmp_") || finalSeller.startsWith("wx_")) {
+                finalSeller = "待识别";
+            }
             
             // 购买方名称：优先 OCR
             String finalBuyerName = ocrResult.containsKey("buyerName") && ocrResult.get("buyerName") != null

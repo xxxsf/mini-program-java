@@ -180,6 +180,10 @@ Page({
     var category = "其他";
     var parsedAmount = "";
     var sellerName = fileName.replace(/\.pdf$/i, '');
+    // 微信临时文件名不作为商家名
+    if (/^tmp_/i.test(sellerName) || /^wx_/i.test(sellerName)) {
+      sellerName = '';
+    }
 
     // 模式一：分段式 餐饮费-529.00元-湖州福宴...
     var parts = fileName.split('-');
