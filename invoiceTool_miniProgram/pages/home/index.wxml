@@ -66,7 +66,7 @@
     <text class="footer-link" bindtap="onShowFeedbackContact">问题反馈</text>
   </view>
 
-  <view class="footer-text">进化树科技</view>
+  <view class="footer-text">进化树科技 v1.3.6</view>
 
   <!-- 添加发票来源弹窗 -->
   <view class="mask" wx:if="{{showSourceSheet}}" bindtap="closeSourceSheet"></view>
