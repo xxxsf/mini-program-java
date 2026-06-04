@@ -11,7 +11,7 @@ try {
 }
 
 // 开发者工具和真机调试使用的公网域名
-var baseURL = 'https://springboot-yncv-260962-4-1386111991.sh.run.tcloudbase.com/';
+var baseURL = 'https://api.evotree.top/';
 var rootDocment = baseURL + 'api/';
 
 var wxAppinfo = {
