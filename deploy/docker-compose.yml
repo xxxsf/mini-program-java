@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: invoicetool-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: invoicetool
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=200
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - invoicetool-net
+
+  # Spring Boot 应用
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: invoicetool-app
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # 数据库配置（容器内部通过服务名连接）
+      DB_URL: jdbc:mysql://mysql:3306/invoicetool?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # 微信配置
+      WECHAT_APPID: ${WECHAT_APPID}
+      WECHAT_APPSECRET: ${WECHAT_APPSECRET}
+      # 邮件配置
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      # 腾讯云 OCR 配置
+      TENCENT_SECRET_ID: ${TENCENT_SECRET_ID}
+      TENCENT_SECRET_KEY: ${TENCENT_SECRET_KEY}
+      TENCENT_REGION: ${TENCENT_REGION:-ap-guangzhou}
+      # JVM 内存限制（适配 4G 服务器）
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    volumes:
+      - app_uploads:/tmp/uploads
+    networks:
+      - invoicetool-net
+
+  # Nginx 反向代理 + HTTPS
+  nginx:
+    image: nginx:alpine
+    container_name: invoicetool-nginx
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - nginx_logs:/var/log/nginx
+    networks:
+      - invoicetool-net
+
+volumes:
+  mysql_data:
+    driver: local
+  app_uploads:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  invoicetool-net:
+    driver: bridge

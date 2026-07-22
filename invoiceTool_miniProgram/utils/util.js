@@ -1,5 +1,5 @@
 // 是否强制使用公网 HTTPS 域名（开启后，真机只需打开“开发调试”即可完美免域名限制测试，100% 成功）
-var forceUseDomain = false;
+var forceUseDomain = true;
 var forceUploadUseDomain = true;
 
 // 自动判断环境：开发者工具用 localhost 或自定义，真机直接使用 callContainer 免域名呼叫
@@ -19,7 +19,7 @@ var wxAppinfo = {
   'logo': '/img/logo.png'
 };
 
-var AppConf = { 'appid': 'wxb95ae2df41575bc3' };
+var AppConf = { 'appid': 'wx223a854a4b68f73f' };
 
 // 云托管配置
 var cloudConfig = {
@@ -258,8 +258,8 @@ function downloadFile(fileUrl, cb) {
   // 保证路径正确，剔除多余的 //
   path = path.replace(/\/+/g, '/');
 
-  // 真机始终优先走 callContainer 二进制下载（免域名白名单），仅开发者工具走 wx.downloadFile
-  if (!isDevtools) {
+  // 真机优先走 callContainer 二进制下载（免域名白名单）；开发者工具或强制公网域名走 wx.downloadFile
+  if (!isDevtools && !forceUseDomain) {
     // 真机走免域名云托管 callContainer
     wx.cloud.callContainer({
       config: { env: cloudConfig.env },

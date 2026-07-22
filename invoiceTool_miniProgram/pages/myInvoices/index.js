@@ -95,6 +95,7 @@ Page({
             amount: amountStr,
             date: dateStr,
             payer: item.buyerName || '个人',
+            seller: (item.sellerName && item.sellerName.trim() && !item.sellerName.match(/^\d+\.?\d*$/) && item.sellerName !== '待识别') ? item.sellerName : '',
             fileName: item.fileName,
             filePath: item.filePath,
             fileSize: item.fileSize,
@@ -398,7 +399,7 @@ Page({
     var isDevtools = false;
     try { isDevtools = (typeof __wxConfig !== 'undefined' && __wxConfig.platform === 'devtools'); } catch (e) {}
 
-    var forceUseDomain = false; // 与 util.js 中 forceUseDomain 保持一致
+    var forceUseDomain = true; // 与 util.js 中 forceUseDomain 保持一致
 
     if (!isDevtools && !forceUseDomain) {
       // 真机免域名走云托管 callContainer
@@ -728,7 +729,7 @@ Page({
       }
 
       var file = files[index];
-      util.uploadFile(file.path, file.name, { sk: sk }, function (res) {
+      util.uploadFile(file.path, 'file', { sk: sk }, function (res) {
         if (res && res.status == 1) {
           uploadedCount++;
         }
@@ -762,8 +763,7 @@ Page({
       }
 
       var file = files[index];
-      var fileName = 'invoice_' + Date.now() + '_' + index + '.jpg';
-      util.uploadFile(file.tempFilePath, fileName, { sk: sk }, function (res) {
+      util.uploadFile(file.tempFilePath, 'file', { sk: sk }, function (res) {
         if (res && res.status == 1) {
           uploadedCount++;
         }

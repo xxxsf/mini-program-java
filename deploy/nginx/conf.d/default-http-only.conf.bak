@@ -1,0 +1,29 @@
+# 仅 HTTP 配置（用于初始部署测试，SSL 证书未配置前使用）
+# 使用方法: 将此文件重命名为 default.conf，原 default.conf 备份
+server {
+    listen 80;
+    server_name YOUR_DOMAIN;
+
+    client_max_body_size 25M;
+
+    location / {
+        proxy_pass http://app:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    location /actuator/health {
+        proxy_pass http://app:8080;
+        access_log off;
+    }
+}

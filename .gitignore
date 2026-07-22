@@ -23,3 +23,9 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Deploy secrets
+deploy/.env
+deploy/nginx/ssl/*.pem
+deploy/nginx/ssl/*.key
+deploy/certbot/

@@ -60,8 +60,12 @@
           <text class="card-label">时间</text>
           <text class="card-value">{{item.date}}</text>
         </view>
+        <view class="card-row" wx:if="{{item.seller}}">
+          <text class="card-label">销售方信息</text>
+          <text class="card-value">{{item.seller}}</text>
+        </view>
         <view class="card-row" wx:if="{{item.payer}}">
-          <text class="card-label">付款方</text>
+          <text class="card-label">购买方信息</text>
           <text class="card-value">{{item.payer}}</text>
         </view>
         <view class="card-row" wx:if="{{item.fileName}}">

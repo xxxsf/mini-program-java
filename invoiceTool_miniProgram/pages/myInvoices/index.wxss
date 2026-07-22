@@ -140,7 +140,9 @@ page { background: #f5f5f5; }
 .card-label {
   font-size: 24rpx;
   color: #999;
-  width: 100rpx;
+  width: 140rpx;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .card-value {
   font-size: 26rpx;
