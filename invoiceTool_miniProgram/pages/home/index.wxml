@@ -33,7 +33,7 @@
   <view class="banner">
     <view class="banner-content">
       <view class="banner-text">
-        <text class="banner-title">广告位招租 2元/天</text>
+        <text class="banner-title">广告位招租 1元/天</text>
         <text class="banner-desc">联系邮箱：evotree@foxmail.com</text>
       </view>
       <view class="banner-badge" bindtap="onShowAdContact">联系投放</view>

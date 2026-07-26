@@ -12,10 +12,21 @@ Page({
     onlyNormalStatus: false, // 仅展示正常状态
     selectedType: '全部', // 选中的类型
 
+    // 时间范围筛选（已生效值）
+    timeRange: 'all', // 'all' | 'month' | 'custom'
+    customStart: '',  // 'YYYY-MM-DD'
+    customEnd: '',
+    // 时间范围弹层临时态（确定后才提交）
+    showTimeModal: false,
+    tempTimeRange: 'all',
+    tempStart: '',
+    tempEnd: '',
+
     // 批量模式状态
     isBatch: false,
     selectedIds: {}, // 记录选中的发票ID映射，形式如：{ "1": true, "3": true }
     selectedCount: 0,
+    selectedAmount: '0.00', // 选中发票的金额合计
     isAllSelected: false,
 
     // 弹窗状态
@@ -129,7 +140,8 @@ Page({
       list = list.filter(function (item) {
         return (item.company && item.company.indexOf(keyword) >= 0) ||
           (item.payer && item.payer.indexOf(keyword) >= 0) ||
-          (item.fileName && item.fileName.indexOf(keyword) >= 0);
+          (item.fileName && item.fileName.indexOf(keyword) >= 0) ||
+          (item.amount !== undefined && item.amount !== null && String(item.amount).indexOf(keyword) >= 0);
       });
     }
 
@@ -140,14 +152,29 @@ Page({
       });
     }
 
-    // 3. 类型筛选
+    // 3. 购买方筛选
     if (selectedType && selectedType !== '全部') {
       list = list.filter(function (item) {
-        return item.industry === selectedType;
+        return item.payer === selectedType;
       });
     }
 
-    // 4. 时间排序
+    // 4. 时间范围筛选
+    var timeRange = this.data.timeRange;
+    if (timeRange === 'month') {
+      var monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      list = list.filter(function (item) {
+        return item.createTime && item.createTime >= monthAgo;
+      });
+    } else if (timeRange === 'custom' && this.data.customStart && this.data.customEnd) {
+      var startTs = new Date(this.data.customStart.replace(/-/g, '/') + ' 00:00:00').getTime();
+      var endTs = new Date(this.data.customEnd.replace(/-/g, '/') + ' 23:59:59').getTime();
+      list = list.filter(function (item) {
+        return item.createTime && item.createTime >= startTs && item.createTime <= endTs;
+      });
+    }
+
+    // 5. 时间排序
     list.sort(function (a, b) {
       return timeSortAsc ? (a.createTime - b.createTime) : (b.createTime - a.createTime);
     });
@@ -161,12 +188,51 @@ Page({
     this.applyFiltersAndSort();
   },
 
-  // 时间排序切换
+  // 打开时间范围弹层
   onFilterTime: function () {
-    var nextSort = !this.data.timeSortAsc;
-    this.setData({ timeSortAsc: nextSort });
+    this.setData({
+      showTimeModal: true,
+      tempTimeRange: this.data.timeRange,
+      tempStart: this.data.customStart,
+      tempEnd: this.data.customEnd
+    });
+  },
+
+  closeTimeModal: function () {
+    this.setData({ showTimeModal: false });
+  },
+
+  onSelectTimeRange: function (e) {
+    this.setData({ tempTimeRange: e.currentTarget.dataset.range });
+  },
+
+  onCustomStartChange: function (e) {
+    this.setData({ tempStart: e.detail.value });
+  },
+
+  onCustomEndChange: function (e) {
+    this.setData({ tempEnd: e.detail.value });
+  },
+
+  onConfirmTimeRange: function () {
+    var range = this.data.tempTimeRange;
+    if (range === 'custom') {
+      if (!this.data.tempStart || !this.data.tempEnd) {
+        wx.showToast({ title: '请选择起止时间', icon: 'none' });
+        return;
+      }
+      if (this.data.tempStart > this.data.tempEnd) {
+        wx.showToast({ title: '起始时间不能晚于截止时间', icon: 'none' });
+        return;
+      }
+    }
+    this.setData({
+      timeRange: range,
+      customStart: this.data.tempStart,
+      customEnd: this.data.tempEnd,
+      showTimeModal: false
+    });
     this.applyFiltersAndSort();
-    wx.showToast({ title: nextSort ? '时间升序' : '时间降序', icon: 'none' });
   },
 
   // 状态筛选切换
@@ -182,14 +248,14 @@ Page({
     });
   },
 
-  // 类型（消费分类）筛选切换
+  // 购买方（公司名称）筛选切换
   onFilterType: function () {
     var that = this;
-    // 自动搜集当前列表中所有的消费类型
+    // 自动搜集当前列表中所有的购买方
     var types = ['全部'];
     this.data.invoices.forEach(function (item) {
-      if (item.industry && types.indexOf(item.industry) === -1) {
-        types.push(item.industry);
+      if (item.payer && types.indexOf(item.payer) === -1) {
+        types.push(item.payer);
       }
     });
 
@@ -213,6 +279,7 @@ Page({
       isBatch: true,
       selectedIds: {},
       selectedCount: 0,
+      selectedAmount: '0.00',
       isAllSelected: false
     });
     this.applyFiltersAndSort();
@@ -223,6 +290,7 @@ Page({
       isBatch: false,
       selectedIds: {},
       selectedCount: 0,
+      selectedAmount: '0.00',
       isAllSelected: false
     });
   },
@@ -248,9 +316,24 @@ Page({
     var count = Object.keys(selectedIds).length;
     this.setData({
       selectedIds: selectedIds,
-      selectedCount: count
+      selectedCount: count,
+      selectedAmount: this.computeSelectedAmount(selectedIds)
     });
     this.updateSelectAllState();
+  },
+
+  // 计算选中发票的金额合计（跳过“待识别”等非数字金额）
+  computeSelectedAmount: function (selectedIds) {
+    var list = this.data.invoices || [];
+    var total = 0;
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      if (selectedIds[item.id]) {
+        var amt = parseFloat(item.amount);
+        if (!isNaN(amt)) total += amt;
+      }
+    }
+    return total.toFixed(2);
   },
 
   // 更新“全选”状态标志
@@ -285,7 +368,8 @@ Page({
     this.setData({
       selectedIds: selectedIds,
       selectedCount: count,
-      isAllSelected: isAllSelected
+      isAllSelected: isAllSelected,
+      selectedAmount: this.computeSelectedAmount(selectedIds)
     });
   },
 

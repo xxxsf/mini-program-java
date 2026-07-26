@@ -484,3 +484,101 @@ page { background: #f5f5f5; }
   font-size: 32rpx;
   color: #999;
 }
+
+/* 时间范围筛选弹层 */
+.time-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 32rpx 0 48rpx;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 301;
+}
+
+.time-sheet.show {
+  transform: translateY(0);
+}
+
+.time-options {
+  display: flex;
+  padding: 24rpx 40rpx 8rpx;
+}
+
+.time-opt {
+  flex: 1;
+  text-align: center;
+  padding: 28rpx 0;
+  margin: 0 12rpx;
+  background: #f2f3f5;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  color: #333;
+  border: 2rpx solid transparent;
+}
+
+.time-opt.active {
+  background: #e8f7ee;
+  color: #07c160;
+  border-color: #07c160;
+}
+
+.time-row {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.time-row-label {
+  font-size: 30rpx;
+  color: #333;
+  width: 160rpx;
+  flex-shrink: 0;
+  margin-right: 15rpx;
+}
+
+.time-row-value {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+  text-align: right;
+  padding-right: 16rpx;
+}
+
+.time-row-value.placeholder {
+  color: #bbb;
+}
+
+.time-row-arrow {
+  font-size: 28rpx;
+  color: #ccc;
+  flex-shrink: 0;
+}
+
+.time-confirm-btn-wrap {
+  padding: 0 0 40rpx;
+}
+
+.time-confirm-btn {
+  margin: 48rpx 40rpx 0;
+  background: #07c160;
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 600;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 46rpx;
+}
+
+.time-confirm-btn.disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+}
+
+.time-confirm-btn::after {
+  border: none;
+}

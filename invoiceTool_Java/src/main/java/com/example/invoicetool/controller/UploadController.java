@@ -115,10 +115,10 @@ public class UploadController {
                 ? (String) ocrResult.get("invoiceNo")
                 : "FP" + now;
             
-            // 分类：使用前端参数或默认值
-            String finalCategory = category != null && !category.trim().isEmpty() 
-                ? category 
-                : "其他";
+            // 分类：优先前端有效参数，否则根据文件名前缀 / 销售方名称智能推断
+            String finalCategory = (category != null && !category.trim().isEmpty() && !"其他".equals(category.trim()))
+                ? category.trim()
+                : inferCategory(originalFileName, finalSeller);
 
             Invoice invoice = new Invoice();
             invoice.setUserId(user.getId());
@@ -150,5 +150,48 @@ public class UploadController {
             result.put("msg", "上传失败: " + e.getMessage());
         }
         return result;
+    }
+
+    /**
+     * 智能推断发票消费类型：优先取文件名下划线/连字符前缀（如"交通_1596.00元_..."），
+     * 其次根据文件名与销售方名称中的关键词匹配，最后归为"其他"。
+     */
+    private String inferCategory(String fileName, String sellerName) {
+        // 已知类型及其关键词
+        String[][] rules = {
+            {"餐饮", "餐饮", "餐厅", "饭店", "酒楼", "美食", "食品", "咖啡", "火锅", "烧烤", "小吃", "食堂", "茶"},
+            {"交通", "交通", "航空", "机票", "高铁", "铁路", "火车", "出租", "打车", "滴滴", "网约车", "加油", "石油", "石化", "停车", "客运", "地铁", "公交", "车票", "过路", "高速"},
+            {"住宿", "住宿", "酒店", "宾馆", "旅馆", "民宿", "客栈", "度假"},
+            {"办公", "办公", "文具", "耗材", "打印", "复印", "纸品"},
+            {"通讯", "通讯", "电信", "移动", "联通", "话费", "宽带", "网络"},
+            {"购物", "商场", "超市", "百货", "商贸", "购物"},
+            {"医疗", "医院", "药房", "药店", "医疗", "诊所", "卫生"}
+        };
+
+        // 1. 文件名前缀直接命中类型名（去掉扩展名后取第一个分隔段）
+        if (fileName != null && !fileName.trim().isEmpty()) {
+            String base = fileName.trim().replaceAll("(?i)\\.(pdf|png|jpe?g)$", "");
+            String[] segs = base.split("[_\\-\\s]");
+            if (segs.length > 0) {
+                String prefix = segs[0].trim();
+                for (String[] rule : rules) {
+                    if (rule[0].equals(prefix)) {
+                        return rule[0];
+                    }
+                }
+            }
+        }
+
+        // 2. 文件名 + 销售方名称关键词匹配
+        String haystack = ((fileName == null ? "" : fileName) + " " + (sellerName == null ? "" : sellerName));
+        for (String[] rule : rules) {
+            for (int i = 1; i < rule.length; i++) {
+                if (haystack.contains(rule[i])) {
+                    return rule[0];
+                }
+            }
+        }
+
+        return "其他";
     }
 }

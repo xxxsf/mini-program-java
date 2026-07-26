@@ -7,7 +7,7 @@
   <view class='text-align gray font3'><text>您的信息和数据将得到保护</text></view>
 </view>
 
-<button class='loginbutton font4'  bindtap="getUserProfile">
+<button class='loginbutton font4'  bindtap="onLogin">
   <image src="/img/wechat.png" class='icon'></image>
   微信授权登录
 </button>

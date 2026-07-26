@@ -2,7 +2,7 @@
   <!-- 搜索框 -->
   <view class="search-bar">
     <icon type="search" size="14" color="#999" />
-    <input class="search-input" placeholder="搜索收款方、付款方、文件名" confirm-type="search" bindinput="onSearchInput" value="{{keyword}}" />
+    <input class="search-input" placeholder="搜索收款方、付款方、金额、文件名" confirm-type="search" bindinput="onSearchInput" value="{{keyword}}" />
   </view>
 
   <!-- 筛选栏 -->
@@ -16,7 +16,7 @@
       <text class="filter-arrow">▾</text>
     </view>
     <view class="filter-item" bindtap="onFilterType">
-      <text>类型</text>
+      <text>购买方</text>
       <text class="filter-arrow">▾</text>
     </view>
     <view class="batch-btn" bindtap="onBatchSelect">
@@ -49,7 +49,7 @@
 
       <view class="card-body">
         <view class="card-top">
-          <view class="card-tag">{{item.source === 'wechat_chat' ? '微信聊天' : item.source === 'local_album' ? '相册导入' : item.source === 'local_camera' ? '拍照导入' : item.source === 'local_file' ? '本地文件' : item.industry || '其他'}}</view>
+          <view class="card-tag">{{item.industry || '其他'}}</view>
           <text class="card-company">{{item.company || item.fileName}}</text>
         </view>
         <view class="card-row">
@@ -95,7 +95,7 @@
         <icon type="success" size="22" color="#3B5BDB" wx:if="{{isAllSelected}}" />
         <view class="uncheck-circle" wx:else></view>
         <text class="batch-select-text">全选</text>
-        <text class="batch-count-text">已选择 {{selectedCount}} 张发票</text>
+        <text class="batch-count-text">已选择 {{selectedCount}} 张发票，合计 ¥{{selectedAmount}}</text>
       </view>
       <view class="batch-close-btn" bindtap="onExitBatch">✕</view>
     </view>
@@ -169,6 +169,37 @@
       <image class="sheet-icon" src="/img/camera-icon.svg" mode="aspectFit" />
       <text class="sheet-label">拍照导入</text>
       <text class="sheet-arrow">></text>
+    </view>
+  </view>
+
+  <!-- 时间范围筛选弹窗 -->
+  <view class="mask" wx:if="{{showTimeModal}}" bindtap="closeTimeModal"></view>
+  <view class="time-sheet {{showTimeModal ? 'show' : ''}}">
+    <view class="sheet-header">
+      <view class="sheet-close" bindtap="closeTimeModal">×</view>
+      <view class="sheet-title-wrap">
+        <text class="sheet-title">请选择发票时间范围</text>
+      </view>
+    </view>
+    <view class="time-options">
+      <view class="time-opt {{tempTimeRange === 'all' ? 'active' : ''}}" data-range="all" bindtap="onSelectTimeRange">全部</view>
+      <view class="time-opt {{tempTimeRange === 'month' ? 'active' : ''}}" data-range="month" bindtap="onSelectTimeRange">近一月</view>
+      <view class="time-opt {{tempTimeRange === 'custom' ? 'active' : ''}}" data-range="custom" bindtap="onSelectTimeRange">自定义</view>
+    </view>
+    <block wx:if="{{tempTimeRange === 'custom'}}">
+      <picker class="time-row" mode="date" value="{{tempStart}}" bindchange="onCustomStartChange">
+        <text class="time-row-label">起始时间</text>
+        <text class="time-row-value {{tempStart ? '' : 'placeholder'}}">{{tempStart || '选择时间'}}</text>
+        <text class="time-row-arrow">></text>
+      </picker>
+      <picker class="time-row" mode="date" value="{{tempEnd}}" bindchange="onCustomEndChange">
+        <text class="time-row-label">截止时间</text>
+        <text class="time-row-value {{tempEnd ? '' : 'placeholder'}}">{{tempEnd || '选择时间'}}</text>
+        <text class="time-row-arrow">></text>
+      </picker>
+    </block>
+    <view class="time-confirm-btn-wrap">
+      <button class="time-confirm-btn {{(tempTimeRange !== 'custom' || (tempStart && tempEnd)) ? '' : 'disabled'}}" bindtap="onConfirmTimeRange">确定</button>
     </view>
   </view>
 </view>
